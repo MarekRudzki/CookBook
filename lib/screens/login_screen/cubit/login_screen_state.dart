@@ -4,8 +4,8 @@ class LoginScreenState {
   LoginScreenState({
     required this.email,
     required this.password,
-    required this.isCreatingAccount,
-    required this.isLoading,
+    this.isCreatingAccount = false,
+    this.isLoading = false,
   });
 
   final String email;

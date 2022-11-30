@@ -8,27 +8,25 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
           LoginScreenState(
             email: '',
             password: '',
-            isCreatingAccount: false,
-            isLoading: false,
           ),
         );
   Future<void> switchLoginRegister() async {
     emit(
       LoginScreenState(
-          email: '',
-          password: '',
-          isCreatingAccount: !state.isCreatingAccount,
-          isLoading: false),
+        email: '',
+        password: '',
+        isCreatingAccount: !state.isCreatingAccount,
+      ),
     );
   }
 
   Future<void> switchLoading() async {
     emit(
       LoginScreenState(
-          email: '',
-          password: '',
-          isCreatingAccount: false,
-          isLoading: !state.isLoading),
+        email: '',
+        password: '',
+        isLoading: !state.isLoading,
+      ),
     );
   }
 }

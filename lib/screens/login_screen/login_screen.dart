@@ -1,3 +1,4 @@
+import '../../constants.dart';
 import '../../widgets/login_action_button.dart';
 import '../../widgets/login_text_input_field.dart';
 import '../login_screen/cubit/login_screen_cubit.dart';
@@ -99,6 +100,122 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+  void passwordReset(BuildContext context, [bool mounted = true]) {
+    TextEditingController passwordResetController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Reset your password?',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          content: const Text(
+            'Enter the email adress associated with your account',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: darkThemeGradientFirst,
+          actions: [
+            TextField(
+              controller: passwordResetController,
+              decoration: InputDecoration(
+                label: const Center(
+                  child: Text('Input your email'),
+                ),
+                labelStyle: TextStyle(
+                  color: Colors.grey.shade500,
+                ),
+              ),
+              style: const TextStyle(color: Colors.white70),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    if (passwordResetController.text.trim().isEmpty) {
+                      showErrorDialog(context, 'Field is empty');
+                      return;
+                    }
+                    //TODO error handling of password reset
+                    try {
+                      loadingSpinner(context);
+                      await FirebaseAuth.instance.sendPasswordResetEmail(
+                        email: passwordResetController.text.trim(),
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == 'invalid-email') {
+                        return showErrorDialog(
+                            context, 'Email adress is not valid');
+                      } else if (e.code == 'user-not-found') {
+                        showErrorDialog(context, 'User not found');
+                      } else {
+                        return showErrorDialog(context, 'Unknown error');
+                      }
+                      return;
+                    } finally {
+                      loadingSpinner(context);
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    }
+                    passwordResetController.dispose();
+                    if (!mounted) return;
+                    Navigator.of(context).pop();
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text(
+                            'Check your mailbox',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          content: const Text(
+                            'You should find link to reset your password in your mailbox.',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          backgroundColor: darkThemeGradientFirst,
+                          actions: [
+                            Center(
+                              child: IconButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: const Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                  )),
+                            )
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.done,
+                    color: Colors.green,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.red,
+                  ),
+                )
+              ],
+            )
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
@@ -144,11 +261,13 @@ class LoginScreen extends StatelessWidget {
           icon: Icons.key,
         ),
         TextButton(
-          onPressed: null,
+          onPressed: () {
+            passwordReset(context);
+          },
           child: Text(
             'Forgot your password?',
             //TODO Apply password reset
-            style: TextStyle(color: Colors.grey.shade500),
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
           ),
         ),
         ActionButton(
@@ -202,19 +321,9 @@ class LoginScreen extends StatelessWidget {
           inputAction: TextInputAction.done,
           icon: Icons.key,
         ),
-        TextButton(
-          onPressed: () {
-            loginCubit.switchLoginRegister();
-          },
-          child: Text(
-            'Already have an account? Try login',
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
-        ),
         const SizedBox(
-          height: 25,
+          height: 14,
         ),
-        const SizedBox(height: 8),
         ActionButton(
           text: 'Register',
           context: context,
@@ -233,6 +342,18 @@ class LoginScreen extends StatelessWidget {
               }
             }
           },
+        ),
+        const SizedBox(
+          height: 5,
+        ),
+        TextButton(
+          onPressed: () {
+            loginCubit.switchLoginRegister();
+          },
+          child: Text(
+            'Already have an account? Try login',
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
+          ),
         ),
       ],
     );
