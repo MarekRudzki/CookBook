@@ -1,0 +1,52 @@
+name: cookbook
+description: A new Flutter project.
+
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+  cupertino_icons: ^1.0.2
+  firebase_core: ^1.24.0
+  cloud_firestore: ^3.5.1
+  bloc: ^8.1.0
+  firebase_auth: ^3.11.2
+  flutter_bloc: ^8.1.1
+  bottom_navy_bar: ^6.0.0
+  google_fonts: ^3.0.1
+  firebase_database: ^9.1.7
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+  flutter_native_splash: ^2.2.11
+
+flutter_native_splash: 
+  background_image: assets/background_image.png
+  
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/background_login.png
+  #   - images/a_dot_ham.jpeg
+
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic

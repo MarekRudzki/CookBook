@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "27924645670",
+    "firebase_url": "https://cookbook-2ceab-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "cookbook-2ceab",
+    "storage_bucket": "cookbook-2ceab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27924645670:android:c67c9827f6bac0d08ca3e7",
+        "android_client_info": {
+          "package_name": "com.marekrudzki.cookbook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "27924645670-km8k57uvgkr76qbi5001aqaldr17a7h6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1ZYXDnPjxVjR8kLbV7ky2ZJuoY5JhV5M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "27924645670-km8k57uvgkr76qbi5001aqaldr17a7h6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "27924645670-9n81hhq5q7ucgebo8955o13et1c8u3ps.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.marekrudzki.cookbook"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
