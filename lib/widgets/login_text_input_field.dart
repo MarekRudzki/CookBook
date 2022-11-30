@@ -5,9 +5,9 @@ class LoginTextInputField extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.labelText,
-    required this.obscure,
+    this.obscure = false,
     required this.icon,
-    required this.inputAction,
+    this.inputAction = TextInputAction.next,
   }) : super(key: key);
 
   final TextEditingController controller;

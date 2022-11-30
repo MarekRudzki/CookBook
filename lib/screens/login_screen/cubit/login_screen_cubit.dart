@@ -12,7 +12,7 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
             isLoading: false,
           ),
         );
-  Future<void> switchToRegister() async {
+  Future<void> switchLoginRegister() async {
     emit(
       LoginScreenState(
           email: '',
