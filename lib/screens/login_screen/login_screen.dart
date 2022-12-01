@@ -15,6 +15,7 @@ class LoginScreen extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmedPasswordController = TextEditingController();
+  final _passwordResetController = TextEditingController();
 
   @override
   void dispose() {
@@ -22,6 +23,7 @@ class LoginScreen extends StatelessWidget {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmedPasswordController.dispose();
+    _passwordResetController.dispose();
   }
 
   void showErrorDialog(BuildContext context, String errorText) {
@@ -100,8 +102,8 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  void passwordReset(BuildContext context, [bool mounted = true]) {
-    TextEditingController passwordResetController = TextEditingController();
+  void resetPassword(BuildContext context, [bool mounted = true]) {
+    var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
 
     showDialog(
       context: context,
@@ -121,93 +123,127 @@ class LoginScreen extends StatelessWidget {
           ),
           backgroundColor: darkThemeGradientFirst,
           actions: [
-            TextField(
-              controller: passwordResetController,
-              decoration: InputDecoration(
-                label: const Center(
-                  child: Text('Input your email'),
-                ),
-                labelStyle: TextStyle(
-                  color: Colors.grey.shade500,
-                ),
-              ),
-              style: const TextStyle(color: Colors.white70),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Column(
               children: [
-                IconButton(
-                  onPressed: () async {
-                    if (passwordResetController.text.trim().isEmpty) {
-                      showErrorDialog(context, 'Field is empty');
-                      return;
-                    }
-                    //TODO error handling of password reset
-                    try {
-                      loadingSpinner(context);
-                      await FirebaseAuth.instance.sendPasswordResetEmail(
-                        email: passwordResetController.text.trim(),
-                      );
-                    } on FirebaseAuthException catch (e) {
-                      if (e.code == 'invalid-email') {
-                        return showErrorDialog(
-                            context, 'Email adress is not valid');
-                      } else if (e.code == 'user-not-found') {
-                        showErrorDialog(context, 'User not found');
-                      } else {
-                        return showErrorDialog(context, 'Unknown error');
-                      }
-                      return;
-                    } finally {
-                      loadingSpinner(context);
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    }
-                    passwordResetController.dispose();
-                    if (!mounted) return;
-                    Navigator.of(context).pop();
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text(
-                            'Check your mailbox',
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                          content: const Text(
-                            'You should find link to reset your password in your mailbox.',
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                          backgroundColor: darkThemeGradientFirst,
-                          actions: [
-                            Center(
-                              child: IconButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  icon: const Icon(
-                                    Icons.check,
-                                    color: Colors.green,
-                                  )),
+                TextField(
+                  controller: _passwordResetController,
+                  decoration: InputDecoration(
+                    label: const Center(
+                      child: Text('Input your email'),
+                    ),
+                    labelStyle: TextStyle(
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: BlocBuilder<LoginScreenCubit, LoginScreenState>(
+                    builder: (context, state) {
+                      return state.errorMessage != ''
+                          ? Text(
+                              state.errorMessage,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 15,
+                              ),
                             )
-                          ],
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        String errorMsg = '';
+                        if (_passwordResetController.text.trim().isEmpty) {
+                          errorMsg = 'Field is empty';
+                          loginCubit.addErrorMessage(errorMsg);
+                          await Future.delayed(
+                            const Duration(seconds: 3),
+                          );
+                          loginCubit.addErrorMessage('');
+                          return;
+                        }
+                        try {
+                          loadingSpinner(context);
+                          await FirebaseAuth.instance.sendPasswordResetEmail(
+                            email: _passwordResetController.text.trim(),
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'invalid-email') {
+                            errorMsg = 'Email adress is not valid';
+                          } else if (e.code == 'user-not-found') {
+                            errorMsg = 'User not found';
+                          } else {
+                            errorMsg = 'Unknown error';
+                          }
+                          return;
+                        } finally {
+                          loadingSpinner(context);
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          if (errorMsg != '') {
+                            loginCubit.addErrorMessage(errorMsg);
+                            await Future.delayed(
+                              const Duration(seconds: 3),
+                            );
+                            loginCubit.addErrorMessage('');
+                          }
+                        }
+                        if (!mounted) return;
+                        Navigator.of(context).pop();
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text(
+                                'Check your mailbox',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              content: const Text(
+                                'You should find link to reset your password in your mailbox.',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              backgroundColor: darkThemeGradientFirst,
+                              actions: [
+                                Center(
+                                  child: IconButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    icon: const Icon(
+                                      Icons.check,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.done,
-                    color: Colors.green,
-                  ),
+                      icon: const Icon(
+                        Icons.done,
+                        color: Colors.green,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _passwordResetController.clear();
+                        loginCubit.addErrorMessage('');
+                        Navigator.of(context).pop();
+                      },
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.red,
+                      ),
+                    )
+                  ],
                 ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.red,
-                  ),
-                )
               ],
             )
           ],
@@ -262,7 +298,7 @@ class LoginScreen extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            passwordReset(context);
+            resetPassword(context);
           },
           child: Text(
             'Forgot your password?',

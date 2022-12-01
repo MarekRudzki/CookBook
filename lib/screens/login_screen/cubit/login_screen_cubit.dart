@@ -5,16 +5,11 @@ part 'login_screen_state.dart';
 class LoginScreenCubit extends Cubit<LoginScreenState> {
   LoginScreenCubit()
       : super(
-          LoginScreenState(
-            email: '',
-            password: '',
-          ),
+          LoginScreenState(),
         );
   Future<void> switchLoginRegister() async {
     emit(
       LoginScreenState(
-        email: '',
-        password: '',
         isCreatingAccount: !state.isCreatingAccount,
       ),
     );
@@ -23,9 +18,16 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
   Future<void> switchLoading() async {
     emit(
       LoginScreenState(
-        email: '',
-        password: '',
         isLoading: !state.isLoading,
+      ),
+    );
+  }
+
+  Future<void> addErrorMessage(String errorText) async {
+    emit(
+      LoginScreenState(
+        isLoading: state.isLoading,
+        errorMessage: errorText,
       ),
     );
   }
