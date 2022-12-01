@@ -24,14 +24,18 @@ class _AccountScreenState extends State<AccountScreen> {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => LoginScreen(),
+        builder: (context) => const LoginScreen(),
       ),
     );
   }
 
   void logOut() {
     FirebaseAuth.instance.signOut();
-    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -217,7 +221,7 @@ class _AccountScreenState extends State<AccountScreen> {
 }
 
 class SettingTile extends StatelessWidget {
-  SettingTile({
+  const SettingTile({
     Key? key,
     required this.icon,
     required this.tileText,
@@ -226,7 +230,7 @@ class SettingTile extends StatelessWidget {
 
   final IconData icon;
   final String tileText;
-  void Function()? onPressed;
+  final void Function()? onPressed;
 
   @override
   Widget build(BuildContext context) {

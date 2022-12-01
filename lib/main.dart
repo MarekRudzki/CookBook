@@ -15,7 +15,7 @@ void main() async {
   runApp(
     BlocProvider(
       create: (context) => LoginScreenCubit(),
-      child: MaterialApp(
+      child: const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: LoginScreen(),
       ),

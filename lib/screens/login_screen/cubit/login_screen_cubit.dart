@@ -19,6 +19,7 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
     emit(
       LoginScreenState(
         isLoading: !state.isLoading,
+        isCreatingAccount: state.isCreatingAccount,
       ),
     );
   }

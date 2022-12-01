@@ -1,24 +1,35 @@
+import 'package:flutter/material.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../constants.dart';
 import '../../widgets/login_action_button.dart';
 import '../../widgets/login_text_input_field.dart';
 import '../login_screen/cubit/login_screen_cubit.dart';
 import '../main_screen/main_screen.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
 
+class _LoginScreenState extends State<LoginScreen> {
   final _nameController = TextEditingController();
+
   final _emailController = TextEditingController();
+
   final _passwordController = TextEditingController();
+
   final _confirmedPasswordController = TextEditingController();
+
   final _passwordResetController = TextEditingController();
 
   @override
   void dispose() {
+    super.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -60,6 +71,7 @@ class LoginScreen extends StatelessWidget {
 
     if (email.isEmpty || password.isEmpty) {
       showErrorDialog(context, 'Email or password field is empty');
+      FocusManager.instance.primaryFocus?.unfocus();
       return;
     }
 
@@ -71,7 +83,7 @@ class LoginScreen extends StatelessWidget {
       );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'network-request-failed') {
-        showErrorDialog(context, 'No Internet connection');
+        return showErrorDialog(context, 'No Internet connection');
       } else if (e.code == "wrong-password") {
         return showErrorDialog(context, 'Please enter correct password');
       } else if (e.code == 'user-not-found') {
@@ -106,6 +118,7 @@ class LoginScreen extends StatelessWidget {
     var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
 
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -252,6 +265,60 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+  void register(BuildContext context, LoginScreenCubit loginCubit,
+      [bool mounted = true]) async {
+    String username = _nameController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    String confirmedPassword = _confirmedPasswordController.text.trim();
+
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmedPassword.isEmpty) {
+      showErrorDialog(context, 'Please fill in all fields');
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+
+    if (password != confirmedPassword) {
+      showErrorDialog(context, 'Given passwords don\'t match');
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+
+    try {
+      loadingSpinner(context);
+      await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'network-request-failed') {
+        showErrorDialog(context, 'No Internet connection');
+      } else if (e.code == 'invalid-email') {
+        showErrorDialog(context, 'Email adress is not valid');
+      } else if (e.code == 'weak-password') {
+        showErrorDialog(context, 'Given password is too weak');
+      } else if (e.code == 'email-already-in-use') {
+        showErrorDialog(context, 'Account with given email already exist');
+      } else {
+        showErrorDialog(context, 'Unknown error');
+      }
+      return;
+    } finally {
+      loadingSpinner(context);
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+
+    if (!mounted) return;
+    loginCubit.switchLoginRegister();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const MainScreen(),
+      ),
+    );
+    //TODO add to local storage username
+  }
+
   @override
   Widget build(BuildContext context) {
     var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
@@ -302,7 +369,6 @@ class LoginScreen extends StatelessWidget {
           },
           child: Text(
             'Forgot your password?',
-            //TODO Apply password reset
             style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
           ),
         ),
@@ -363,20 +429,8 @@ class LoginScreen extends StatelessWidget {
         ActionButton(
           text: 'Register',
           context: context,
-          onTap: () async {
-            if (_emailController.text.contains('@') &&
-                _emailController.text.length > 5 &&
-                _passwordController.text.isNotEmpty &&
-                _passwordController.text == _confirmedPasswordController.text) {
-              try {
-                await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                    email: _emailController.text,
-                    password: _passwordController.text);
-                //TODO add to local storage username
-              } catch (error) {
-                print(error);
-              }
-            }
+          onTap: () {
+            register(context, loginCubit);
           },
         ),
         const SizedBox(
