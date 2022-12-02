@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants.dart';
 import '../../widgets/login_action_button.dart';
@@ -111,6 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
       MaterialPageRoute(
         builder: (context) => const MainScreen(),
       ),
+    );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+      'email',
+      _emailController.text.trim(),
     );
   }
 
@@ -309,6 +316,13 @@ class _LoginScreenState extends State<LoginScreen> {
       FocusManager.instance.primaryFocus?.unfocus();
     }
 
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'username': username,
+    });
+
     if (!mounted) return;
     loginCubit.switchLoginRegister();
     Navigator.of(context).push(
@@ -316,7 +330,11 @@ class _LoginScreenState extends State<LoginScreen> {
         builder: (context) => const MainScreen(),
       ),
     );
-    //TODO add to local storage username
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+      'email',
+      _emailController.text.trim(),
+    );
   }
 
   @override

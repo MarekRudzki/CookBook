@@ -3,6 +3,7 @@ import 'package:cookbook/screens/login_screen/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -13,7 +14,8 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   User user = FirebaseAuth.instance.currentUser!;
-  Future deleteAccount([bool mounted = true]) async {
+
+  Future deleteAccount() async {
     showDialog(
       context: context,
       builder: (context) {
@@ -29,8 +31,11 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void logOut() {
+  void logOut() async {
     FirebaseAuth.instance.signOut();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('email');
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const LoginScreen(),
@@ -88,7 +93,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             width: 7,
                           ),
                           Text(
-                            'Username: ', //TODO get from local memory
+                            'Username: ',
                             style: GoogleFonts.robotoSlab(
                               color: Colors.white,
                               fontSize: 16,
