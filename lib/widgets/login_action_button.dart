@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ActionButton extends StatelessWidget {
-  const ActionButton(
-      {Key? key,
-      required this.text,
-      required this.onTap,
-      required this.context})
-      : super(key: key);
+  const ActionButton({
+    Key? key,
+    required this.text,
+    required this.onTap,
+    required this.context,
+  }) : super(key: key);
 
   final String text;
   final Function() onTap;

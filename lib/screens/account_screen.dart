@@ -23,7 +23,9 @@ class _AccountScreenState extends State<AccountScreen> {
       },
     );
     await user.delete();
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const LoginScreen(),
@@ -31,11 +33,13 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void logOut() async {
+  Future logOut() async {
     FirebaseAuth.instance.signOut();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     prefs.remove('email');
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const LoginScreen(),
@@ -161,44 +165,43 @@ class _AccountScreenState extends State<AccountScreen> {
                 tileText: 'Delete account',
                 onPressed: () {
                   showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text(
-                            'Are you sure?',
-                            style: TextStyle(
-                              color: Colors.white,
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text(
+                          'Are you sure?',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                        content: const Text(
+                          'This action will permanently delete your account',
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
+                        backgroundColor: darkThemeGradientFirst,
+                        actions: [
+                          IconButton(
+                            onPressed: deleteAccount,
+                            icon: const Icon(
+                              Icons.done,
+                              color: Colors.green,
                             ),
                           ),
-                          content: const Text(
-                            'This action will permanently delete your account',
-                            style: TextStyle(
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: const Icon(
+                              Icons.close,
                               color: Colors.red,
                             ),
                           ),
-                          backgroundColor: darkThemeGradientFirst,
-                          actions: [
-                            IconButton(
-                              onPressed: () {
-                                deleteAccount();
-                              },
-                              icon: const Icon(
-                                Icons.done,
-                                color: Colors.green,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.red,
-                              ),
-                            )
-                          ],
-                        );
-                      });
+                        ],
+                      );
+                    },
+                  );
                 },
               ),
               const Spacer(),

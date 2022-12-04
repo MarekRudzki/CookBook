@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants.dart';
@@ -55,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void loadingSpinner(BuildContext context) {
-    var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
+    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
     loginCubit.switchLoading();
     loginCubit.state.isLoading
         ? showDialog(
@@ -67,9 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
         : Navigator.of(context).pop();
   }
 
-  void logIn(BuildContext context, [bool mounted = true]) async {
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+  Future<void> logIn(BuildContext context) async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       showErrorDialog(context, 'Email or password field is empty');
@@ -86,13 +87,15 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'network-request-failed') {
         return showErrorDialog(context, 'No Internet connection');
-      } else if (e.code == "wrong-password") {
+      } else if (e.code == 'wrong-password') {
         return showErrorDialog(context, 'Please enter correct password');
       } else if (e.code == 'user-not-found') {
         showErrorDialog(context, 'User not found');
       } else if (e.code == 'too-many-requests') {
         return showErrorDialog(
-            context, 'Too many attempts, please try again later');
+          context,
+          'Too many attempts, please try again later',
+        );
       } else if (e.code == 'invalid-email') {
         return showErrorDialog(context, 'Email adress is not valid');
       } else {
@@ -107,22 +110,24 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.clear();
     _passwordController.clear();
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => const MainScreen(),
       ),
     );
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(
       'email',
       _emailController.text.trim(),
     );
   }
 
-  void resetPassword(BuildContext context, [bool mounted = true]) {
-    var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
+  void resetPassword(BuildContext context) {
+    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
 
     showDialog(
       barrierDismissible: false,
@@ -214,7 +219,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             loginCubit.addErrorMessage('');
                           }
                         }
-                        if (!mounted) return;
+                        if (!mounted) {
+                          return;
+                        }
                         Navigator.of(context).pop();
                         showDialog(
                           context: context,
@@ -240,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       color: Colors.green,
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             );
                           },
@@ -261,23 +268,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         Icons.close,
                         color: Colors.red,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ],
-            )
+            ),
           ],
         );
       },
     );
   }
 
-  void register(BuildContext context, LoginScreenCubit loginCubit,
-      [bool mounted = true]) async {
-    String username = _nameController.text.trim();
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-    String confirmedPassword = _confirmedPasswordController.text.trim();
+  Future<void> register(
+    BuildContext context,
+    LoginScreenCubit loginCubit,
+  ) async {
+    final String username = _nameController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String confirmedPassword = _confirmedPasswordController.text.trim();
 
     if (username.isEmpty ||
         email.isEmpty ||
@@ -289,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (password != confirmedPassword) {
-      showErrorDialog(context, 'Given passwords don\'t match');
+      showErrorDialog(context, "Given passwords don't match");
       FocusManager.instance.primaryFocus?.unfocus();
       return;
     }
@@ -323,14 +332,16 @@ class _LoginScreenState extends State<LoginScreen> {
       'username': username,
     });
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     loginCubit.switchLoginRegister();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const MainScreen(),
       ),
     );
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(
       'email',
       _emailController.text.trim(),
@@ -339,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
+    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
     return BlocBuilder<LoginScreenCubit, LoginScreenState>(
       builder: (context, state) {
         return SafeArea(
@@ -349,8 +360,9 @@ class _LoginScreenState extends State<LoginScreen> {
               width: MediaQuery.of(context).size.width * 1,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage('assets/background_login.png'),
-                    fit: BoxFit.cover),
+                  image: AssetImage('assets/background_login.png'),
+                  fit: BoxFit.cover,
+                ),
               ),
               child: loginCubit.state.isCreatingAccount
                   ? registerView(context)
@@ -362,8 +374,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  loginView(BuildContext context) {
-    var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
+  Column loginView(BuildContext context) {
+    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
     return Column(
       children: [
         SizedBox(
@@ -411,8 +423,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  registerView(BuildContext context) {
-    var loginCubit = BlocProvider.of<LoginScreenCubit>(context);
+  Column registerView(BuildContext context) {
+    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
     return Column(
       children: [
         SizedBox(
@@ -455,9 +467,7 @@ class _LoginScreenState extends State<LoginScreen> {
           height: 5,
         ),
         TextButton(
-          onPressed: () {
-            loginCubit.switchLoginRegister();
-          },
+          onPressed: loginCubit.switchLoginRegister,
           child: Text(
             'Already have an account? Try login',
             style: TextStyle(color: Colors.grey.shade500, fontSize: 15),

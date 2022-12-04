@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:flutter/material.dart';
 
 import '/constants.dart';
 import '../account_screen.dart';
@@ -16,10 +16,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
-  PageController pageController = PageController(
-    initialPage: 0,
-    keepPage: true,
-  );
+  PageController pageController = PageController();
 
   @override
   void dispose() {
@@ -34,11 +31,11 @@ class _MainScreenState extends State<MainScreen> {
         body: SizedBox.expand(
           child: PageView(
             controller: pageController,
-            onPageChanged: ((value) {
+            onPageChanged: (value) {
               setState(() {
                 selectedIndex = value;
               });
-            }),
+            },
             children: const [
               HomeScreen(),
               AddScreen(),
@@ -51,10 +48,11 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: darkThemeGradientFirst,
           items: [
             BottomNavyBarItem(
-                icon: const Icon(Icons.home),
-                title: const Text('Home'),
-                activeColor: Colors.amber,
-                inactiveColor: Colors.grey),
+              icon: const Icon(Icons.home),
+              title: const Text('Home'),
+              activeColor: Colors.amber,
+              inactiveColor: Colors.grey,
+            ),
             BottomNavyBarItem(
               icon: const Icon(Icons.add),
               title: const Text('Add'),

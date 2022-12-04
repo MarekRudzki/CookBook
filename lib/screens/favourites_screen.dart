@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:cookbook/constants.dart';
+import 'package:flutter/material.dart';
 
 class FavouritesScreen extends StatelessWidget {
   const FavouritesScreen({super.key});
