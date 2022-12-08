@@ -1,5 +1,5 @@
-import 'package:cookbook/constants.dart';
-import 'package:cookbook/screens/login_screen/login_screen.dart';
+import 'package:cookbook/src/core/constants.dart';
+import 'package:cookbook/src/screens/login_screen/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -54,8 +54,8 @@ class _AccountScreenState extends State<AccountScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              darkThemeGradientFirst,
-              darkThemeGradientSecond,
+              kDarkThemeFirst,
+              kDartThemeSecond,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -180,7 +180,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             color: Colors.red,
                           ),
                         ),
-                        backgroundColor: darkThemeGradientFirst,
+                        backgroundColor: kDarkThemeFirst,
                         actions: [
                           IconButton(
                             onPressed: deleteAccount,
@@ -209,7 +209,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.logout),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: darkThemeGradientFirst,
+                    backgroundColor: kDarkThemeFirst,
                   ),
                   onPressed: logOut,
                   label: const Text(

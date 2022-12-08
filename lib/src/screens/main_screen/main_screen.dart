@@ -1,7 +1,7 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 
-import '/constants.dart';
+import '../../core/constants.dart';
 import '../account_screen.dart';
 import '../add_screen.dart';
 import '../favourites_screen.dart';
@@ -45,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
         bottomNavigationBar: BottomNavyBar(
-          backgroundColor: darkThemeGradientFirst,
+          backgroundColor: kDarkThemeFirst,
           items: [
             BottomNavyBarItem(
               icon: const Icon(Icons.home),

@@ -1,8 +1,8 @@
-import 'package:cookbook/constants.dart';
+import 'package:cookbook/src/core/constants.dart';
 import 'package:flutter/material.dart';
 
-class FavouritesScreen extends StatelessWidget {
-  const FavouritesScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,8 +11,8 @@ class FavouritesScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              darkThemeGradientFirst,
-              darkThemeGradientSecond,
+              kDarkThemeFirst,
+              kDartThemeSecond,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -20,7 +20,11 @@ class FavouritesScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Row(),
+            Row(
+              children: const [
+                Text('Home Screen'),
+              ],
+            ),
           ],
         ),
       ),

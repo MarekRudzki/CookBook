@@ -1,4 +1,4 @@
-import 'package:cookbook/constants.dart';
+import 'package:cookbook/src/core/constants.dart';
 import 'package:flutter/material.dart';
 
 class AddScreen extends StatelessWidget {
@@ -11,8 +11,8 @@ class AddScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              darkThemeGradientFirst,
-              darkThemeGradientSecond,
+              kDarkThemeFirst,
+              kDartThemeSecond,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,

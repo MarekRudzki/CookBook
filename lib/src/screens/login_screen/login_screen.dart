@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../constants.dart';
+import '../../core/constants.dart';
 import '../../widgets/login_action_button.dart';
 import '../../widgets/login_text_input_field.dart';
 import '../login_screen/cubit/login_screen_cubit.dart';
@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
               color: Colors.white,
             ),
           ),
-          backgroundColor: darkThemeGradientFirst,
+          backgroundColor: kDarkThemeFirst,
           actions: [
             Column(
               children: [
@@ -235,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 'You should find link to reset your password in your mailbox.',
                                 style: TextStyle(color: Colors.white70),
                               ),
-                              backgroundColor: darkThemeGradientFirst,
+                              backgroundColor: kDarkThemeFirst,
                               actions: [
                                 Center(
                                   child: IconButton(
