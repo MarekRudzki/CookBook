@@ -2,10 +2,11 @@ import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants.dart';
-import '../account_screen.dart';
-import '../add_screen.dart';
-import '../favourites_screen.dart';
-import '../home_screen.dart';
+
+import 'account/account_screen.dart';
+import 'add_item/add_screen.dart';
+import 'favorites/favorites_screen.dart';
+import 'home/home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -38,14 +39,14 @@ class _MainScreenState extends State<MainScreen> {
             },
             children: const [
               HomeScreen(),
-              AddScreen(),
-              FavouritesScreen(),
+              AddItemScreen(),
+              FavoritesScreen(),
               AccountScreen(),
             ],
           ),
         ),
         bottomNavigationBar: BottomNavyBar(
-          backgroundColor: kDarkThemeFirst,
+          backgroundColor: kLighterBlue,
           items: [
             BottomNavyBarItem(
               icon: const Icon(Icons.home),

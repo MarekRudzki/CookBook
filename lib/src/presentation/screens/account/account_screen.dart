@@ -1,5 +1,5 @@
 import 'package:cookbook/src/core/constants.dart';
-import 'package:cookbook/src/screens/login_screen/login_screen.dart';
+import 'package:cookbook/src/presentation/screens/login/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -54,8 +54,8 @@ class _AccountScreenState extends State<AccountScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              kDarkThemeFirst,
-              kDartThemeSecond,
+              kLighterBlue,
+              kDartBlue,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -180,7 +180,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             color: Colors.red,
                           ),
                         ),
-                        backgroundColor: kDarkThemeFirst,
+                        backgroundColor: kLighterBlue,
                         actions: [
                           IconButton(
                             onPressed: deleteAccount,
@@ -209,7 +209,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.logout),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kDarkThemeFirst,
+                    backgroundColor: kLighterBlue,
                   ),
                   onPressed: logOut,
                   label: const Text(
@@ -230,11 +230,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
 class SettingTile extends StatelessWidget {
   const SettingTile({
-    Key? key,
+    super.key,
     required this.icon,
     required this.tileText,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String tileText;
