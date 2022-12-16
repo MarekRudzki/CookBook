@@ -1,9 +1,13 @@
-import 'package:cookbook/src/core/constants.dart';
-import 'package:cookbook/src/presentation/screens/login/login_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cookbook/src/services/shared_prefs.dart';
 import 'package:flutter/material.dart';
+
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../src/core/constants.dart';
+import '../../../../src/presentation/screens/login/login_screen.dart';
+
+import '../../../services/firebase/auth.dart';
+import 'widgets/settings_tile.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -13,16 +17,18 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  User user = FirebaseAuth.instance.currentUser!;
+  final Auth _auth = Auth();
+  final SharedPrefs _sharedPrefs = SharedPrefs();
 
-  Future deleteAccount() async {
+  Future<void> deleteAccount() async {
     showDialog(
       context: context,
       builder: (context) {
         return const Center(child: CircularProgressIndicator());
       },
     );
-    await user.delete();
+    _auth.deleteUser(); //TODO handle string input
+    _sharedPrefs.removeUser();
     if (!mounted) {
       return;
     }
@@ -33,10 +39,9 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Future logOut() async {
-    FirebaseAuth.instance.signOut();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove('email');
+  Future<void> logOut() async {
+    _auth.signOut(); //TODO handle string input
+    _sharedPrefs.removeUser();
     if (!mounted) {
       return;
     }
@@ -118,7 +123,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             width: 7,
                           ),
                           Text(
-                            'Email: ${user.email!}',
+                            'Email: ${_auth.email}',
                             style: GoogleFonts.robotoSlab(
                               color: Colors.white,
                               fontSize: 16,
@@ -143,7 +148,7 @@ class _AccountScreenState extends State<AccountScreen> {
               const SizedBox(
                 height: 5,
               ),
-              SettingTile(
+              SettingsTile(
                 icon: Icons.edit,
                 tileText: 'Change username',
                 onPressed:
@@ -152,7 +157,7 @@ class _AccountScreenState extends State<AccountScreen> {
               const SizedBox(
                 height: 5,
               ),
-              SettingTile(
+              SettingsTile(
                 icon: Icons.key,
                 tileText: 'Change password',
                 onPressed: () {},
@@ -160,7 +165,7 @@ class _AccountScreenState extends State<AccountScreen> {
               const SizedBox(
                 height: 5,
               ),
-              SettingTile(
+              SettingsTile(
                 icon: Icons.delete_forever,
                 tileText: 'Delete account',
                 onPressed: () {
@@ -219,63 +224,6 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SettingTile extends StatelessWidget {
-  const SettingTile({
-    super.key,
-    required this.icon,
-    required this.tileText,
-    this.onPressed,
-  });
-
-  final IconData icon;
-  final String tileText;
-  final void Function()? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 15,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: Colors.white,
-              ),
-              const SizedBox(
-                width: 7,
-              ),
-              Expanded(
-                child: Text(
-                  tileText,
-                  style: GoogleFonts.robotoSlab(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
               ),
             ],
           ),

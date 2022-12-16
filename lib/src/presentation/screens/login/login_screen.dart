@@ -1,16 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants.dart';
 import 'widgets/login_action_button.dart';
 import 'widgets/login_text_input_field.dart';
 import '../login/cubit/login_screen_cubit.dart';
-import '../main_screen.dart';
+import '../main/main_screen.dart';
+import '../../../../src/services/shared_prefs.dart';
+import '../../../../src/services/firebase/auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,24 +20,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final Auth _auth = Auth();
+  final SharedPrefs _sharedPrefs = SharedPrefs();
+
   final _nameController = TextEditingController();
-
   final _emailController = TextEditingController();
-
   final _passwordController = TextEditingController();
-
   final _confirmedPasswordController = TextEditingController();
-
   final _passwordResetController = TextEditingController();
 
   @override
   void dispose() {
-    super.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmedPasswordController.dispose();
     _passwordResetController.dispose();
+    super.dispose();
   }
 
   void showErrorDialog(BuildContext context, String errorText) {
@@ -119,11 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
         builder: (context) => const MainScreen(),
       ),
     );
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(
-      'email',
-      _emailController.text.trim(),
-    );
+    _sharedPrefs.setUser(_emailController.text);
   }
 
   void resetPassword(BuildContext context) {
@@ -280,9 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> register(
-    BuildContext context,
-    LoginScreenCubit loginCubit,
-  ) async {
+      BuildContext context, LoginScreenCubit loginCubit) async {
     final String username = _nameController.text.trim();
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
@@ -341,11 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
         builder: (context) => const MainScreen(),
       ),
     );
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(
-      'email',
-      _emailController.text.trim(),
-    );
+    _sharedPrefs.setUser(_emailController.text);
   }
 
   @override
@@ -365,7 +354,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               child: loginCubit.state.isCreatingAccount
-                  ? registerView(context)
+                  ? registerView(context) //TODO handle this
                   : loginView(context),
             ),
           ),
@@ -475,5 +464,14 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
     );
+  }
+}
+
+class LoginView extends StatelessWidget {
+  const LoginView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }

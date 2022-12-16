@@ -1,17 +1,17 @@
+import 'package:flutter/material.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'src/config/firebase_options.dart';
+import 'src/services/shared_prefs.dart';
 import 'src/presentation/screens/login/cubit/login_screen_cubit.dart';
 import 'src/presentation/screens/login/login_screen.dart';
-import 'src/presentation/screens/main_screen.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cookbook/src/config/firebase_options.dart';
+import 'src/presentation/screens/main/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String? email = prefs.getString('email');
+  final bool isLogged = await SharedPrefs().isLogged();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -21,7 +21,7 @@ void main() async {
       create: (context) => LoginScreenCubit(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: email == null ? const LoginScreen() : const MainScreen(),
+        home: isLogged ? const MainScreen() : const LoginScreen(),
       ),
     ),
   );
