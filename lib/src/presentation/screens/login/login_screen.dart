@@ -1,14 +1,14 @@
+import 'package:cookbook/src/services/firebase/firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants.dart';
-import 'widgets/login_action_button.dart';
-import 'widgets/login_text_input_field.dart';
 import '../login/cubit/login_screen_cubit.dart';
+import '../login/widgets/register_view.dart';
 import '../main/main_screen.dart';
+import 'widgets/login_view.dart';
 import '../../../../src/services/shared_prefs.dart';
 import '../../../../src/services/firebase/auth.dart';
 
@@ -21,22 +21,27 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final Auth _auth = Auth();
+  final Firestore _firestore = Firestore();
   final SharedPrefs _sharedPrefs = SharedPrefs();
 
   final _nameController = TextEditingController();
+
   final _emailController = TextEditingController();
+
   final _passwordController = TextEditingController();
+
   final _confirmedPasswordController = TextEditingController();
+
   final _passwordResetController = TextEditingController();
 
   @override
   void dispose() {
+    super.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmedPasswordController.dispose();
     _passwordResetController.dispose();
-    super.dispose();
   }
 
   void showErrorDialog(BuildContext context, String errorText) {
@@ -71,59 +76,74 @@ class _LoginScreenState extends State<LoginScreen> {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      showErrorDialog(context, 'Email or password field is empty');
-      FocusManager.instance.primaryFocus?.unfocus();
-      return;
-    }
+    loadingSpinner(context);
+    await _auth
+        .logIn(
+      email: email,
+      password: password,
+    )
+        .then((errorText) {
+      if (errorText.isNotEmpty) {
+        loadingSpinner(context);
+        showErrorDialog(context, errorText);
 
-    try {
-      loadingSpinner(context);
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'network-request-failed') {
-        return showErrorDialog(context, 'No Internet connection');
-      } else if (e.code == 'wrong-password') {
-        return showErrorDialog(context, 'Please enter correct password');
-      } else if (e.code == 'user-not-found') {
-        showErrorDialog(context, 'User not found');
-      } else if (e.code == 'too-many-requests') {
-        return showErrorDialog(
-          context,
-          'Too many attempts, please try again later',
-        );
-      } else if (e.code == 'invalid-email') {
-        return showErrorDialog(context, 'Email adress is not valid');
+        FocusManager.instance.primaryFocus?.unfocus();
       } else {
-        return showErrorDialog(context, 'Unknown error');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainScreen(),
+          ),
+        );
+        _sharedPrefs.setUser(_emailController.text);
       }
-      return;
-    } finally {
-      loadingSpinner(context);
-      FocusManager.instance.primaryFocus?.unfocus();
-    }
+    });
+  }
 
-    _emailController.clear();
-    _passwordController.clear();
+  Future<void> register(
+      BuildContext context, LoginScreenCubit loginCubit) async {
+    final String username = _nameController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String confirmedPassword = _confirmedPasswordController.text.trim();
 
-    if (!mounted) {
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MainScreen(),
-      ),
-    );
-    _sharedPrefs.setUser(_emailController.text);
+    loadingSpinner(context);
+    await _auth
+        .register(
+      email: email,
+      password: password,
+      username: username,
+      confirmedPassword: confirmedPassword,
+    )
+        .then((errorText) {
+      if (errorText.isNotEmpty) {
+        loadingSpinner(context);
+        showErrorDialog(context, errorText);
+        FocusManager.instance.primaryFocus?.unfocus();
+      } else {
+        _firestore.addUser(username, _auth.uid!).then((errorText) => {
+              if (errorText.isNotEmpty)
+                {
+                  showErrorDialog(context, errorText),
+                }
+              else
+                {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MainScreen(),
+                    ),
+                  ),
+                  _sharedPrefs.setUser(_emailController.text),
+                }
+            });
+      }
+    });
   }
 
   void resetPassword(BuildContext context) {
     final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
-
+    //TODO handle password reset
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -274,69 +294,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> register(
-      BuildContext context, LoginScreenCubit loginCubit) async {
-    final String username = _nameController.text.trim();
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
-    final String confirmedPassword = _confirmedPasswordController.text.trim();
-
-    if (username.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmedPassword.isEmpty) {
-      showErrorDialog(context, 'Please fill in all fields');
-      FocusManager.instance.primaryFocus?.unfocus();
-      return;
-    }
-
-    if (password != confirmedPassword) {
-      showErrorDialog(context, "Given passwords don't match");
-      FocusManager.instance.primaryFocus?.unfocus();
-      return;
-    }
-
-    try {
-      loadingSpinner(context);
-      await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'network-request-failed') {
-        showErrorDialog(context, 'No Internet connection');
-      } else if (e.code == 'invalid-email') {
-        showErrorDialog(context, 'Email adress is not valid');
-      } else if (e.code == 'weak-password') {
-        showErrorDialog(context, 'Given password is too weak');
-      } else if (e.code == 'email-already-in-use') {
-        showErrorDialog(context, 'Account with given email already exist');
-      } else {
-        showErrorDialog(context, 'Unknown error');
-      }
-      return;
-    } finally {
-      loadingSpinner(context);
-      FocusManager.instance.primaryFocus?.unfocus();
-    }
-
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .set({
-      'username': username,
-    });
-
-    if (!mounted) {
-      return;
-    }
-    loginCubit.switchLoginRegister();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const MainScreen(),
-      ),
-    );
-    _sharedPrefs.setUser(_emailController.text);
-  }
-
   @override
   Widget build(BuildContext context) {
     final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
@@ -354,124 +311,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               child: loginCubit.state.isCreatingAccount
-                  ? registerView(context) //TODO handle this
-                  : loginView(context),
+                  ? RegisterView(
+                      emailController: _emailController,
+                      passwordController: _passwordController,
+                      nameController: _nameController,
+                      confirmedPasswordController: _confirmedPasswordController,
+                      onRegisterTap: () => register(context, loginCubit),
+                      onLoginTap: () {
+                        loginCubit.switchLoginRegister();
+                        _emailController.clear();
+                        _passwordController.clear();
+                        _confirmedPasswordController.clear();
+                        _nameController.clear();
+                      },
+                    )
+                  : LoginView(
+                      emailController: _emailController,
+                      passwordController: _passwordController,
+                      onLoginTap: () => logIn(context),
+                      onRegisterTap: () {
+                        loginCubit.switchLoginRegister();
+                        _emailController.clear();
+                        _passwordController.clear();
+                      },
+                      onPswResetTap: () => resetPassword(context),
+                    ),
             ),
           ),
         );
       },
     );
-  }
-
-  Column loginView(BuildContext context) {
-    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
-    return Column(
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.25,
-        ),
-        LoginTextInputField(
-          controller: _emailController,
-          labelText: 'Enter your email',
-          icon: Icons.email_outlined,
-        ),
-        LoginTextInputField(
-          controller: _passwordController,
-          labelText: 'Enter your password',
-          obscure: true,
-          inputAction: TextInputAction.done,
-          icon: Icons.key,
-        ),
-        TextButton(
-          onPressed: () {
-            resetPassword(context);
-          },
-          child: Text(
-            'Forgot your password?',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
-          ),
-        ),
-        ActionButton(
-          text: 'Login',
-          context: context,
-          onTap: () {
-            logIn(context);
-          },
-        ),
-        const SizedBox(
-          height: 15,
-        ),
-        ActionButton(
-          text: 'Register',
-          context: context,
-          onTap: () {
-            loginCubit.switchLoginRegister();
-          },
-        ),
-      ],
-    );
-  }
-
-  Column registerView(BuildContext context) {
-    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
-    return Column(
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.17,
-        ),
-        LoginTextInputField(
-          controller: _nameController,
-          labelText: 'Enter your name',
-          icon: Icons.person,
-        ),
-        LoginTextInputField(
-          controller: _emailController,
-          labelText: 'Enter your email',
-          icon: Icons.email_outlined,
-        ),
-        LoginTextInputField(
-          controller: _passwordController,
-          labelText: 'Enter your password',
-          obscure: true,
-          icon: Icons.key,
-        ),
-        LoginTextInputField(
-          controller: _confirmedPasswordController,
-          labelText: 'Confirm your password',
-          obscure: true,
-          inputAction: TextInputAction.done,
-          icon: Icons.key,
-        ),
-        const SizedBox(
-          height: 14,
-        ),
-        ActionButton(
-          text: 'Register',
-          context: context,
-          onTap: () {
-            register(context, loginCubit);
-          },
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        TextButton(
-          onPressed: loginCubit.switchLoginRegister,
-          child: Text(
-            'Already have an account? Try login',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class LoginView extends StatelessWidget {
-  const LoginView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
