@@ -1,16 +1,15 @@
-import 'package:cookbook/src/services/firebase/firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/constants.dart';
-import '../login/cubit/login_screen_cubit.dart';
-import '../login/widgets/register_view.dart';
-import '../main/main_screen.dart';
-import 'widgets/login_view.dart';
 import '../../../../src/services/shared_prefs.dart';
 import '../../../../src/services/firebase/auth.dart';
+import '../../../../src/services/firebase/firestore.dart';
+import '../main/main_screen.dart';
+import 'cubit/login_screen_cubit.dart';
+import 'widgets/register_view.dart';
+import 'widgets/reset_password.dart';
+import 'widgets/login_view.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -89,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         FocusManager.instance.primaryFocus?.unfocus();
       } else {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => const MainScreen(),
@@ -142,153 +141,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void resetPassword(BuildContext context) {
-    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
-    //TODO handle password reset
     showDialog(
       barrierDismissible: false,
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            'Reset your password?',
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-          content: const Text(
-            'Enter the email adress associated with your account',
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-          backgroundColor: kLighterBlue,
-          actions: [
-            Column(
-              children: [
-                TextField(
-                  controller: _passwordResetController,
-                  decoration: InputDecoration(
-                    label: const Center(
-                      child: Text('Input your email'),
-                    ),
-                    labelStyle: TextStyle(
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: BlocBuilder<LoginScreenCubit, LoginScreenState>(
-                    builder: (context, state) {
-                      return state.errorMessage != ''
-                          ? Text(
-                              state.errorMessage,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 15,
-                              ),
-                            )
-                          : const SizedBox.shrink();
-                    },
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        String errorMsg = '';
-                        if (_passwordResetController.text.trim().isEmpty) {
-                          errorMsg = 'Field is empty';
-                          loginCubit.addErrorMessage(errorMsg);
-                          await Future.delayed(
-                            const Duration(seconds: 3),
-                          );
-                          loginCubit.addErrorMessage('');
-                          return;
-                        }
-                        try {
-                          loadingSpinner(context);
-                          await FirebaseAuth.instance.sendPasswordResetEmail(
-                            email: _passwordResetController.text.trim(),
-                          );
-                        } on FirebaseAuthException catch (e) {
-                          if (e.code == 'invalid-email') {
-                            errorMsg = 'Email adress is not valid';
-                          } else if (e.code == 'user-not-found') {
-                            errorMsg = 'User not found';
-                          } else {
-                            errorMsg = 'Unknown error';
-                          }
-                          return;
-                        } finally {
-                          loadingSpinner(context);
-                          FocusManager.instance.primaryFocus?.unfocus();
-                          if (errorMsg != '') {
-                            loginCubit.addErrorMessage(errorMsg);
-                            await Future.delayed(
-                              const Duration(seconds: 3),
-                            );
-                            loginCubit.addErrorMessage('');
-                          }
-                        }
-                        if (!mounted) {
-                          return;
-                        }
-                        Navigator.of(context).pop();
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text(
-                                'Check your mailbox',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              content: const Text(
-                                'You should find link to reset your password in your mailbox.',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              backgroundColor: kLighterBlue,
-                              actions: [
-                                Center(
-                                  child: IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    icon: const Icon(
-                                      Icons.check,
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.done,
-                        color: Colors.green,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _passwordResetController.clear();
-                        loginCubit.addErrorMessage('');
-                        Navigator.of(context).pop();
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+        return ResetPassword(
+          passwordResetController: _passwordResetController,
+          loadingSpinner: loadingSpinner,
         );
       },
     );

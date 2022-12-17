@@ -81,6 +81,57 @@ class Auth {
     return errorValue;
   }
 
+  Future<String> resetPassword({
+    required String passwordResetText,
+  }) async {
+    String errorValue = '';
+
+    if (passwordResetText.trim().isEmpty) {
+      errorValue = 'Field is empty';
+    }
+
+    try {
+      await _user.sendPasswordResetEmail(
+        email: passwordResetText.trim(),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-email') {
+        errorValue = 'Email adress is not valid';
+      } else if (e.code == 'user-not-found') {
+        errorValue = 'User not found';
+      } else {
+        errorValue = 'Unknown error';
+      }
+    }
+    return errorValue;
+  }
+
+  // try {
+  //   loadingSpinner(context);
+  //   await FirebaseAuth.instance.sendPasswordResetEmail(
+  //     email: _passwordResetController.text.trim(),
+  //   );
+  // } on FirebaseAuthException catch (e) {
+  //   if (e.code == 'invalid-email') {
+  //     errorMsg = 'Email adress is not valid';
+  //   } else if (e.code == 'user-not-found') {
+  //     errorMsg = 'User not found';
+  //   } else {
+  //     errorMsg = 'Unknown error';
+  //   }
+  //   return;
+  // } finally {
+  //   loadingSpinner(context);
+  //   FocusManager.instance.primaryFocus?.unfocus();
+  //   if (errorMsg != '') {
+  //     loginCubit.addErrorMessage(errorMsg);
+  //     await Future.delayed(
+  //       const Duration(seconds: 3),
+  //     );
+  //     loginCubit.addErrorMessage('');
+  //   }
+  // }
+
   Future<String> deleteUser() async {
     String errorValue = '';
     try {

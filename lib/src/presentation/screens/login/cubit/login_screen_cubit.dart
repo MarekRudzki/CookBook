@@ -32,4 +32,13 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
       ),
     );
   }
+
+  Future<void> clearErrorMessage() async {
+    await Future.delayed(
+      Duration(seconds: 3),
+    );
+    emit(
+      LoginScreenState(),
+    );
+  }
 }
