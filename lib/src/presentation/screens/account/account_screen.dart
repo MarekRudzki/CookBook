@@ -27,29 +27,33 @@ class _AccountScreenState extends State<AccountScreen> {
         return const Center(child: CircularProgressIndicator());
       },
     );
-    _auth.deleteUser(); //TODO handle string input
-    _sharedPrefs.removeUser();
-    if (!mounted) {
-      return;
-    }
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
+    await _auth.deleteUser().then((errorText) {
+      if (errorText.isNotEmpty) {
+        print(errorText); //TODO handle this error
+      } else {
+        _sharedPrefs.removeUser();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> logOut() async {
-    _auth.signOut(); //TODO handle string input
-    _sharedPrefs.removeUser();
-    if (!mounted) {
-      return;
-    }
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
+    await _auth.signOut().then((errorText) {
+      if (errorText.isNotEmpty) {
+        print(errorText); //TODO handle this error
+      } else {
+        _sharedPrefs.removeUser();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      }
+    });
   }
 
   @override
@@ -216,7 +220,9 @@ class _AccountScreenState extends State<AccountScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kLighterBlue,
                   ),
-                  onPressed: logOut,
+                  onPressed: () {
+                    logOut();
+                  },
                   label: const Text(
                     'Log out',
                     style: TextStyle(

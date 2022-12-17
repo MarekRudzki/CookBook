@@ -82,13 +82,12 @@ class _LoginScreenState extends State<LoginScreen> {
       password: password,
     )
         .then((errorText) {
+      loadingSpinner(context);
+      FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
-        loadingSpinner(context);
         showErrorDialog(context, errorText);
-
-        FocusManager.instance.primaryFocus?.unfocus();
       } else {
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const MainScreen(),
@@ -115,10 +114,10 @@ class _LoginScreenState extends State<LoginScreen> {
       confirmedPassword: confirmedPassword,
     )
         .then((errorText) {
+      loadingSpinner(context);
+      FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
-        loadingSpinner(context);
         showErrorDialog(context, errorText);
-        FocusManager.instance.primaryFocus?.unfocus();
       } else {
         _firestore.addUser(username, _auth.uid!).then((errorText) => {
               if (errorText.isNotEmpty)

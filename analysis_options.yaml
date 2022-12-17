@@ -655,16 +655,16 @@ linter:
     # Always use const when possible, make runtime faster
     #
     # https://dart-lang.github.io/linter/lints/prefer_const_constructors.html
-    # - prefer_const_constructors
+    - prefer_const_constructors
 
     # Add a const constructor when possible
     #
     # https://dart-lang.github.io/linter/lints/prefer_const_constructors_in_immutables.html
-    # - prefer_const_constructors_in_immutables
+    - prefer_const_constructors_in_immutables
 
     # final is good, const is better
     # https://dart-lang.github.io/linter/lints/prefer_const_declarations.html
-    # - prefer_const_declarations
+    - prefer_const_declarations
 
     # Always use const when possible, make runtime faster
     #
