@@ -1,13 +1,13 @@
-import 'package:cookbook/src/services/shared_prefs.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../src/core/constants.dart';
-import '../../../../src/presentation/screens/login/login_screen.dart';
-
+import '../../../core/constants.dart';
 import '../../../services/firebase/auth.dart';
-import 'widgets/settings_tile.dart';
+import '../../../services/shared_prefs.dart';
+import '../../common_widgets/error_handling.dart';
+import '../widgets/settings_tile.dart';
+import 'login_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -19,8 +19,9 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   final Auth _auth = Auth();
   final SharedPrefs _sharedPrefs = SharedPrefs();
+  final ErrorHandling _errorHandling = ErrorHandling();
 
-  Future<void> deleteAccount() async {
+  Future<void> deleteUser() async {
     showDialog(
       context: context,
       builder: (context) {
@@ -29,7 +30,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
     await _auth.deleteUser().then((errorText) {
       if (errorText.isNotEmpty) {
-        print(errorText); //TODO handle this error
+        _errorHandling.showErrorSnackbar(context, errorText);
       } else {
         _sharedPrefs.removeUser();
         Navigator.of(context).pushReplacement(
@@ -44,7 +45,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> logOut() async {
     await _auth.signOut().then((errorText) {
       if (errorText.isNotEmpty) {
-        print(errorText); //TODO handle this error
+        _errorHandling.showErrorSnackbar(context, errorText);
       } else {
         _sharedPrefs.removeUser();
         Navigator.of(context).pushReplacement(
@@ -164,7 +165,7 @@ class _AccountScreenState extends State<AccountScreen> {
               SettingsTile(
                 icon: Icons.key,
                 tileText: 'Change password',
-                onPressed: () {},
+                onPressed: () {}, //TODO add password change
               ),
               const SizedBox(
                 height: 5,
@@ -192,7 +193,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         backgroundColor: kLighterBlue,
                         actions: [
                           IconButton(
-                            onPressed: deleteAccount,
+                            onPressed: () => deleteUser(),
                             icon: const Icon(
                               Icons.done,
                               color: Colors.green,

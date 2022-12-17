@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../src/services/shared_prefs.dart';
-import '../../../../src/services/firebase/auth.dart';
-import '../../../../src/services/firebase/firestore.dart';
-import '../main/main_screen.dart';
-import 'cubit/login_screen_cubit.dart';
-import 'widgets/register_view.dart';
-import 'widgets/reset_password.dart';
-import 'widgets/login_view.dart';
+import '../../../services/shared_prefs.dart';
+import '../../../services/firebase/auth.dart';
+import '../../../services/firebase/firestore.dart';
+import '../../common_widgets/error_handling.dart';
+import '../../main_screen.dart';
+import '../cubit/account_cubit.dart';
+import '../widgets/login_view.dart';
+import '../widgets/register_view.dart';
+import '../widgets/reset_password.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final Auth _auth = Auth();
   final Firestore _firestore = Firestore();
   final SharedPrefs _sharedPrefs = SharedPrefs();
+  final ErrorHandling _errorHandling = ErrorHandling();
 
   final _nameController = TextEditingController();
 
@@ -43,49 +45,21 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordResetController.dispose();
   }
 
-  void showErrorDialog(BuildContext context, String errorText) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(errorText, textAlign: TextAlign.center),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.red,
-        margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
-      ),
-    );
-  }
-
-  void loadingSpinner(BuildContext context) {
-    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
-    loginCubit.switchLoading();
-    loginCubit.state.isLoading
-        ? showDialog(
-            context: context,
-            builder: (context) {
-              return const Center(child: CircularProgressIndicator());
-            },
-          )
-        : Navigator.of(context).pop();
-  }
-
   Future<void> logIn(BuildContext context) async {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
-    loadingSpinner(context);
+    _errorHandling.loadingSpinner(context);
     await _auth
         .logIn(
       email: email,
       password: password,
     )
         .then((errorText) {
-      loadingSpinner(context);
+      _errorHandling.loadingSpinner(context);
       FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
-        showErrorDialog(context, errorText);
+        _errorHandling.showErrorSnackbar(context, errorText);
       } else {
         Navigator.push(
           context,
@@ -98,14 +72,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> register(
-      BuildContext context, LoginScreenCubit loginCubit) async {
+  Future<void> register(BuildContext context, AccountCubit accountCubit) async {
     final String username = _nameController.text.trim();
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
     final String confirmedPassword = _confirmedPasswordController.text.trim();
 
-    loadingSpinner(context);
+    _errorHandling.loadingSpinner(context);
     await _auth
         .register(
       email: email,
@@ -114,15 +87,15 @@ class _LoginScreenState extends State<LoginScreen> {
       confirmedPassword: confirmedPassword,
     )
         .then((errorText) {
-      loadingSpinner(context);
+      _errorHandling.loadingSpinner(context);
       FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
-        showErrorDialog(context, errorText);
+        _errorHandling.showErrorSnackbar(context, errorText);
       } else {
         _firestore.addUser(username, _auth.uid!).then((errorText) => {
               if (errorText.isNotEmpty)
                 {
-                  showErrorDialog(context, errorText),
+                  _errorHandling.showErrorSnackbar(context, errorText),
                 }
               else
                 {
@@ -146,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (context) {
         return ResetPassword(
           passwordResetController: _passwordResetController,
-          loadingSpinner: loadingSpinner,
+          loadingSpinner: _errorHandling.loadingSpinner,
         );
       },
     );
@@ -154,8 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loginCubit = BlocProvider.of<LoginScreenCubit>(context);
-    return BlocBuilder<LoginScreenCubit, LoginScreenState>(
+    final accountCubit = BlocProvider.of<AccountCubit>(context);
+    return BlocBuilder<AccountCubit, AccountState>(
       builder: (context, state) {
         return SafeArea(
           child: Scaffold(
@@ -168,15 +141,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              child: loginCubit.state.isCreatingAccount
+              child: accountCubit.state.isCreatingAccount
                   ? RegisterView(
                       emailController: _emailController,
                       passwordController: _passwordController,
                       nameController: _nameController,
                       confirmedPasswordController: _confirmedPasswordController,
-                      onRegisterTap: () => register(context, loginCubit),
+                      onRegisterTap: () => register(context, accountCubit),
                       onLoginTap: () {
-                        loginCubit.switchLoginRegister();
+                        accountCubit.switchLoginRegister();
                         _emailController.clear();
                         _passwordController.clear();
                         _confirmedPasswordController.clear();
@@ -188,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       passwordController: _passwordController,
                       onLoginTap: () => logIn(context),
                       onRegisterTap: () {
-                        loginCubit.switchLoginRegister();
+                        accountCubit.switchLoginRegister();
                         _emailController.clear();
                         _passwordController.clear();
                       },

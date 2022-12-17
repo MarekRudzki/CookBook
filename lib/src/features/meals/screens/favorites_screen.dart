@@ -1,5 +1,6 @@
-import 'package:cookbook/src/core/constants.dart';
 import 'package:flutter/material.dart';
+
+import '/src/core/constants.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -18,7 +19,7 @@ class FavoritesScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Center(
+        child: const Center(
           child: Text(
             'Favorites Screen',
             style: TextStyle(

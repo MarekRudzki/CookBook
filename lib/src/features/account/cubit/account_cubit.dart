@@ -1,15 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-part 'login_screen_state.dart';
+part 'account_state.dart';
 
-class LoginScreenCubit extends Cubit<LoginScreenState> {
-  LoginScreenCubit()
+class AccountCubit extends Cubit<AccountState> {
+  AccountCubit()
       : super(
-          LoginScreenState(),
+          AccountState(),
         );
   Future<void> switchLoginRegister() async {
     emit(
-      LoginScreenState(
+      AccountState(
         isCreatingAccount: !state.isCreatingAccount,
       ),
     );
@@ -17,7 +17,7 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
 
   Future<void> switchLoading() async {
     emit(
-      LoginScreenState(
+      AccountState(
         isLoading: !state.isLoading,
       ),
     );
@@ -25,7 +25,7 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
 
   Future<void> addErrorMessage(String errorText) async {
     emit(
-      LoginScreenState(
+      AccountState(
         isLoading: state.isLoading,
         errorMessage: errorText,
       ),
@@ -34,10 +34,10 @@ class LoginScreenCubit extends Cubit<LoginScreenState> {
 
   Future<void> clearErrorMessage() async {
     await Future.delayed(
-      Duration(seconds: 3),
+      const Duration(seconds: 3),
     );
     emit(
-      LoginScreenState(),
+      AccountState(),
     );
   }
 }

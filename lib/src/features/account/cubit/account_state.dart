@@ -1,7 +1,7 @@
-part of 'login_screen_cubit.dart';
+part of 'account_cubit.dart';
 
-class LoginScreenState {
-  LoginScreenState({
+class AccountState {
+  AccountState({
     this.email = '',
     this.password = '',
     this.isCreatingAccount = false,

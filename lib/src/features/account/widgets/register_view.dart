@@ -1,6 +1,7 @@
-import 'package:cookbook/src/presentation/screens/login/widgets/login_action_button.dart';
-import 'package:cookbook/src/presentation/screens/login/widgets/login_text_input_field.dart';
 import 'package:flutter/material.dart';
+
+import './login_action_button.dart';
+import './login_text_input_field.dart';
 
 class RegisterView extends StatelessWidget {
   const RegisterView({

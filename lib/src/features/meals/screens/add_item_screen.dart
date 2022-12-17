@@ -1,8 +1,9 @@
-import 'package:cookbook/src/core/constants.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+import '/src/core/constants.dart';
+
+class AddItemScreen extends StatelessWidget {
+  const AddItemScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +19,9 @@ class HomeScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Center(
+        child: const Center(
           child: Text(
-            'Home Screen',
+            'Add Screen',
             style: TextStyle(
               color: Colors.white,
             ),

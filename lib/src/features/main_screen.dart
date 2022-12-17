@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 
-import '../../../core/constants.dart';
-import '../account/account_screen.dart';
-import '../add_item/add_screen.dart';
-import '../favorites/favorites_screen.dart';
-import '../home/home_screen.dart';
+import '../core/constants.dart';
+import 'account/screens/account_screen.dart';
+import 'meals/screens/add_item_screen.dart';
+import 'meals/screens/favorites_screen.dart';
+import 'meals/screens/home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -41,11 +41,11 @@ class _MainScreenState extends State<MainScreen> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text('No'),
+          child: const Text('No'),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text('Yes'),
+          child: const Text('Yes'),
         ),
       ],
     );

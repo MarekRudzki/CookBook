@@ -25,7 +25,7 @@ class Auth {
       if (e.code == 'network-request-failed') {
         errorValue = 'No Internet connection';
       } else if (e.code == 'wrong-password') {
-        errorValue = "Given password is incorrect";
+        errorValue = 'Given password is incorrect';
       } else if (e.code == 'user-not-found') {
         errorValue = 'No user found for given email';
       } else if (e.code == 'too-many-requests') {
