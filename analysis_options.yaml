@@ -815,7 +815,7 @@ linter:
     # Conflicts with prefer_double_quotes
     #
     # https://dart-lang.github.io/linter/lints/prefer_single_quotes.html
-    # - prefer_single_quotes
+    - prefer_single_quotes
 
     # Allows potential usage of const
     #
