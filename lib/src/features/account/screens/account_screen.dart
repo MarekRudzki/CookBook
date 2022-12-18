@@ -9,56 +9,15 @@ import '../../common_widgets/error_handling.dart';
 import '../widgets/settings_tile.dart';
 import 'login_screen.dart';
 
-class AccountScreen extends StatefulWidget {
+class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
-  State<AccountScreen> createState() => _AccountScreenState();
-}
-
-class _AccountScreenState extends State<AccountScreen> {
-  final Auth _auth = Auth();
-  final SharedPrefs _sharedPrefs = SharedPrefs();
-  final ErrorHandling _errorHandling = ErrorHandling();
-
-  Future<void> deleteUser() async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-    await _auth.deleteUser().then((errorText) {
-      if (errorText.isNotEmpty) {
-        _errorHandling.showErrorSnackbar(context, errorText);
-      } else {
-        _sharedPrefs.removeUser();
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      }
-    });
-  }
-
-  Future<void> logOut() async {
-    await _auth.signOut().then((errorText) {
-      if (errorText.isNotEmpty) {
-        _errorHandling.showErrorSnackbar(context, errorText);
-      } else {
-        _sharedPrefs.removeUser();
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final Auth _auth = Auth();
+    final SharedPrefs _sharedPrefs = SharedPrefs();
+    final ErrorHandling _errorHandling = ErrorHandling();
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -193,7 +152,28 @@ class _AccountScreenState extends State<AccountScreen> {
                         backgroundColor: kLighterBlue,
                         actions: [
                           IconButton(
-                            onPressed: () => deleteUser(),
+                            onPressed: () async {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                },
+                              );
+                              await _auth.deleteUser().then((errorText) {
+                                if (errorText.isNotEmpty) {
+                                  _errorHandling.showErrorSnackbar(
+                                      context, errorText);
+                                } else {
+                                  _sharedPrefs.removeUser();
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginScreen(),
+                                    ),
+                                  );
+                                }
+                              });
+                            },
                             icon: const Icon(
                               Icons.done,
                               color: Colors.green,
@@ -221,8 +201,19 @@ class _AccountScreenState extends State<AccountScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kLighterBlue,
                   ),
-                  onPressed: () {
-                    logOut();
+                  onPressed: () async {
+                    await _auth.signOut().then((errorText) {
+                      if (errorText.isNotEmpty) {
+                        _errorHandling.showErrorSnackbar(context, errorText);
+                      } else {
+                        _sharedPrefs.removeUser();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      }
+                    });
                   },
                   label: const Text(
                     'Log out',

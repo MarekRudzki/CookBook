@@ -88,6 +88,7 @@ class Auth {
 
     if (passwordResetText.trim().isEmpty) {
       errorValue = 'Field is empty';
+      return errorValue;
     }
 
     try {

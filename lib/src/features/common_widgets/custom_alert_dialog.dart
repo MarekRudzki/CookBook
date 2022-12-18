@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants.dart';
 import '../account/cubit/account_cubit.dart';
-import '../common_widgets/error_handling.dart';
 
 class CustromAlertDialog extends StatelessWidget {
   const CustromAlertDialog({
@@ -12,21 +12,18 @@ class CustromAlertDialog extends StatelessWidget {
     required this.content,
     required this.labelText,
     required this.controller,
-    required this.functionTryCatch,
-    this.additionalFunction,
+    required this.onConfirmed,
   });
 
   final String title;
   final String content;
   final String labelText;
   final TextEditingController controller;
-  final Future<String> functionTryCatch;
-  final Function()? additionalFunction;
+  final Function() onConfirmed;
 
   @override
   Widget build(BuildContext context) {
     final accountCubit = BlocProvider.of<AccountCubit>(context);
-    final ErrorHandling _errorHandling = ErrorHandling();
     return AlertDialog(
       title: Text(
         title,
@@ -78,28 +75,7 @@ class CustromAlertDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
-                  onPressed: () async {
-                    _errorHandling.loadingSpinner(context);
-                    await functionTryCatch.then(
-                      (errorText) => {
-                        print(
-                            errorText), //TODO handle no error message in psw reset
-                        if (errorText.isNotEmpty)
-                          {
-                            _errorHandling.loadingSpinner(context),
-                            FocusManager.instance.primaryFocus?.unfocus(),
-                            accountCubit.addErrorMessage(errorText),
-                            accountCubit.clearErrorMessage(),
-                          }
-                        else
-                          {
-                            _errorHandling.loadingSpinner(context),
-                            Navigator.of(context).pop(),
-                            additionalFunction,
-                          }
-                      },
-                    );
-                  },
+                  onPressed: onConfirmed,
                   icon: const Icon(
                     Icons.done,
                     color: Colors.green,

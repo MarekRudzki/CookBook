@@ -112,19 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  void resetPassword(BuildContext context) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return ResetPassword(
-          passwordResetController: _passwordResetController,
-          loadingSpinner: _errorHandling.loadingSpinner,
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final accountCubit = BlocProvider.of<AccountCubit>(context);
@@ -165,7 +152,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         _emailController.clear();
                         _passwordController.clear();
                       },
-                      onPswResetTap: () => resetPassword(context),
+                      onPasswordResetTap: () => resetPassword(
+                        context,
+                        _passwordResetController,
+                      ),
                     ),
             ),
           ),

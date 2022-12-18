@@ -10,14 +10,14 @@ class LoginView extends StatelessWidget {
     required this.passwordController,
     required this.onLoginTap,
     required this.onRegisterTap,
-    required this.onPswResetTap,
+    required this.onPasswordResetTap,
   });
 
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final Function() onLoginTap;
   final Function() onRegisterTap;
-  final Function() onPswResetTap;
+  final Function() onPasswordResetTap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class LoginView extends StatelessWidget {
           icon: Icons.key,
         ),
         TextButton(
-          onPressed: onPswResetTap,
+          onPressed: onPasswordResetTap,
           child: Text(
             'Forgot your password?',
             style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
