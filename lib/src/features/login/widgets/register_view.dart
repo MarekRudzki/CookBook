@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import './login_action_button.dart';
-import './login_text_input_field.dart';
+import 'login_action_button.dart';
+import 'login_text_input_field.dart';
 
 class RegisterView extends StatelessWidget {
   const RegisterView({
@@ -54,7 +54,11 @@ class RegisterView extends StatelessWidget {
         const SizedBox(
           height: 14,
         ),
-        ActionButton(text: 'Register', context: context, onTap: onRegisterTap),
+        ActionButton(
+          text: 'Register',
+          context: context,
+          onTap: onRegisterTap,
+        ),
         const SizedBox(
           height: 5,
         ),

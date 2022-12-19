@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants.dart';
-import '../account/cubit/account_cubit.dart';
+import '../login/cubit/login_cubit.dart';
 
 class CustromAlertDialog extends StatelessWidget {
   const CustromAlertDialog({
@@ -23,7 +23,7 @@ class CustromAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accountCubit = BlocProvider.of<AccountCubit>(context);
+    final loginCubit = BlocProvider.of<LoginCubit>(context);
     return AlertDialog(
       title: Text(
         title,
@@ -56,7 +56,7 @@ class CustromAlertDialog extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: BlocBuilder<AccountCubit, AccountState>(
+              child: BlocBuilder<LoginCubit, LoginState>(
                 builder: (context, state) {
                   return state.errorMessage != ''
                       ? Text(
@@ -84,7 +84,7 @@ class CustromAlertDialog extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     controller.clear();
-                    accountCubit.addErrorMessage('');
+                    loginCubit.addErrorMessage('');
                     Navigator.of(context).pop();
                   },
                   icon: const Icon(

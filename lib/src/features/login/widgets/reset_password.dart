@@ -6,12 +6,12 @@ import '../../../core/constants.dart';
 import '../../../services/firebase/auth.dart';
 import '../../common_widgets/custom_alert_dialog.dart';
 import '../../common_widgets/error_handling.dart';
-import '../cubit/account_cubit.dart';
+import '../cubit/login_cubit.dart';
 
 void resetPassword(BuildContext context, TextEditingController controller) {
   final Auth _auth = Auth();
   final ErrorHandling _errorHandling = ErrorHandling();
-  final accountCubit = BlocProvider.of<AccountCubit>(context);
+  final loginCubit = BlocProvider.of<LoginCubit>(context);
   showDialog(
     barrierDismissible: false,
     context: context,
@@ -33,8 +33,8 @@ void resetPassword(BuildContext context, TextEditingController controller) {
                     {
                       _errorHandling.loadingSpinner(context),
                       FocusManager.instance.primaryFocus?.unfocus(),
-                      accountCubit.addErrorMessage(errorText),
-                      accountCubit.clearErrorMessage(),
+                      loginCubit.addErrorMessage(errorText),
+                      loginCubit.clearErrorMessage(),
                     }
                   else
                     {

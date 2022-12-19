@@ -1,15 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-part 'account_state.dart';
+part 'login_state.dart';
 
-class AccountCubit extends Cubit<AccountState> {
-  AccountCubit()
+class LoginCubit extends Cubit<LoginState> {
+  LoginCubit()
       : super(
-          AccountState(),
+          LoginState(),
         );
   Future<void> switchLoginRegister() async {
     emit(
-      AccountState(
+      LoginState(
         isCreatingAccount: !state.isCreatingAccount,
       ),
     );
@@ -17,15 +17,16 @@ class AccountCubit extends Cubit<AccountState> {
 
   Future<void> switchLoading() async {
     emit(
-      AccountState(
+      LoginState(
         isLoading: !state.isLoading,
+        isCreatingAccount: state.isCreatingAccount,
       ),
     );
   }
 
   Future<void> addErrorMessage(String errorText) async {
     emit(
-      AccountState(
+      LoginState(
         isLoading: state.isLoading,
         errorMessage: errorText,
       ),
@@ -35,9 +36,6 @@ class AccountCubit extends Cubit<AccountState> {
   Future<void> clearErrorMessage() async {
     await Future.delayed(
       const Duration(seconds: 3),
-    );
-    emit(
-      AccountState(),
     );
   }
 }

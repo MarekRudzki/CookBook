@@ -7,7 +7,7 @@ import '../../../services/firebase/auth.dart';
 import '../../../services/shared_prefs.dart';
 import '../../common_widgets/error_handling.dart';
 import '../widgets/settings_tile.dart';
-import 'login_screen.dart';
+import '../../login/login_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});

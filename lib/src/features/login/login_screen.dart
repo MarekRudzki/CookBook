@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../services/shared_prefs.dart';
-import '../../../services/firebase/auth.dart';
-import '../../../services/firebase/firestore.dart';
-import '../../common_widgets/error_handling.dart';
-import '../../main_screen.dart';
-import '../cubit/account_cubit.dart';
-import '../widgets/login_view.dart';
-import '../widgets/register_view.dart';
-import '../widgets/reset_password.dart';
+import '../../services/shared_prefs.dart';
+import '../../services/firebase/auth.dart';
+import '../../services/firebase/firestore.dart';
+import '../common_widgets/error_handling.dart';
+import '../main_screen.dart';
+import 'cubit/login_cubit.dart';
+import 'widgets/login_view.dart';
+import 'widgets/register_view.dart';
+import 'widgets/reset_password.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> register(BuildContext context, AccountCubit accountCubit) async {
+  Future<void> register(BuildContext context) async {
     final String username = _nameController.text.trim();
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
@@ -114,8 +114,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final accountCubit = BlocProvider.of<AccountCubit>(context);
-    return BlocBuilder<AccountCubit, AccountState>(
+    final loginCubit = BlocProvider.of<LoginCubit>(context);
+    return BlocBuilder<LoginCubit, LoginState>(
       builder: (context, state) {
         return SafeArea(
           child: Scaffold(
@@ -128,15 +128,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              child: accountCubit.state.isCreatingAccount
+              child: loginCubit.state.isCreatingAccount
                   ? RegisterView(
                       emailController: _emailController,
                       passwordController: _passwordController,
                       nameController: _nameController,
                       confirmedPasswordController: _confirmedPasswordController,
-                      onRegisterTap: () => register(context, accountCubit),
+                      onRegisterTap: () => register(context),
                       onLoginTap: () {
-                        accountCubit.switchLoginRegister();
+                        loginCubit.switchLoginRegister();
                         _emailController.clear();
                         _passwordController.clear();
                         _confirmedPasswordController.clear();
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       passwordController: _passwordController,
                       onLoginTap: () => logIn(context),
                       onRegisterTap: () {
-                        accountCubit.switchLoginRegister();
+                        loginCubit.switchLoginRegister();
                         _emailController.clear();
                         _passwordController.clear();
                       },

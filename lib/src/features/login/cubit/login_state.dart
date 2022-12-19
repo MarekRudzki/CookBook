@@ -1,16 +1,12 @@
-part of 'account_cubit.dart';
+part of 'login_cubit.dart';
 
-class AccountState {
-  AccountState({
-    this.email = '',
-    this.password = '',
+class LoginState {
+  LoginState({
     this.isCreatingAccount = false,
     this.isLoading = false,
     this.errorMessage = '',
   });
 
-  final String email;
-  final String password;
   final bool isCreatingAccount;
   final bool isLoading;
   final String errorMessage;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../account/cubit/account_cubit.dart';
+import '../login/cubit/login_cubit.dart';
 
 class ErrorHandling {
   void showErrorSnackbar(BuildContext context, String errorText) {
@@ -20,9 +20,9 @@ class ErrorHandling {
   }
 
   void loadingSpinner(BuildContext context) {
-    final accountCubit = BlocProvider.of<AccountCubit>(context);
-    accountCubit.switchLoading();
-    accountCubit.state.isLoading
+    final loginCubit = BlocProvider.of<LoginCubit>(context);
+    loginCubit.switchLoading();
+    loginCubit.state.isLoading
         ? showDialog(
             context: context,
             builder: (context) {
