@@ -26,12 +26,15 @@ class CustromAlertDialog extends StatelessWidget {
     final loginCubit = BlocProvider.of<LoginCubit>(context);
     return AlertDialog(
       title: Text(
+        textAlign: TextAlign.center,
         title,
         style: const TextStyle(
           color: Colors.white,
         ),
       ),
       content: Text(
+        textAlign: TextAlign.center,
+        softWrap: true,
         content,
         style: const TextStyle(
           color: Colors.white,

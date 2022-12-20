@@ -1,22 +1,36 @@
+import 'package:cookbook/src/services/firebase/firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
+import '../../../features/common_widgets/custom_alert_dialog.dart';
 import '../../../core/constants.dart';
 import '../../../services/firebase/auth.dart';
 import '../../../services/shared_prefs.dart';
 import '../../common_widgets/error_handling.dart';
-import '../widgets/settings_tile.dart';
 import '../../login/login_screen.dart';
+import '../account_provider.dart';
+import '../widgets/settings_tile.dart';
 
-class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
+class AccountScreen extends StatefulWidget {
+  const AccountScreen({
+    super.key,
+  });
 
   @override
+  State<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
+  @override
   Widget build(BuildContext context) {
+    final TextEditingController _changeUsernameConroller =
+        TextEditingController();
     final Auth _auth = Auth();
     final SharedPrefs _sharedPrefs = SharedPrefs();
     final ErrorHandling _errorHandling = ErrorHandling();
+    final Firestore _firestore = Firestore();
 
     return Scaffold(
       body: Container(
@@ -66,7 +80,7 @@ class AccountScreen extends StatelessWidget {
                             width: 7,
                           ),
                           Text(
-                            'Username: ',
+                            'Username: ${Provider.of<AccountProvider>(context).username}',
                             style: GoogleFonts.robotoSlab(
                               color: Colors.white,
                               fontSize: 16,
@@ -115,8 +129,36 @@ class AccountScreen extends StatelessWidget {
               SettingsTile(
                 icon: Icons.edit,
                 tileText: 'Change username',
-                onPressed:
-                    () {}, //TODO Dodać wyskakujący ekran na którym można zmienić dane, i gdzie te zostaną spradzone
+                onPressed: () {
+                  showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) {
+                        return CustromAlertDialog(
+                          title: 'Change username?',
+                          content: 'Enter new username you want to use',
+                          labelText: 'Input new username',
+                          controller: _changeUsernameConroller,
+                          onConfirmed: () async {
+                            await _firestore
+                                .addUser(_changeUsernameConroller.text)
+                                .then((errorText) {
+                              if (errorText.isNotEmpty) {
+                                _errorHandling.showErrorSnackbar(
+                                    context, errorText);
+                              } else {
+                                Provider.of<AccountProvider>(context,
+                                        listen: false)
+                                    .changeUsername(
+                                  _changeUsernameConroller.text,
+                                );
+                                Navigator.of(context).pop();
+                              }
+                            });
+                          },
+                        );
+                      });
+                },
               ),
               const SizedBox(
                 height: 5,

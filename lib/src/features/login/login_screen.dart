@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (errorText.isNotEmpty) {
         _errorHandling.showErrorSnackbar(context, errorText);
       } else {
-        _firestore.addUser(username, _auth.uid!).then((errorText) => {
+        _firestore.addUser(username).then((errorText) => {
               if (errorText.isNotEmpty)
                 {
                   _errorHandling.showErrorSnackbar(context, errorText),

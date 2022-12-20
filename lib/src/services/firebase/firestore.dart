@@ -6,7 +6,8 @@ class Firestore {
   final Auth _auth = Auth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<String> addUser(String username, String uid) async {
+  Future<String> addUser(String username) async {
+    final String? uid = _auth.uid;
     String errorText = '';
     try {
       await _firestore.collection('users').doc(uid).set({

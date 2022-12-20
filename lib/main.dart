@@ -1,7 +1,9 @@
+import 'package:cookbook/src/features/account/account_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 
 import 'src/features/login/cubit/login_cubit.dart';
 import 'src/features/login/login_screen.dart';
@@ -19,9 +21,12 @@ void main() async {
   runApp(
     BlocProvider(
       create: (context) => LoginCubit(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: isLogged ? const MainScreen() : const LoginScreen(),
+      child: ChangeNotifierProvider<AccountProvider>(
+        create: (_) => AccountProvider(),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: isLogged ? const MainScreen() : const LoginScreen(),
+        ),
       ),
     ),
   );

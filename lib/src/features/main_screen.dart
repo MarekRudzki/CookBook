@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants.dart';
+import 'account/account_provider.dart';
 import 'account/screens/account_screen.dart';
 import 'meals/screens/add_item_screen.dart';
 import 'meals/screens/favorites_screen.dart';
@@ -17,7 +19,17 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
+  String v = '';
+
   PageController pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<AccountProvider>(context, listen: false).setUsername();
+    });
+  }
 
   @override
   void dispose() {
