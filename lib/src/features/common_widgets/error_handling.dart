@@ -1,7 +1,6 @@
+import 'package:cookbook/src/features/login/login_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../login/cubit/login_cubit.dart';
+import 'package:provider/provider.dart';
 
 class ErrorHandling {
   void showErrorSnackbar(BuildContext context, String errorText) {
@@ -20,9 +19,9 @@ class ErrorHandling {
   }
 
   void loadingSpinner(BuildContext context) {
-    final loginCubit = BlocProvider.of<LoginCubit>(context);
-    loginCubit.switchLoading();
-    loginCubit.state.isLoading
+    final loginProvider = Provider.of<LoginProvider>(context, listen: false);
+    loginProvider.toggleLoading();
+    context.read<LoginProvider>().isLoading
         ? showDialog(
             context: context,
             builder: (context) {

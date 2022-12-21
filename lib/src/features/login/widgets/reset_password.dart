@@ -1,17 +1,16 @@
+import 'package:cookbook/src/features/login/login_provider.dart';
 import 'package:flutter/material.dart';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants.dart';
 import '../../../services/firebase/auth.dart';
 import '../../common_widgets/custom_alert_dialog.dart';
 import '../../common_widgets/error_handling.dart';
-import '../cubit/login_cubit.dart';
 
 void resetPassword(BuildContext context, TextEditingController controller) {
   final Auth _auth = Auth();
   final ErrorHandling _errorHandling = ErrorHandling();
-  final loginCubit = BlocProvider.of<LoginCubit>(context);
+  final loginProvider = Provider.of<LoginProvider>(context, listen: false);
   showDialog(
     barrierDismissible: false,
     context: context,
@@ -33,8 +32,8 @@ void resetPassword(BuildContext context, TextEditingController controller) {
                     {
                       _errorHandling.loadingSpinner(context),
                       FocusManager.instance.primaryFocus?.unfocus(),
-                      loginCubit.addErrorMessage(errorText),
-                      loginCubit.clearErrorMessage(),
+                      loginProvider.addErrorMessage(errorText),
+                      loginProvider.resetErrorMessage(),
                     }
                   else
                     {

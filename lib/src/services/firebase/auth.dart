@@ -104,6 +104,39 @@ class Auth {
         errorValue = 'Unknown error';
       }
     }
+    print(errorValue);
+    return errorValue;
+  }
+
+  Future<String> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmedNewPassword,
+  }) async {
+    String errorValue = '';
+    final UserCredential _userCredential = await _user.currentUser!
+        .reauthenticateWithCredential(EmailAuthProvider.credential(
+      email: _user.currentUser!.email!,
+      password: currentPassword,
+    ));
+    _userCredential.user;
+
+    if (currentPassword.trim().isEmpty ||
+        newPassword.trim().isEmpty ||
+        confirmedNewPassword.trim().isEmpty) {
+      errorValue = 'Please fill in all fields';
+      return errorValue;
+    }
+
+    try {
+      await _user.currentUser!.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        errorValue = 'Password is weak';
+      } else {
+        errorValue = 'Unknown error';
+      }
+    }
     return errorValue;
   }
 

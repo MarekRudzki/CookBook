@@ -91,20 +91,26 @@ class _MainScreenState extends State<MainScreen> {
               BottomNavyBarItem(
                 icon: const Icon(Icons.home),
                 title: const Text('Home'),
-                activeColor: Colors.amber,
-                inactiveColor: Colors.grey,
+                activeColor: kActiveNavyBar,
+                inactiveColor: kInactiveNavyBar,
               ),
               BottomNavyBarItem(
                 icon: const Icon(Icons.add),
                 title: const Text('Add'),
+                activeColor: kActiveNavyBar,
+                inactiveColor: kInactiveNavyBar,
               ),
               BottomNavyBarItem(
                 icon: const Icon(Icons.favorite),
                 title: const Text('Favourites'),
+                activeColor: kActiveNavyBar,
+                inactiveColor: kInactiveNavyBar,
               ),
               BottomNavyBarItem(
                 icon: const Icon(Icons.person),
                 title: const Text('Account'),
+                activeColor: kActiveNavyBar,
+                inactiveColor: kInactiveNavyBar,
               ),
             ],
             selectedIndex: selectedIndex,

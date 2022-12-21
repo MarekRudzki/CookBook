@@ -1,4 +1,3 @@
-import 'package:cookbook/src/services/firebase/firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -12,6 +11,7 @@ import '../../common_widgets/error_handling.dart';
 import '../../login/login_screen.dart';
 import '../account_provider.dart';
 import '../widgets/settings_tile.dart';
+import '/src/services/firebase/firestore.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({
@@ -23,15 +23,29 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  late final TextEditingController _changeUsernameConroller;
+  late final TextEditingController _changePasswordConroller;
+  final Auth _auth = Auth();
+  final SharedPrefs _sharedPrefs = SharedPrefs();
+  final ErrorHandling _errorHandling = ErrorHandling();
+  final Firestore _firestore = Firestore();
+
+  @override
+  void initState() {
+    super.initState();
+    _changeUsernameConroller = TextEditingController();
+    _changePasswordConroller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _changeUsernameConroller.dispose();
+    _changePasswordConroller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final TextEditingController _changeUsernameConroller =
-        TextEditingController();
-    final Auth _auth = Auth();
-    final SharedPrefs _sharedPrefs = SharedPrefs();
-    final ErrorHandling _errorHandling = ErrorHandling();
-    final Firestore _firestore = Firestore();
-
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -80,7 +94,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             width: 7,
                           ),
                           Text(
-                            'Username: ${Provider.of<AccountProvider>(context).username}',
+                            'Username: ${Provider.of<AccountProvider>(context, listen: false).username}',
                             style: GoogleFonts.robotoSlab(
                               color: Colors.white,
                               fontSize: 16,
@@ -166,7 +180,21 @@ class _AccountScreenState extends State<AccountScreen> {
               SettingsTile(
                 icon: Icons.key,
                 tileText: 'Change password',
-                onPressed: () {}, //TODO add password change
+                onPressed: () {
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) {
+                      return CustromAlertDialog(
+                        title: 'Change password?',
+                        content: 'Enter your new password',
+                        labelText: 'Input new password',
+                        controller: _changePasswordConroller,
+                        onConfirmed: () {},
+                      );
+                    },
+                  );
+                },
               ),
               const SizedBox(
                 height: 5,

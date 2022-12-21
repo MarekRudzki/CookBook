@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants.dart';
-import '../login/cubit/login_cubit.dart';
+import '../login/login_provider.dart';
 
 class CustromAlertDialog extends StatelessWidget {
   const CustromAlertDialog({
@@ -23,7 +22,7 @@ class CustromAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loginCubit = BlocProvider.of<LoginCubit>(context);
+    final loginProvider = Provider.of<LoginProvider>(context, listen: false);
     return AlertDialog(
       title: Text(
         textAlign: TextAlign.center,
@@ -59,20 +58,18 @@ class CustromAlertDialog extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: BlocBuilder<LoginCubit, LoginState>(
-                builder: (context, state) {
-                  return state.errorMessage != ''
-                      ? Text(
-                          state.errorMessage,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 15,
-                          ),
-                        )
-                      : const SizedBox.shrink();
-                },
-              ),
+              child: context.select(
+                          (LoginProvider provider) => provider.errorMessage) !=
+                      ''
+                  ? Text(
+                      loginProvider.errorMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 15,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -87,7 +84,7 @@ class CustromAlertDialog extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     controller.clear();
-                    loginCubit.addErrorMessage('');
+                    loginProvider.addErrorMessage('');
                     Navigator.of(context).pop();
                   },
                   icon: const Icon(

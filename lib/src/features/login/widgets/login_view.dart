@@ -45,11 +45,19 @@ class LoginView extends StatelessWidget {
             style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
           ),
         ),
-        ActionButton(text: 'Login', context: context, onTap: onLoginTap),
+        ActionButton(
+          text: 'Login',
+          context: context,
+          onTap: onLoginTap,
+        ),
         const SizedBox(
           height: 15,
         ),
-        ActionButton(text: 'Register', context: context, onTap: onRegisterTap),
+        ActionButton(
+          text: 'Register',
+          context: context,
+          onTap: onRegisterTap,
+        ),
       ],
     );
   }
