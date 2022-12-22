@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/shared_prefs.dart';
-import '../../services/firebase/auth.dart';
-import '../../services/firebase/firestore.dart';
-import '../common_widgets/error_handling.dart';
-import '../main_screen.dart';
-import 'login_provider.dart';
-import 'widgets/login_view.dart';
-import 'widgets/register_view.dart';
-import 'widgets/reset_password.dart';
+import '../../../services/shared_prefs.dart';
+import '../../../services/firebase/auth.dart';
+import '../../../services/firebase/firestore.dart';
+import '../../common_widgets/error_handling.dart';
+import '../../main_screen.dart';
+import '../account_provider.dart';
+import '../widgets/login_view.dart';
+import '../widgets/register_view.dart';
+import '../widgets/reset_password.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,14 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
-    _errorHandling.loadingSpinner(context);
+    _errorHandling.toggleLoadingSpinner(context);
     await _auth
         .logIn(
       email: email,
       password: password,
     )
         .then((errorText) {
-      _errorHandling.loadingSpinner(context);
+      _errorHandling.toggleLoadingSpinner(context);
       FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
         _errorHandling.showErrorSnackbar(context, errorText);
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final String password = _passwordController.text.trim();
     final String confirmedPassword = _confirmedPasswordController.text.trim();
 
-    _errorHandling.loadingSpinner(context);
+    _errorHandling.toggleLoadingSpinner(context);
     await _auth
         .register(
       email: email,
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
       confirmedPassword: confirmedPassword,
     )
         .then((errorText) {
-      _errorHandling.loadingSpinner(context);
+      _errorHandling.toggleLoadingSpinner(context);
       FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
         _errorHandling.showErrorSnackbar(context, errorText);
@@ -113,7 +113,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loginProvider = Provider.of<LoginProvider>(context, listen: false);
+    final accountProvider =
+        Provider.of<AccountProvider>(context, listen: false);
+
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -126,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           child: context.select(
-                  (LoginProvider provider) => provider.isCreatingAccount)
+                  (AccountProvider provider) => provider.isCreatingAccount)
               ? RegisterView(
                   emailController: _emailController,
                   passwordController: _passwordController,
@@ -134,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   confirmedPasswordController: _confirmedPasswordController,
                   onRegisterTap: () => register(context),
                   onLoginTap: () {
-                    loginProvider.switchLoginRegister();
+                    accountProvider.switchLoginRegister();
                     _emailController.clear();
                     _passwordController.clear();
                     _confirmedPasswordController.clear();
@@ -146,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   passwordController: _passwordController,
                   onLoginTap: () => logIn(context),
                   onRegisterTap: () {
-                    loginProvider.switchLoginRegister();
+                    accountProvider.switchLoginRegister();
                     _emailController.clear();
                     _passwordController.clear();
                   },

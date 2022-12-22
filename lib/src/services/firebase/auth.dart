@@ -114,17 +114,31 @@ class Auth {
     required String confirmedNewPassword,
   }) async {
     String errorValue = '';
-    final UserCredential _userCredential = await _user.currentUser!
-        .reauthenticateWithCredential(EmailAuthProvider.credential(
-      email: _user.currentUser!.email!,
-      password: currentPassword,
-    ));
-    _userCredential.user;
 
     if (currentPassword.trim().isEmpty ||
         newPassword.trim().isEmpty ||
         confirmedNewPassword.trim().isEmpty) {
       errorValue = 'Please fill in all fields';
+      return errorValue;
+    }
+
+    if (newPassword.trim() != confirmedNewPassword.trim()) {
+      errorValue = 'Given passwords do not match';
+      return errorValue;
+    }
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: email!,
+        password: currentPassword,
+      );
+      await _user.currentUser!.reauthenticateWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        errorValue = 'Password not correct';
+      } else {
+        errorValue = 'Unknown error';
+      }
       return errorValue;
     }
 
@@ -140,12 +154,37 @@ class Auth {
     return errorValue;
   }
 
-  Future<String> deleteUser() async {
+  Future<String> deleteUser({required String password}) async {
     String errorValue = '';
+
+    if (password.trim().isEmpty) {
+      errorValue = 'Please provide your password';
+      return errorValue;
+    }
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: email!,
+        password: password,
+      );
+      await _user.currentUser!.reauthenticateWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        errorValue = 'Password not correct';
+      } else {
+        errorValue = 'Unknown error';
+      }
+      return errorValue;
+    }
+
     try {
       await _user.currentUser!.delete();
     } on FirebaseAuthException catch (e) {
-      errorValue = e.code;
+      if (e.code == 'requires-recent-login') {
+        errorValue = 'Login data expired, please login again';
+      } else {
+        errorValue = e.code;
+      }
     }
     return errorValue;
   }

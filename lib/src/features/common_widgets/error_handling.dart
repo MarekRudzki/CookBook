@@ -1,6 +1,7 @@
-import 'package:cookbook/src/features/login/login_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../account/account_provider.dart';
 
 class ErrorHandling {
   void showErrorSnackbar(BuildContext context, String errorText) {
@@ -18,10 +19,11 @@ class ErrorHandling {
     );
   }
 
-  void loadingSpinner(BuildContext context) {
-    final loginProvider = Provider.of<LoginProvider>(context, listen: false);
-    loginProvider.toggleLoading();
-    context.read<LoginProvider>().isLoading
+  void toggleLoadingSpinner(BuildContext context) {
+    final accountProvider =
+        Provider.of<AccountProvider>(context, listen: false);
+    accountProvider.toggleLoading();
+    context.read<AccountProvider>().isLoading
         ? showDialog(
             context: context,
             builder: (context) {

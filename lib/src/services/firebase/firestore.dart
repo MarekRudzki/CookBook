@@ -9,6 +9,12 @@ class Firestore {
   Future<String> addUser(String username) async {
     final String? uid = _auth.uid;
     String errorText = '';
+
+    if (username == '') {
+      errorText = 'Field is empty';
+      return errorText;
+    }
+
     try {
       await _firestore.collection('users').doc(uid).set({
         'username': username,
@@ -35,6 +41,18 @@ class Firestore {
       returnValue = e.toString();
     }
 
+    return returnValue;
+  }
+
+  Future<String> deleteUserData(String uid) async {
+    String returnValue = '';
+
+    try {
+      final collection = _firestore.collection('users');
+      await collection.doc(uid).delete();
+    } on Exception catch (e) {
+      returnValue = e.toString();
+    }
     return returnValue;
   }
 }
