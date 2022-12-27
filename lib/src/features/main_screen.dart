@@ -1,3 +1,4 @@
+import 'package:cookbook/src/core/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
@@ -49,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
     return AlertDialog(
       title: const Text('Please confirm'),
       content: const Text('Do you want to exit the app?'),
-      backgroundColor: kLighterBlue,
+      backgroundColor: kLightBlue,
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
@@ -85,43 +86,59 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
           ),
-          bottomNavigationBar: BottomNavyBar(
-            backgroundColor: kLighterBlue,
-            items: [
-              BottomNavyBarItem(
-                icon: const Icon(Icons.home),
-                title: const Text('Home'),
-                activeColor: kActiveNavyBar,
-                inactiveColor: kInactiveNavyBar,
-              ),
-              BottomNavyBarItem(
-                icon: const Icon(Icons.add),
-                title: const Text('Add'),
-                activeColor: kActiveNavyBar,
-                inactiveColor: kInactiveNavyBar,
-              ),
-              BottomNavyBarItem(
-                icon: const Icon(Icons.favorite),
-                title: const Text('Favourites'),
-                activeColor: kActiveNavyBar,
-                inactiveColor: kInactiveNavyBar,
-              ),
-              BottomNavyBarItem(
-                icon: const Icon(Icons.person),
-                title: const Text('Account'),
-                activeColor: kActiveNavyBar,
-                inactiveColor: kInactiveNavyBar,
-              ),
-            ],
-            selectedIndex: selectedIndex,
-            onItemSelected: (value) {
-              selectedIndex = value;
-              pageController.animateToPage(
-                value,
-                duration: const Duration(
-                  milliseconds: 200,
-                ),
-                curve: Curves.easeIn,
+          bottomNavigationBar: Consumer<ThemeProvider>(
+            builder: (context, theme, _) {
+              return BottomNavyBar(
+                backgroundColor: theme.isDark() ? kLightBlue : kLightGreen,
+                items: [
+                  BottomNavyBarItem(
+                    icon: const Icon(Icons.home),
+                    title: Text(
+                      'Home',
+                      style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                    activeColor: Theme.of(context).highlightColor,
+                    inactiveColor: kInactiveNavyBar,
+                  ),
+                  BottomNavyBarItem(
+                    icon: const Icon(Icons.add),
+                    title: Text(
+                      'Add',
+                      style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                    activeColor: Theme.of(context).highlightColor,
+                    inactiveColor: kInactiveNavyBar,
+                  ),
+                  BottomNavyBarItem(
+                    icon: const Icon(Icons.favorite),
+                    title: Text(
+                      'Favourites',
+                      style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                    activeColor: Theme.of(context).highlightColor,
+                    inactiveColor: kInactiveNavyBar,
+                  ),
+                  BottomNavyBarItem(
+                    icon: const Icon(Icons.person),
+                    title: Text(
+                      'Account',
+                      style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                    activeColor: Theme.of(context).highlightColor,
+                    inactiveColor: kInactiveNavyBar,
+                  ),
+                ],
+                selectedIndex: selectedIndex,
+                onItemSelected: (value) {
+                  selectedIndex = value;
+                  pageController.animateToPage(
+                    value,
+                    duration: const Duration(
+                      milliseconds: 200,
+                    ),
+                    curve: Curves.easeIn,
+                  );
+                },
               );
             },
           ),

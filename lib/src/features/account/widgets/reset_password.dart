@@ -32,7 +32,7 @@ void resetPassword(BuildContext context, TextEditingController controller) {
             color: Colors.white,
           ),
         ),
-        backgroundColor: kLighterBlue,
+        backgroundColor: kLightBlue,
         actions: [
           Column(
             children: [
@@ -57,8 +57,8 @@ void resetPassword(BuildContext context, TextEditingController controller) {
                     ? Text(
                         _accountProvider.errorMessage,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.red,
+                        style: TextStyle(
+                          color: Theme.of(context).errorColor,
                           fontSize: 15,
                         ),
                       )
@@ -101,7 +101,7 @@ void resetPassword(BuildContext context, TextEditingController controller) {
                                           style:
                                               TextStyle(color: Colors.white70),
                                         ),
-                                        backgroundColor: kLighterBlue,
+                                        backgroundColor: kLightBlue,
                                         actions: [
                                           Center(
                                             child: IconButton(
@@ -133,9 +133,9 @@ void resetPassword(BuildContext context, TextEditingController controller) {
                       _accountProvider.addErrorMessage('');
                       Navigator.of(context).pop();
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close,
-                      color: Colors.red,
+                      color: Theme.of(context).errorColor,
                     ),
                   ),
                 ],

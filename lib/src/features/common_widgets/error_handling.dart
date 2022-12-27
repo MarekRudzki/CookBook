@@ -10,7 +10,7 @@ class ErrorHandling {
       SnackBar(
         content: Text(errorText, textAlign: TextAlign.center),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.red,
+        backgroundColor: Theme.of(context).errorColor,
         margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),

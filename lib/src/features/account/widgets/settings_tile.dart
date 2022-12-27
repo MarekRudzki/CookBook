@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:google_fonts/google_fonts.dart';
-
 class SettingsTile extends StatelessWidget {
   const SettingsTile({
     super.key,
@@ -21,7 +19,7 @@ class SettingsTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey,
+            color: Theme.of(context).primaryColorDark,
           ),
         ),
         child: Padding(
@@ -33,7 +31,7 @@ class SettingsTile extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: Colors.white,
+                color: Theme.of(context).primaryColor,
               ),
               const SizedBox(
                 width: 7,
@@ -41,15 +39,12 @@ class SettingsTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   tileText,
-                  style: GoogleFonts.robotoSlab(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios,
-                color: Colors.white,
+                color: Theme.of(context).primaryColor,
               ),
             ],
           ),

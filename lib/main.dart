@@ -19,7 +19,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+//TODO add l10n
   runApp(
     MultiProvider(
       providers: [
@@ -29,7 +29,7 @@ void main() async {
       child: Consumer<ThemeProvider>(
         builder: (context, theme, _) {
           return MaterialApp(
-            theme: theme.dark,
+            theme: theme.getTheme(),
             debugShowCheckedModeBanner: false,
             home: isLogged ? const MainScreen() : const LoginScreen(),
           );

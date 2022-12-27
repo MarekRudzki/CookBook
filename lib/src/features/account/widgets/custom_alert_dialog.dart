@@ -1,8 +1,10 @@
-import 'package:cookbook/src/features/account/account_provider.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
+import '../../../core/theme_provider.dart';
 import '../../../core/constants.dart';
+import '../account_provider.dart';
 
 class CustomAlertDialog extends StatelessWidget {
   const CustomAlertDialog({
@@ -36,12 +38,14 @@ class CustomAlertDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final _accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
+    final ThemeProvider _themeProvider = ThemeProvider();
     return AlertDialog(
       title: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
-        ),
+        style: Theme.of(context).textTheme.bodyText2!.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
       ),
       content: Text(
         softWrap: true,
@@ -50,7 +54,7 @@ class CustomAlertDialog extends StatelessWidget {
           color: contentColor,
         ),
       ),
-      backgroundColor: kLighterBlue,
+      backgroundColor: _themeProvider.isDark() ? kLightBlue : kLightGreen,
       actions: [
         Column(
           children: [
@@ -64,10 +68,10 @@ class CustomAlertDialog extends StatelessWidget {
                     child: Text(firstLabel!),
                   ),
                   labelStyle: TextStyle(
-                    color: Colors.grey.shade500,
+                    color: Theme.of(context).primaryColorDark,
                   ),
                 ),
-                style: const TextStyle(color: Colors.white70),
+                style: Theme.of(context).textTheme.bodyText1,
               ),
             if (secondLabel != null)
               TextField(
@@ -79,10 +83,10 @@ class CustomAlertDialog extends StatelessWidget {
                     child: Text(secondLabel!),
                   ),
                   labelStyle: TextStyle(
-                    color: Colors.grey.shade500,
+                    color: Theme.of(context).primaryColorDark,
                   ),
                 ),
-                style: const TextStyle(color: Colors.white70),
+                style: Theme.of(context).textTheme.bodyText1,
               ),
             if (thirdLabel != null)
               TextField(
@@ -94,10 +98,10 @@ class CustomAlertDialog extends StatelessWidget {
                     child: Text(thirdLabel!),
                   ),
                   labelStyle: TextStyle(
-                    color: Colors.grey.shade500,
+                    color: Theme.of(context).primaryColorDark,
                   ),
                 ),
-                style: const TextStyle(color: Colors.white70),
+                style: Theme.of(context).textTheme.bodyText1,
               ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -107,8 +111,8 @@ class CustomAlertDialog extends StatelessWidget {
                   ? Text(
                       _accountProvider.errorMessage,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.red,
+                      style: TextStyle(
+                        color: Theme.of(context).errorColor,
                         fontSize: 15,
                       ),
                     )

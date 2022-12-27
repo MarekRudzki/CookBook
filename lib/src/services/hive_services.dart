@@ -14,34 +14,27 @@ class HiveServices {
 
   void setUser(String username) {
     _userBox.put('email', username.trim());
-  }
-
-  String? getUserEmail() {
-    final String _userEmail = _userBox.get('email').toString();
-    return _userEmail;
+    _userBox.put('theme', 'light');
   }
 
   void removeUser() {
     _userBox.delete('email');
+    _userBox.delete('theme');
   }
 
-  bool isDarkTheme({required String userEmail}) {
-    final isDark = _userBox.get('{$userEmail}_isDark');
-    if (isDark == null) {
-      return false;
+  void setTheme({required String theme}) {
+    _userBox.put('theme', theme);
+  } // TODO maybe use as List to get username and isLogged
+
+  String getTheme() {
+    final String theme;
+    final bool hasTheme = _userBox.containsKey('theme');
+    final String currentTheme = _userBox.get('theme').toString();
+    if (!hasTheme || currentTheme == 'light') {
+      return theme = 'light';
     } else {
-      return true;
+      theme = 'dark';
     }
-  }
-
-  void setTheme({required bool isDark, required String userEmail}) {
-    _userBox.put('${userEmail}_isDark', isDark);
-  }
-
-  void deleteTheme({required String userEmail}) {
-    final hasTheme = _userBox.get('{$userEmail}_isDark');
-    if (hasTheme != null) {
-      _userBox.delete('{$userEmail}_isDark');
-    }
+    return theme;
   }
 }
