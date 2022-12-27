@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../services/hive_services.dart';
 import '../widgets/custom_alert_dialog.dart';
 import '../../../core/constants.dart';
 import '../../../services/firebase/auth.dart';
-import '../../../services/shared_prefs.dart';
 import '../../common_widgets/error_handling.dart';
 import 'login_screen.dart';
 import '../account_provider.dart';
@@ -30,7 +30,8 @@ class _AccountScreenState extends State<AccountScreen> {
   late final TextEditingController _newPasswordController;
   late final TextEditingController _confirmedNewPasswordController;
   final Auth _auth = Auth();
-  final SharedPrefs _sharedPrefs = SharedPrefs();
+  final HiveServices _hiveServices = HiveServices();
+
   final ErrorHandling _errorHandling = ErrorHandling();
   final Firestore _firestore = Firestore();
 
@@ -270,7 +271,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             FocusManager.instance.primaryFocus?.unfocus();
                             _currentPasswordController.clear();
                             _errorHandling.toggleLoadingSpinner(context);
-                            _sharedPrefs.removeUser();
+                            _hiveServices.removeUser();
 
                             _accountProvider.isCreatingAccount = false;
                             Navigator.of(context).pushReplacement(
@@ -323,7 +324,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       _errorHandling.showErrorSnackbar(context, errorText);
                     } else {
                       _errorHandling.toggleLoadingSpinner(context);
-                      _sharedPrefs.removeUser();
+                      _hiveServices.removeUser();
                       _accountProvider.isCreatingAccount = false;
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(

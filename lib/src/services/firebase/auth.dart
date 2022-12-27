@@ -104,7 +104,6 @@ class Auth {
         errorValue = 'Unknown error';
       }
     }
-    print(errorValue);
     return errorValue;
   }
 

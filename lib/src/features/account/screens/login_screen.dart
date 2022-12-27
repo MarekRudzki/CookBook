@@ -1,7 +1,7 @@
+import 'package:cookbook/src/services/hive_services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../services/shared_prefs.dart';
 import '../../../services/firebase/auth.dart';
 import '../../../services/firebase/firestore.dart';
 import '../../common_widgets/error_handling.dart';
@@ -21,8 +21,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final Auth _auth = Auth();
   final Firestore _firestore = Firestore();
-  final SharedPrefs _sharedPrefs = SharedPrefs();
   final ErrorHandling _errorHandling = ErrorHandling();
+  final HiveServices _hiveServices = HiveServices();
 
   final _nameController = TextEditingController();
 
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
             builder: (context) => const MainScreen(),
           ),
         );
-        _sharedPrefs.setUser(_emailController.text);
+        _hiveServices.setUser(_emailController.text);
       }
     });
   }
@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       builder: (context) => const MainScreen(),
                     ),
                   ),
-                  _sharedPrefs.setUser(_emailController.text),
+                  _hiveServices.setUser(_emailController.text),
                 }
             });
       }
