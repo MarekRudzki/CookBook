@@ -192,7 +192,7 @@ linter:
     # Don't call print in production code
     #
     # https://dart-lang.github.io/linter/lints/avoid_print.html
-    # - avoid_print
+    - avoid_print
 
     # Always prefer function references over typedefs.
     # Jumping twice in code to see the signature of a lambda sucks. This is different from the flutter analysis_options
