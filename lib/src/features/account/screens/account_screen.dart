@@ -145,7 +145,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               width: 7,
                             ),
                             Text(
-                              'Email: ${_auth.email}',
+                              'Email: ${_hiveServices.getEmail()}',
                               style: Theme.of(context).textTheme.bodyText2,
                             ),
                           ],
@@ -298,6 +298,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 _currentPasswordController.clear();
                                 _errorHandling.toggleLoadingSpinner(context);
                                 _hiveServices.removeUser();
+                                _hiveServices.removeUsername();
 
                                 _accountProvider.isCreatingAccount = false;
                                 Navigator.of(context).pushReplacement(

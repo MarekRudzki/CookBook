@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
             builder: (context) => const MainScreen(),
           ),
         );
-        _hiveServices.setUser(_emailController.text);
+        _hiveServices.setUserEmail(_emailController.text);
       }
     });
   }
@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       builder: (context) => const MainScreen(),
                     ),
                   ),
-                  _hiveServices.setUser(_emailController.text),
+                  _hiveServices.setUserEmail(_emailController.text),
                   _hiveServices.setUsername(username: username),
                 }
             });
