@@ -56,6 +56,20 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     final _accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
+    String? username;
+
+    // Get username from firestore in case, where user created account on
+    // different device and there is no username in local storage
+    Future<bool> setUsername() async {
+      if (_hiveServices.getUsername() != null) {
+        username = _hiveServices.getUsername();
+      } else {
+        await _accountProvider.setUsername();
+        username = _accountProvider.username;
+      }
+      return true;
+    }
+
     return Consumer<ThemeProvider>(builder: (context, theme, _) {
       return Scaffold(
         body: Container(
@@ -98,9 +112,23 @@ class _AccountScreenState extends State<AccountScreen> {
                             const SizedBox(
                               width: 7,
                             ),
-                            Text(
-                              'Username: ${context.select((AccountProvider provider) => provider.username)}',
-                              style: Theme.of(context).textTheme.bodyText2,
+                            Consumer<AccountProvider>(
+                              builder: (context, value, child) {
+                                return FutureBuilder(
+                                  future: setUsername(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Text(
+                                        'Username: $username',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
+                                      );
+                                    }
+                                    return const SizedBox.shrink();
+                                  },
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -166,6 +194,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                   _accountProvider.changeUsername(
                                     _changeUsernameConroller.text,
                                   );
+                                  _hiveServices.setUsername(
+                                      username: _changeUsernameConroller.text);
                                   Navigator.of(context).pop();
                                 }
                                 _changeUsernameConroller.clear();

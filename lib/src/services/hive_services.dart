@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 class HiveServices {
   final _userBox = Hive.box('userBox');
 
+  // User
   bool isLogged() {
     final email = _userBox.get('email');
     if (email != null) {
@@ -22,9 +23,21 @@ class HiveServices {
     _userBox.delete('theme');
   }
 
+  void setUsername({required String username}) {
+    final String email = _userBox.get('email').toString();
+    _userBox.put('${email}_username', username);
+  }
+
+  String? getUsername() {
+    final String email = _userBox.get('email').toString();
+    final String username = _userBox.get('${email}_username').toString();
+    return username;
+  }
+
+  // Theme
   void setTheme({required String theme}) {
     _userBox.put('theme', theme);
-  } // TODO maybe use as List to get username and isLogged
+  }
 
   String getTheme() {
     final String theme;

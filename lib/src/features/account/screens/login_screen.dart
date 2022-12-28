@@ -105,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   _hiveServices.setUser(_emailController.text),
+                  _hiveServices.setUsername(username: username),
                 }
             });
       }

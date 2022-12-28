@@ -1,4 +1,5 @@
 import 'package:cookbook/src/core/theme_provider.dart';
+import 'package:cookbook/src/services/hive_services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -11,17 +12,22 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Future<bool> _setInterval() async {
-      await Future.delayed(
-        const Duration(
-          milliseconds: 900,
-        ),
-      );
+    final HiveServices _hiveServices = HiveServices();
+    final AccountProvider _accountProvider = AccountProvider();
+    String? username;
+
+    // Get username from firestore in case, where user created account on
+    // different device and there is no username in local storage
+    Future<bool> setUsername() async {
+      if (_hiveServices.getUsername() != null) {
+        username = _hiveServices.getUsername();
+      } else {
+        await _accountProvider.setUsername();
+        username = _accountProvider.username;
+      }
       return true;
     }
 
-    final String username =
-        context.select((AccountProvider provider) => provider.username);
     return Consumer<ThemeProvider>(
       builder: (context, theme, _) {
         return Scaffold(
@@ -44,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                         fontFamily: 'Bobbers',
                       ),
                       child: FutureBuilder(
-                        future: _setInterval(),
+                        future: setUsername(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return AnimatedTextKit(
