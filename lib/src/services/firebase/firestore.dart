@@ -6,6 +6,7 @@ class Firestore {
   final Auth _auth = Auth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  //Firestore for user data storage
   Future<String> addUser(String username) async {
     final String? uid = _auth.uid;
     String errorText = '';
@@ -55,4 +56,7 @@ class Firestore {
     }
     return returnValue;
   }
+
+  //Firestore for meals data storage
+  //TODO add here
 }

@@ -1,4 +1,5 @@
 import 'package:cookbook/src/features/account/account_provider.dart';
+import 'package:cookbook/src/features/meals/meals_provider.dart';
 import 'package:cookbook/src/services/hive_services.dart';
 import 'package:flutter/material.dart';
 
@@ -20,11 +21,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 //TODO add l10n
+//TODO add error handling for offline user with online functions
   runApp(
     MultiProvider(
       providers: [
         ListenableProvider<ThemeProvider>(create: (_) => ThemeProvider()),
         ListenableProvider<AccountProvider>(create: (_) => AccountProvider()),
+        ListenableProvider<MealsProvider>(create: (_) => MealsProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, theme, _) {

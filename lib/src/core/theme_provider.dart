@@ -11,7 +11,11 @@ class ThemeProvider with ChangeNotifier {
     primaryColor: Colors.white,
     primaryColorDark: Colors.grey,
     errorColor: Colors.red,
+    backgroundColor: kLightBlue,
     highlightColor: kLightGreen,
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(backgroundColor: kLightBlue),
+    ),
     textTheme: TextTheme(
       bodyText1: const TextStyle(
         color: Colors.white,
@@ -91,7 +95,7 @@ class ThemeProvider with ChangeNotifier {
   List<Color> getGradient() {
     List<Color> gradientColors;
     if (isDark()) {
-      gradientColors = [kLightBlue, kDartBlue];
+      gradientColors = [kLightBlue, kDarkBlue];
     } else {
       gradientColors = [kLightGreen, kDarkGreen];
     }

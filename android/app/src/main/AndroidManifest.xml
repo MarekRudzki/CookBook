@@ -2,6 +2,7 @@
     package="com.marekrudzki.cookbook">
    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
    <application
+        android:requestLegacyExternalStorage="true"
         android:label="cookbook"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

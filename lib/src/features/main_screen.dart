@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../core/constants.dart';
 import 'account/account_provider.dart';
 import 'account/screens/account_screen.dart';
-import 'meals/screens/add_item_screen.dart';
+import 'meals/screens/add_recipe_screen.dart';
 import 'meals/screens/favorites_screen.dart';
 import 'meals/screens/home_screen.dart';
 
@@ -80,8 +80,8 @@ class _MainScreenState extends State<MainScreen> {
               },
               children: const [
                 HomeScreen(),
-                AddItemScreen(),
                 FavoritesScreen(),
+                AddRecipeScreen(),
                 AccountScreen(),
               ],
             ),
@@ -101,18 +101,18 @@ class _MainScreenState extends State<MainScreen> {
                     inactiveColor: kInactiveNavyBar,
                   ),
                   BottomNavyBarItem(
-                    icon: const Icon(Icons.add),
+                    icon: const Icon(Icons.favorite),
                     title: Text(
-                      'Add',
+                      'Favourites',
                       style: Theme.of(context).textTheme.bodyText2,
                     ),
                     activeColor: Theme.of(context).highlightColor,
                     inactiveColor: kInactiveNavyBar,
                   ),
                   BottomNavyBarItem(
-                    icon: const Icon(Icons.favorite),
+                    icon: const Icon(Icons.add),
                     title: Text(
-                      'Favourites',
+                      'Add',
                       style: Theme.of(context).textTheme.bodyText2,
                     ),
                     activeColor: Theme.of(context).highlightColor,

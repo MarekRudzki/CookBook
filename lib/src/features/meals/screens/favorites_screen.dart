@@ -20,7 +20,7 @@ class FavoritesScreen extends StatelessWidget {
             ),
             child: const Center(
               child: Text(
-                'Favorites Screen',
+                'No favorites yet!',
                 style: TextStyle(
                   color: Colors.white,
                 ),
