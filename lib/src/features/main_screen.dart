@@ -1,15 +1,15 @@
-import 'package:cookbook/src/core/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:provider/provider.dart';
 
+import '../../src/core/theme_provider.dart';
 import '../core/constants.dart';
-import 'account/account_provider.dart';
-import 'account/screens/account_screen.dart';
 import 'meals/screens/add_recipe_screen.dart';
+import 'account/screens/account_screen.dart';
 import 'meals/screens/favorites_screen.dart';
 import 'meals/screens/home_screen.dart';
+import 'account/account_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

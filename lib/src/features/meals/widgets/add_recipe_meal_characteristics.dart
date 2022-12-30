@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../../domain/models/meal_model.dart';
@@ -66,6 +67,7 @@ class MealCharacteristics extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyText2,
                 ),
                 Switch(
+                  activeColor: Theme.of(context).highlightColor,
                   value: meals.isPublic,
                   onChanged: (bool switchPublic) {
                     meals.togglePublic(

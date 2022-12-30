@@ -1,11 +1,13 @@
-import 'package:cookbook/src/features/meals/meals_provider.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 import '../account/account_provider.dart';
+import '../meals/meals_provider.dart';
 
 class ErrorHandling {
-  void showErrorSnackbar(BuildContext context, String errorText) {
+  void showInfoSnackbar(BuildContext context, String errorText,
+      [Color backgroundColor = Colors.red]) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -17,7 +19,7 @@ class ErrorHandling {
           ),
         ),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.red,
+        backgroundColor: backgroundColor,
         margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),

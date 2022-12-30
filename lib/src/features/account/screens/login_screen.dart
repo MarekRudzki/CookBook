@@ -1,15 +1,16 @@
-import 'package:cookbook/src/services/hive_services.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
-import '../../../services/firebase/auth.dart';
 import '../../../services/firebase/firestore.dart';
+import '../../../services/hive_services.dart';
+import '../../../services/firebase/auth.dart';
 import '../../common_widgets/error_handling.dart';
 import '../../main_screen.dart';
-import '../account_provider.dart';
-import '../widgets/login_view.dart';
-import '../widgets/register_view.dart';
 import '../widgets/reset_password.dart';
+import '../widgets/register_view.dart';
+import '../widgets/login_view.dart';
+import '../account_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -58,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorHandling.toggleLoadingSpinner(context);
       FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
-        _errorHandling.showErrorSnackbar(context, errorText);
+        _errorHandling.showInfoSnackbar(context, errorText);
       } else {
         Navigator.push(
           context,
@@ -89,12 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorHandling.toggleLoadingSpinner(context);
       FocusManager.instance.primaryFocus?.unfocus();
       if (errorText.isNotEmpty) {
-        _errorHandling.showErrorSnackbar(context, errorText);
+        _errorHandling.showInfoSnackbar(context, errorText);
       } else {
         _firestore.addUser(username).then((errorText) => {
               if (errorText.isNotEmpty)
                 {
-                  _errorHandling.showErrorSnackbar(context, errorText),
+                  _errorHandling.showInfoSnackbar(context, errorText),
                 }
               else
                 {

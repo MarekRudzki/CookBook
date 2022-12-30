@@ -134,7 +134,7 @@ class Auth {
       await _user.currentUser!.reauthenticateWithCredential(credential);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'wrong-password') {
-        errorValue = 'Password not correct';
+        errorValue = 'Current password not correct';
       } else {
         errorValue = 'Unknown error';
       }

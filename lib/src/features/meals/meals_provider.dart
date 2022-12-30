@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:cookbook/src/domain/models/meal_model.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import '../../domain/models/meal_model.dart';
 
 enum PhotoType { camera, gallery, url }
 
@@ -13,6 +14,7 @@ class MealsProvider with ChangeNotifier {
   File? imageFile;
   Complexity complexity = Complexity.simple;
   bool isLoading = false;
+  String errorMessage = '';
 
   void toggleFavorite() {
     isFavorite = !isFavorite;
@@ -44,8 +46,24 @@ class MealsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  //// Error handling
   void toggleLoading() {
     isLoading = !isLoading;
+    notifyListeners();
+  }
+
+  void addErrorMessage(String message) {
+    errorMessage = message;
+    notifyListeners();
+  }
+
+  Future<void> resetErrorMessage() async {
+    await Future.delayed(
+      const Duration(
+        seconds: 3,
+      ),
+    );
+    errorMessage = '';
     notifyListeners();
   }
 }

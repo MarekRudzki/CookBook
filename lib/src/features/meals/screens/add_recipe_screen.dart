@@ -1,10 +1,14 @@
-import 'package:cookbook/src/features/common_widgets/error_handling.dart';
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
+import '../../../../src/services/firebase/storage.dart';
 import '../../../core/theme_provider.dart';
+import '../../common_widgets/error_handling.dart';
 import '../widgets/add_recipe_meal_characteristics.dart';
 import '../widgets/add_recipe_photo_picker.dart';
 import '../widgets/add_recipe_text_field.dart';
+import '../meals_provider.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   const AddRecipeScreen({super.key});
@@ -21,6 +25,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
   final ThemeProvider _themeProvider = ThemeProvider();
   final ErrorHandling _errorHandling = ErrorHandling();
+  final Storage _storage = Storage();
 
   @override
   void initState() {
@@ -96,26 +101,42 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                MaterialButton(
-                    color: Theme.of(context).highlightColor,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.save),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        const Text('Save recipe'),
-                      ],
-                    ),
-                    onPressed: () async {
-                      _errorHandling.toggleRecipeLoadingSpinner(context);
-                      await Future.delayed(
-                        const Duration(seconds: 2),
-                      );
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      _errorHandling.toggleRecipeLoadingSpinner(context);
-                    }),
+                Consumer<MealsProvider>(
+                  builder: (context, meals, _) {
+                    return MaterialButton(
+                      color: Theme.of(context).highlightColor,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.save),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Text('Save recipe'),
+                        ],
+                      ),
+                      onPressed: () async {
+                        _errorHandling.toggleRecipeLoadingSpinner(context);
+                        await _storage
+                            .uploadImage(
+                          mealId: '4',
+                          image: meals.imageFile,
+                          mealsProvider: meals,
+                        )
+                            .then((errorText) {
+                          if (errorText.isNotEmpty) {
+                            _errorHandling.toggleLoadingSpinner(context);
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            meals.addErrorMessage(errorText);
+                            meals.resetErrorMessage();
+                          }
+                        });
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        _errorHandling.toggleRecipeLoadingSpinner(context);
+                      },
+                    ); //TODO add proper security rules to firebase
+                  },
+                ),
                 const SizedBox(
                   height: 25,
                 )

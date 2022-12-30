@@ -1,10 +1,10 @@
-import 'package:cookbook/src/core/theme_provider.dart';
-import 'package:cookbook/src/services/hive_services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/theme_provider.dart';
+import '../../../services/hive_services.dart';
 import '../../account/account_provider.dart';
 
 class HomeScreen extends StatelessWidget {

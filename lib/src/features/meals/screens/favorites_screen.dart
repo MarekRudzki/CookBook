@@ -1,6 +1,8 @@
-import 'package:cookbook/src/core/theme_provider.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
+
+import '../../../core/theme_provider.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
