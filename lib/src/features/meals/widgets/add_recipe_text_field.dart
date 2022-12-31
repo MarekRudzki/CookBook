@@ -4,11 +4,13 @@ class AddRecipeTextField extends StatelessWidget {
   const AddRecipeTextField({
     super.key,
     required this.controller,
-    required this.hintText,
+    required this.labelText,
     this.textInputAction = TextInputAction.newline,
+    required this.hintText,
   });
 
   final TextEditingController controller;
+  final String labelText;
   final String hintText;
   final TextInputAction textInputAction;
 
@@ -16,15 +18,19 @@ class AddRecipeTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      textAlign: TextAlign.center,
       keyboardType: TextInputType.multiline,
       maxLines: null,
       textInputAction: textInputAction,
+      cursorColor: Theme.of(context).primaryColor,
       decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Theme.of(context).primaryColorDark),
-          ),
-          hintText: hintText),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).highlightColor),
+        ),
+        border: const OutlineInputBorder(),
+        floatingLabelStyle: TextStyle(color: Theme.of(context).highlightColor),
+        labelText: labelText,
+        hintText: hintText,
+      ),
     );
   }
 }

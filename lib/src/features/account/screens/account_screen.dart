@@ -28,11 +28,12 @@ class _AccountScreenState extends State<AccountScreen> {
   late final TextEditingController _currentPasswordController;
   late final TextEditingController _newPasswordController;
   late final TextEditingController _confirmedNewPasswordController;
-  final Auth _auth = Auth();
-  final HiveServices _hiveServices = HiveServices();
 
   final ErrorHandling _errorHandling = ErrorHandling();
+  final HiveServices _hiveServices = HiveServices();
   final Firestore _firestore = Firestore();
+  final Auth _auth = Auth();
+  String? username;
 
   @override
   void initState() {
@@ -52,134 +53,135 @@ class _AccountScreenState extends State<AccountScreen> {
     super.dispose();
   }
 
+  // Get username from firestore in case, where user created account on
+  // different device and there is no username in local storage
+  //TODO check if this works
+  Future<bool> setUsername({required AccountProvider accountProvider}) async {
+    if (_hiveServices.getUsername() != null) {
+      username = _hiveServices.getUsername();
+    } else {
+      await accountProvider.setUsername();
+      username = accountProvider.username;
+    }
+    return true;
+  }
+
+  Future<void> changeUsername(
+      {required AccountProvider accountProvider}) async {
+    _errorHandling.toggleLoadingSpinner(context);
+    await _firestore.addUser(_changeUsernameConroller.text).then(
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          _errorHandling.toggleLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          accountProvider.addErrorMessage(errorText);
+          accountProvider.resetErrorMessage();
+        } else {
+          _errorHandling.toggleLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          accountProvider.changeUsername(
+            _changeUsernameConroller.text,
+          );
+          _hiveServices.setUsername(username: _changeUsernameConroller.text);
+          Navigator.of(context).pop();
+          _errorHandling.showInfoSnackbar(
+            context,
+            'Username changed successfully',
+            Colors.green,
+          );
+        }
+        _changeUsernameConroller.clear();
+      },
+    );
+  }
+
+  Future<void> changePassword(
+      {required AccountProvider accountProvider}) async {
+    _errorHandling.toggleLoadingSpinner(context);
+    _auth
+        .changePassword(
+      currentPassword: _currentPasswordController.text,
+      newPassword: _newPasswordController.text,
+      confirmedNewPassword: _confirmedNewPasswordController.text,
+    )
+        .then(
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          _errorHandling.toggleLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          accountProvider.addErrorMessage(errorText);
+          accountProvider.resetErrorMessage();
+        } else {
+          _errorHandling.toggleLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          Navigator.of(context).pop();
+          _errorHandling.showInfoSnackbar(
+            context,
+            'Password changed successfully',
+            Colors.green,
+          );
+        }
+      },
+    );
+
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmedNewPasswordController.clear();
+  }
+
+  Future<void> deleteAccount({required AccountProvider accountProvider}) async {
+    final String uid = _auth.uid!;
+    _errorHandling.toggleLoadingSpinner(context);
+    await _auth.deleteUser(password: _currentPasswordController.text).then(
+      (errorText) async {
+        if (errorText.isNotEmpty) {
+          _errorHandling.toggleLoadingSpinner(context);
+          accountProvider.addErrorMessage(errorText);
+          accountProvider.resetErrorMessage();
+          _currentPasswordController.clear();
+          FocusManager.instance.primaryFocus?.unfocus();
+          return;
+        }
+        FocusManager.instance.primaryFocus?.unfocus();
+        _currentPasswordController.clear();
+        _errorHandling.toggleLoadingSpinner(context);
+        _hiveServices.removeUser();
+        _hiveServices.removeUsername();
+
+        accountProvider.isCreatingAccount = false;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+        await _firestore.deleteUserData(uid);
+      },
+    );
+  }
+
+  Future<void> logOut({required AccountProvider accountProvider}) async {
+    _errorHandling.toggleLoadingSpinner(context);
+    await _auth.signOut().then((errorText) {
+      if (errorText.isNotEmpty) {
+        _errorHandling.toggleLoadingSpinner(context);
+        _errorHandling.showInfoSnackbar(context, errorText);
+      } else {
+        _errorHandling.toggleLoadingSpinner(context);
+        _hiveServices.removeUser();
+        accountProvider.isCreatingAccount = false;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final _accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
-    String? username;
-
-    // Get username from firestore in case, where user created account on
-    // different device and there is no username in local storage
-    //TODO check if this works
-    Future<bool> setUsername() async {
-      if (_hiveServices.getUsername() != null) {
-        username = _hiveServices.getUsername();
-      } else {
-        await _accountProvider.setUsername();
-        username = _accountProvider.username;
-      }
-      return true;
-    }
-
-    Future<void> changeUsername() async {
-      _errorHandling.toggleLoadingSpinner(context);
-      await _firestore.addUser(_changeUsernameConroller.text).then(
-        (errorText) {
-          if (errorText.isNotEmpty) {
-            _errorHandling.toggleLoadingSpinner(context);
-            FocusManager.instance.primaryFocus?.unfocus();
-            _accountProvider.addErrorMessage(errorText);
-            _accountProvider.resetErrorMessage();
-          } else {
-            _errorHandling.toggleLoadingSpinner(context);
-            FocusManager.instance.primaryFocus?.unfocus();
-            _accountProvider.changeUsername(
-              _changeUsernameConroller.text,
-            );
-            _hiveServices.setUsername(username: _changeUsernameConroller.text);
-            Navigator.of(context).pop();
-            _errorHandling.showInfoSnackbar(
-              context,
-              'Username changed successfully',
-              Colors.green,
-            );
-          }
-          _changeUsernameConroller.clear();
-        },
-      );
-    }
-
-    Future<void> changePassword() async {
-      _errorHandling.toggleLoadingSpinner(context);
-      _auth
-          .changePassword(
-        currentPassword: _currentPasswordController.text,
-        newPassword: _newPasswordController.text,
-        confirmedNewPassword: _confirmedNewPasswordController.text,
-      )
-          .then(
-        (errorText) {
-          if (errorText.isNotEmpty) {
-            _errorHandling.toggleLoadingSpinner(context);
-            FocusManager.instance.primaryFocus?.unfocus();
-            _accountProvider.addErrorMessage(errorText);
-            _accountProvider.resetErrorMessage();
-          } else {
-            _errorHandling.toggleLoadingSpinner(context);
-            FocusManager.instance.primaryFocus?.unfocus();
-            Navigator.of(context).pop();
-            _errorHandling.showInfoSnackbar(
-              context,
-              'Password changed successfully',
-              Colors.green,
-            );
-          }
-        },
-      );
-
-      _currentPasswordController.clear();
-      _newPasswordController.clear();
-      _confirmedNewPasswordController.clear();
-    }
-
-    Future<void> deleteAccount() async {
-      final String uid = _auth.uid!;
-      _errorHandling.toggleLoadingSpinner(context);
-      await _auth.deleteUser(password: _currentPasswordController.text).then(
-        (errorText) async {
-          if (errorText.isNotEmpty) {
-            _errorHandling.toggleLoadingSpinner(context);
-            _accountProvider.addErrorMessage(errorText);
-            _accountProvider.resetErrorMessage();
-            _currentPasswordController.clear();
-            FocusManager.instance.primaryFocus?.unfocus();
-            return;
-          }
-          FocusManager.instance.primaryFocus?.unfocus();
-          _currentPasswordController.clear();
-          _errorHandling.toggleLoadingSpinner(context);
-          _hiveServices.removeUser();
-          _hiveServices.removeUsername();
-
-          _accountProvider.isCreatingAccount = false;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const LoginScreen(),
-            ),
-          );
-          await _firestore.deleteUserData(uid);
-        },
-      );
-    }
-
-    Future<void> logOut() async {
-      _errorHandling.toggleLoadingSpinner(context);
-      await _auth.signOut().then((errorText) {
-        if (errorText.isNotEmpty) {
-          _errorHandling.toggleLoadingSpinner(context);
-          _errorHandling.showInfoSnackbar(context, errorText);
-        } else {
-          _errorHandling.toggleLoadingSpinner(context);
-          _hiveServices.removeUser();
-          _accountProvider.isCreatingAccount = false;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const LoginScreen(),
-            ),
-          );
-        }
-      });
-    }
 
     return Consumer<ThemeProvider>(
       builder: (context, theme, _) {
@@ -227,7 +229,9 @@ class _AccountScreenState extends State<AccountScreen> {
                               Consumer<AccountProvider>(
                                 builder: (context, value, child) {
                                   return FutureBuilder(
-                                    future: setUsername(),
+                                    future: setUsername(
+                                      accountProvider: _accountProvider,
+                                    ),
                                     builder: (context, snapshot) {
                                       if (snapshot.hasData) {
                                         return Text(
@@ -282,7 +286,9 @@ class _AccountScreenState extends State<AccountScreen> {
                             firstLabel: 'Input new username',
                             firstController: _changeUsernameConroller,
                             onConfirmed: () async {
-                              await changeUsername();
+                              await changeUsername(
+                                accountProvider: _accountProvider,
+                              );
                             },
                           );
                         },
@@ -310,7 +316,9 @@ class _AccountScreenState extends State<AccountScreen> {
                               thirdLabel: 'Confirm new password',
                               obscureText: true,
                               onConfirmed: () async {
-                                await changePassword();
+                                await changePassword(
+                                  accountProvider: _accountProvider,
+                                );
                               });
                         },
                       );
@@ -333,7 +341,9 @@ class _AccountScreenState extends State<AccountScreen> {
                             firstLabel: 'Current password',
                             obscureText: true,
                             onConfirmed: () async {
-                              deleteAccount();
+                              deleteAccount(
+                                accountProvider: _accountProvider,
+                              );
                             },
                           );
                         },
@@ -374,7 +384,9 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.logout),
                       onPressed: () async {
-                        logOut();
+                        logOut(
+                          accountProvider: _accountProvider,
+                        );
                       },
                       label: Text(
                         'Log out',

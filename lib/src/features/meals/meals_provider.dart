@@ -12,7 +12,7 @@ class MealsProvider with ChangeNotifier {
   bool isPublic = false;
   PhotoType? selectedPhotoType;
   File? imageFile;
-  Complexity complexity = Complexity.simple;
+  Complexity complexity = Complexity.easy;
   bool isLoading = false;
   String errorMessage = '';
 

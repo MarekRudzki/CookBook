@@ -18,6 +18,9 @@ class ErrorHandling {
             color: Colors.white,
           ),
         ),
+        duration: const Duration(
+          seconds: 2,
+        ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: backgroundColor,
         margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),

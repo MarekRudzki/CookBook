@@ -1,6 +1,6 @@
 enum Complexity {
-  simple,
-  challenging,
+  easy,
+  medium,
   hard,
 }
 

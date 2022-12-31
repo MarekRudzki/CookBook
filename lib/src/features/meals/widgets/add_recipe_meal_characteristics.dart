@@ -13,7 +13,8 @@ class MealCharacteristics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<MealsProvider>(
-      builder: (context, meals, child) {
+      builder: (context, meals, _) {
+        FocusManager.instance.primaryFocus?.unfocus();
         final Complexity complexity = meals.complexity;
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -27,7 +28,7 @@ class MealCharacteristics extends StatelessWidget {
                 Row(
                   children: [
                     Radio(
-                      value: Complexity.simple,
+                      value: Complexity.easy,
                       groupValue: complexity,
                       onChanged: (Complexity? complexity) {
                         meals.setComplexity(
@@ -37,7 +38,7 @@ class MealCharacteristics extends StatelessWidget {
                       activeColor: Colors.green,
                     ),
                     Radio(
-                      value: Complexity.challenging,
+                      value: Complexity.medium,
                       groupValue: complexity,
                       onChanged: (Complexity? complexity) {
                         meals.setComplexity(

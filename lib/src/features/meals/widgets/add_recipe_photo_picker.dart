@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:cookbook/src/features/common_widgets/error_handling.dart';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../core/constants.dart';
 import '../meals_provider.dart';
@@ -150,12 +152,59 @@ class PhotoFromGallery extends StatelessWidget {
 class PhotoFromURL extends StatelessWidget {
   const PhotoFromURL({
     super.key,
-    required TextEditingController imageUrlController,
     required this.meals,
-  }) : _imageUrlController = imageUrlController;
+    required this.imageUrlController,
+  });
 
-  final TextEditingController _imageUrlController;
+  final TextEditingController imageUrlController;
   final MealsProvider meals;
+
+  Future<void> validateUrl({
+    required BuildContext context,
+    required TextEditingController urlController,
+  }) async {
+    final ErrorHandling errorHandling = ErrorHandling();
+    Future<bool> validateStatusAndType() async {
+      http.Response res;
+
+      try {
+        res = await http.get(
+          Uri.parse(urlController.text),
+        );
+      } catch (error) {
+        return false;
+      }
+      if (res.statusCode != 200) return false;
+
+      if (imageUrlController.text.endsWith('.jpg') ||
+          imageUrlController.text.endsWith('.jpeg') ||
+          imageUrlController.text.endsWith('.png')) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    if (imageUrlController.text.trim().isEmpty) {
+      meals.addErrorMessage('Field is empty');
+      meals.resetErrorMessage();
+    } else {
+      errorHandling.toggleRecipeLoadingSpinner(context);
+      await validateStatusAndType().then(
+        (bool isValid) {
+          if (!isValid) {
+            errorHandling.toggleRecipeLoadingSpinner(context);
+            meals.addErrorMessage('Provided URL is not valid');
+            meals.resetErrorMessage();
+          } else {
+            errorHandling.toggleRecipeLoadingSpinner(context);
+            meals.changePhotoType(PhotoType.url);
+            Navigator.of(context).pop();
+          }
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,16 +228,34 @@ class PhotoFromURL extends StatelessWidget {
                       children: [
                         const Text('Please insert URL'),
                         TextField(
-                          controller: _imageUrlController,
+                          controller: imageUrlController,
                           textAlign: TextAlign.center,
                         ),
+                        if (context.select(
+                                (MealsProvider meals) => meals.errorMessage) ==
+                            '')
+                          const SizedBox.shrink()
+                        else
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              meals.errorMessage,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Theme.of(context).errorColor,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             IconButton(
-                              onPressed: () {
-                                meals.changePhotoType(PhotoType.url);
-                                Navigator.of(context).pop();
+                              onPressed: () async {
+                                await validateUrl(
+                                  context: context,
+                                  urlController: imageUrlController,
+                                );
                               },
                               icon: const Icon(
                                 Icons.done,
@@ -198,7 +265,7 @@ class PhotoFromURL extends StatelessWidget {
                             IconButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                _imageUrlController.clear();
+                                imageUrlController.clear();
                               },
                               icon: const Icon(
                                 Icons.close,

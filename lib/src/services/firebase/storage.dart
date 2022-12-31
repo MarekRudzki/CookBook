@@ -14,10 +14,9 @@ class Storage {
   }) async {
     String errorText = '';
     if (mealsProvider!.selectedPhotoType == PhotoType.url) return errorText;
-    print('sdsd');
 
     try {
-      await ref.child('Meal_${mealId}.jpg').putFile(image!);
+      await ref.child('${mealId}.jpg').putFile(image!);
     } on FirebaseException catch (e) {
       errorText = e.code;
     }
@@ -25,7 +24,7 @@ class Storage {
   }
 
   Future<String> getUrl({required String mealId}) async {
-    final String url = await ref.child('Meal_${mealId}.jpg').getDownloadURL();
+    final String url = await ref.child('${mealId}.jpg').getDownloadURL();
     return url;
   }
 }

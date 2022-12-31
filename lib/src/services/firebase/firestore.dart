@@ -28,7 +28,7 @@ class Firestore {
 
   Future<String> getUsername() async {
     final String? uid = _auth.uid;
-    String returnValue = '';
+    String errorText = '';
 
     try {
       final collection = _firestore.collection('users');
@@ -36,27 +36,57 @@ class Firestore {
       if (docSnapshot.exists) {
         final Map<String, dynamic>? data = docSnapshot.data();
         final value = data?['username'];
-        returnValue = value.toString();
+        errorText = value.toString();
       }
     } on Exception catch (e) {
-      returnValue = e.toString();
+      errorText = e.toString();
     }
 
-    return returnValue;
+    return errorText;
   }
 
   Future<String> deleteUserData(String uid) async {
-    String returnValue = '';
+    String errorText = '';
 
     try {
       final collection = _firestore.collection('users');
       await collection.doc(uid).delete();
     } on Exception catch (e) {
-      returnValue = e.toString();
+      errorText = e.toString();
     }
-    return returnValue;
+    return errorText;
   }
 
   //Firestore for meals data storage
-  //TODO add here
+  Future<String> addMeal({
+    required String mealName,
+    required List<String> ingredientsList,
+    required List<String> descriptionList,
+    required String complexity,
+    required bool isPublic,
+    required String authorId,
+    required String authorName,
+    required String imageUrl,
+    required String generatedUid,
+  }) async {
+    String errorText = '';
+
+    try {
+      final mealCollection = _firestore.collection('meals');
+      await mealCollection.doc(generatedUid).set({
+        'mealName': mealName,
+        'ingredients': ingredientsList,
+        'description': descriptionList,
+        'complexity': complexity,
+        'isPublic': isPublic,
+        'authorId': authorId,
+        'authorName': authorName,
+        'image_url': imageUrl,
+      });
+    } on Exception catch (e) {
+      errorText = e.toString();
+    }
+
+    return errorText;
+  }
 }
