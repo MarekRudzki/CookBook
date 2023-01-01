@@ -49,6 +49,7 @@ flutter:
   assets:
     - assets/background_login.png
     - assets/recipe_example.jpg
+    - assets/meal_loading.jpg
   #   - images/a_dot_ham.jpeg
 
   # fonts:

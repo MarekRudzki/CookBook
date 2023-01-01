@@ -89,4 +89,10 @@ class Firestore {
 
     return errorText;
   }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getSnapshots() {
+    final Stream<QuerySnapshot<Map<String, dynamic>>> snapshots =
+        _firestore.collection('meals').snapshots();
+    return snapshots;
+  }
 }

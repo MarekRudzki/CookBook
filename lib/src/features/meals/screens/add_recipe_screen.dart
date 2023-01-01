@@ -309,6 +309,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         ],
                       ),
                       onPressed: () async {
+                        //TODO delete photo and controllers on success
                         saveRecipe(
                           mealNameTec: _mealNameController,
                           ingredientsTec: _ingredientsController,
