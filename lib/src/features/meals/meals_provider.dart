@@ -3,20 +3,26 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../domain/models/meal_model.dart';
-import '../../services/firebase/firestore.dart';
 
 enum PhotoType { camera, gallery, url }
 
 class MealsProvider with ChangeNotifier {
-  final Firestore _firestore = Firestore();
-  //TODO for now its locally, use firestore
-  bool isFavorite = false;
-  bool isPublic = false;
-  PhotoType? selectedPhotoType;
-  File? imageFile;
+  // Meals info
   Complexity complexity = Complexity.easy;
+  PhotoType? selectedPhotoType;
+  bool isFavorite = false;
   bool isLoading = false;
+  bool isPublic = false;
+  File? imageFile;
+  // MealsToggleButton
+  bool buttonIsMyMeals = true;
+  // Other
   String errorMessage = '';
+
+  void toggleButtonStatus() {
+    buttonIsMyMeals = !buttonIsMyMeals;
+    notifyListeners();
+  }
 
   void toggleFavorite() {
     isFavorite = !isFavorite;
@@ -40,6 +46,14 @@ class MealsProvider with ChangeNotifier {
 
   void removeCurrentPhoto() {
     selectedPhotoType = null;
+    notifyListeners();
+  }
+
+  void resetFields() {
+    selectedPhotoType = null;
+    complexity = Complexity.easy;
+    isPublic = false;
+    isFavorite = false;
     notifyListeners();
   }
 

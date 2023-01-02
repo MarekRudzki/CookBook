@@ -13,12 +13,15 @@ class MealItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(15),
       child: GridTile(
         footer: GridTileBar(
           backgroundColor: Colors.black45,
           title: Center(
-            child: Text(mealName),
+            child: Text(
+              mealName,
+              style: const TextStyle(overflow: TextOverflow.ellipsis),
+            ),
           ),
         ),
         child: GestureDetector(

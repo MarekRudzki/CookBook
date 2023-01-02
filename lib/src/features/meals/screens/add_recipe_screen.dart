@@ -152,6 +152,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         );
       } else {
         _errorHandling.toggleRecipeLoadingSpinner(context);
+        mealsProvider.resetFields();
+        _mealNameController.clear();
+        _ingredientsController.clear();
+        _descriptionController.clear();
         FocusManager.instance.primaryFocus?.unfocus();
         _errorHandling.showInfoSnackbar(
           context,
@@ -309,7 +313,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         ],
                       ),
                       onPressed: () async {
-                        //TODO delete photo and controllers on success
                         saveRecipe(
                           mealNameTec: _mealNameController,
                           ingredientsTec: _ingredientsController,
@@ -317,7 +320,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           mealsProvider: meals,
                         );
                       },
-                    ); //TODO add proper security rules to firebase
+                    );
                   },
                 ),
                 const SizedBox(

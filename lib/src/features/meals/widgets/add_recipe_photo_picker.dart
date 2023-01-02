@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:cookbook/src/features/common_widgets/error_handling.dart';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../src/features/common_widgets/error_handling.dart';
 import '../../../core/constants.dart';
 import '../meals_provider.dart';
 
