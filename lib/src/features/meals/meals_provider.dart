@@ -1,12 +1,16 @@
 import 'dart:io';
 
+import 'package:cookbook/src/services/firebase/firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/models/meal_model.dart';
 
 enum PhotoType { camera, gallery, url }
 
+enum CategoryType { myMeals, allMeals, favorites }
+
 class MealsProvider with ChangeNotifier {
+  final Firestore _firestore = Firestore();
   // Meals info
   Complexity complexity = Complexity.easy;
   PhotoType? selectedPhotoType;
@@ -15,12 +19,12 @@ class MealsProvider with ChangeNotifier {
   bool isPublic = false;
   File? imageFile;
   // MealsToggleButton
-  bool buttonIsMyMeals = true;
+  CategoryType selectedCategory = CategoryType.allMeals;
   // Other
   String errorMessage = '';
 
-  void toggleButtonStatus() {
-    buttonIsMyMeals = !buttonIsMyMeals;
+  void setMealsCategory(CategoryType category) {
+    selectedCategory = category;
     notifyListeners();
   }
 
@@ -60,6 +64,32 @@ class MealsProvider with ChangeNotifier {
   void setImage(File image) {
     imageFile = image;
     notifyListeners();
+  }
+
+  Future<List<MealModel>> getUserMeals() async {
+    final List<MealModel> allMeals = await _firestore.getUserMeals();
+    final List<String> userMealsId = await _firestore.getUserMealsId();
+
+    final List<MealModel> userMeals = [];
+
+    for (final meal in allMeals) {
+      if (userMealsId.contains(meal.id)) {
+        userMeals.add(meal);
+      }
+    }
+    return userMeals;
+  }
+
+  Future<List<MealModel>> getPublicMeals() async {
+    final List<MealModel> allMeals = await _firestore.getUserMeals();
+    final List<MealModel> publicMeals = [];
+
+    for (final meal in allMeals) {
+      if (meal.isPublic) {
+        publicMeals.add(meal);
+      }
+    }
+    return publicMeals;
   }
 
   //// Error handling

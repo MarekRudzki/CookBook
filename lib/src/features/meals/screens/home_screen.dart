@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cookbook/src/features/meals/widgets/meals_toggle_button.dart';
+import 'package:cookbook/src/features/meals/meals_provider.dart';
 import 'package:cookbook/src/features/meals/widgets/meal_item.dart';
+import 'package:cookbook/src/features/meals/widgets/meals_toggle_button.dart';
 import 'package:cookbook/src/services/firebase/firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +22,6 @@ class HomeScreen extends StatelessWidget {
     final AccountProvider _accountProvider = AccountProvider();
     final Firestore _firestore = Firestore();
     String? username;
-
     // Get username from firestore in case, where user created account on
     // different device and there is no username in local storage//TODO check if this works
     Future<bool> setUsername() async {
@@ -66,30 +65,26 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: Center(
-                    child: AnimatedContainer(
-                      duration: const Duration(seconds: 1),
-                      child: DefaultTextStyle(
-                        style: Theme.of(context).textTheme.headline1!,
-                        child: FutureBuilder(
-                          future: setUsername(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return AnimatedTextKit(
-                                isRepeatingAnimation: false,
-                                animatedTexts: [
-                                  TyperAnimatedText(
-                                      getRandomGreeting(username!),
-                                      speed: const Duration(
-                                        milliseconds: 80,
-                                      )),
-                                ],
-                              );
-                            }
-                            return const Text('Lets cook!');
-                          },
-                        ),
-                      ),
+                  child: DefaultTextStyle(
+                    style: Theme.of(context).textTheme.headline1!,
+                    child: FutureBuilder(
+                      future: setUsername(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return AnimatedTextKit(
+                            isRepeatingAnimation: false,
+                            animatedTexts: [
+                              TyperAnimatedText(
+                                getRandomGreeting(username!),
+                                speed: const Duration(
+                                  milliseconds: 80,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        return const Text('');
+                      },
                     ),
                   ),
                 ),
@@ -100,98 +95,135 @@ class HomeScreen extends StatelessWidget {
                     height: 2,
                   ),
                 ),
-                MealsToggleButton(),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(
-                //     horizontal: 35,
-                //     vertical: 10,
-                //   ),
-                //   child:
-                //   Row(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //       Expanded(
-                //         child: Container(
-                //           child: Padding(
-                //             padding: const EdgeInsets.all(8.0),
-                //             child: InkWell(
-                //               child: const Text(
-                //                 'My meals',
-                //                 textAlign: TextAlign.center,
-                //               ),
-                //               onTap: () {},
-                //             ),
-                //           ),
-                //           decoration: const BoxDecoration(
-                //             color: Colors.green,
-                //             borderRadius: BorderRadius.only(
-                //               bottomLeft: Radius.circular(25),
-                //               topLeft: Radius.circular(25),
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //       Expanded(
-                //         child: Container(
-                //           child: Padding(
-                //             padding: const EdgeInsets.all(8.0),
-                //             child: InkWell(
-                //               child: const Text(
-                //                 'All meals',
-                //                 textAlign: TextAlign.center,
-                //               ),
-                //               onTap: () {},
-                //             ),
-                //           ),
-                //           decoration: const BoxDecoration(
-                //             color: Colors.blue,
-                //             borderRadius: BorderRadius.only(
-                //               bottomRight: Radius.circular(25),
-                //               topRight: Radius.circular(25),
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                StreamBuilder(
-                  stream: _firestore.getSnapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                const MealsToggleButton(),
+                Consumer<MealsProvider>(
+                  builder: (context, mealsProvider, _) {
+                    if (mealsProvider.selectedCategory ==
+                        CategoryType.myMeals) {
+                      return MyMealsGrid(mealsProvider: mealsProvider);
+                    } else if (mealsProvider.selectedCategory ==
+                        CategoryType.allMeals) {
+                      return AllMealsGrid(mealsProvider: mealsProvider);
+                    } else {
+                      return Container(
+                        child: const Text('Favorites'),
+                      );
                     }
-                    return !snapshot.hasData
-                        ? const SizedBox(
-                            width: double.infinity,
-                          )
-                        : Expanded(
-                            child: GridView.builder(
-                              padding: const EdgeInsets.all(8),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 3 / 2,
-                                crossAxisSpacing: 15,
-                                mainAxisSpacing: 15,
-                              ),
-                              itemBuilder: (context, index) {
-                                final DocumentSnapshot product =
-                                    snapshot.data!.docs[index];
-                                return MealItem(
-                                  mealName: product['mealName'] as String,
-                                  imageUrl: product['image_url'] as String,
-                                );
-                              },
-                              itemCount: snapshot.data!.docs.length,
-                            ),
-                          );
                   },
                 ),
               ],
             ),
           ),
         );
+      },
+    );
+  }
+}
+
+class AllMealsGrid extends StatelessWidget {
+  const AllMealsGrid({
+    super.key,
+    required this.mealsProvider,
+  });
+
+  final MealsProvider mealsProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: mealsProvider.getPublicMeals(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        if (snapshot.hasData) {
+          return Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 3 / 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+              ),
+              itemBuilder: (context, index) {
+                return MealItem(
+                  mealName: snapshot.data![index].name,
+                  imageUrl: snapshot.data![index].imageUrl,
+                );
+              },
+              itemCount: snapshot.data!.length,
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
+class MyMealsGrid extends StatelessWidget {
+  const MyMealsGrid({
+    super.key,
+    required this.mealsProvider,
+  });
+
+  final MealsProvider mealsProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: mealsProvider.getUserMeals(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.data!.isEmpty) {
+          return Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Text(
+                  'You don\'t have any own recipes, try adding them or use others users recipes!',
+                  style: Theme.of(context).textTheme.bodyText2,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.hasData) {
+          return Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 3 / 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+              ),
+              itemBuilder: (context, index) {
+                return MealItem(
+                  mealName: snapshot.data![index].name,
+                  imageUrl: snapshot.data![index].imageUrl,
+                );
+              },
+              itemCount: snapshot.data!.length,
+            ),
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
       },
     );
   }

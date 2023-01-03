@@ -17,11 +17,11 @@ class MealModel {
   );
   final String id;
   final String name;
-  final String description;
+  final List<dynamic> description;
 
-  final String ingredients;
+  final List<dynamic> ingredients;
   final String imageUrl;
   final String mealAuthor;
-  final String isPublic;
-  final Complexity complexity;
+  final bool isPublic;
+  final String complexity;
 }

@@ -133,6 +133,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
     await _firestore
         .addMeal(
+      mealId: generatedUid,
       mealName: mealNameTec.text,
       ingredientsList: ingredientsList,
       descriptionList: descriptionList,
@@ -154,6 +155,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         _errorHandling.toggleRecipeLoadingSpinner(context);
         mealsProvider.resetFields();
         _mealNameController.clear();
+        mealsProvider.getUserMeals();
         _ingredientsController.clear();
         _descriptionController.clear();
         FocusManager.instance.primaryFocus?.unfocus();
