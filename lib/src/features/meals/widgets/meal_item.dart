@@ -1,42 +1,61 @@
+import 'package:cookbook/src/features/meals/meals_provider.dart';
+import 'package:cookbook/src/features/meals/screens/meal_details_screen.dart';
 import 'package:flutter/material.dart';
+
+import '../../../domain/models/meal_model.dart';
 
 class MealItem extends StatelessWidget {
   const MealItem({
     super.key,
-    required this.mealName,
-    required this.imageUrl,
+    required this.mealModel,
   });
 
-  final String mealName;
-  final String imageUrl;
+  final MealModel mealModel;
 
   @override
   Widget build(BuildContext context) {
+    final MealsProvider mealsProvider = MealsProvider();
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
-      child: GridTile(
-        footer: GridTileBar(
-          backgroundColor: Colors.black45,
-          title: Center(
-            child: Text(
-              mealName,
-              style: const TextStyle(overflow: TextOverflow.ellipsis),
+      child: InkWell(
+        child: Hero(
+          tag: mealModel.id,
+          child: GridTile(
+            header: mealModel.authorId == mealsProvider.getAuthorId()
+                ? Align(
+                    alignment: Alignment.topRight,
+                    child: Card(
+                      child: Icon(
+                        Icons.person,
+                        color: Theme.of(context).highlightColor,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+            footer: GridTileBar(
+              backgroundColor: Colors.black45,
+              title: Center(
+                child: Text(
+                  mealModel.name,
+                  style: const TextStyle(overflow: TextOverflow.ellipsis),
+                ),
+              ),
             ),
-          ),
-        ),
-        child: GestureDetector(
-          child: Hero(
-            tag: '1',
             child: FadeInImage(
               placeholder: const AssetImage('assets/meal_loading.jpg'),
-              image: NetworkImage(imageUrl),
+              image: NetworkImage(mealModel.imageUrl),
               fit: BoxFit.cover,
             ),
           ),
-          onTap: () {
-            //Navigator.push
-          },
         ),
+        onTap: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MealDetailsScreen(mealModel: mealModel),
+            ),
+          );
+        },
       ),
     );
   }

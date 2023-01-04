@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AddRecipeTextField extends StatelessWidget {
-  const AddRecipeTextField({
+class AddMealTextField extends StatelessWidget {
+  const AddMealTextField({
     super.key,
     required this.controller,
     required this.labelText,

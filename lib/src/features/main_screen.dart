@@ -5,9 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../../src/core/theme_provider.dart';
 import '../core/constants.dart';
-import 'meals/screens/add_recipe_screen.dart';
+import 'meals/screens/add_meal_screen.dart';
 import 'account/screens/account_screen.dart';
-import 'meals/screens/favorites_screen.dart';
 import 'meals/screens/home_screen.dart';
 import 'account/account_provider.dart';
 
@@ -20,7 +19,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
-  String v = '';
 
   PageController pageController = PageController();
 
@@ -80,8 +78,7 @@ class _MainScreenState extends State<MainScreen> {
               },
               children: const [
                 HomeScreen(),
-                FavoritesScreen(),
-                AddRecipeScreen(),
+                AddMealScreen(),
                 AccountScreen(),
               ],
             ),
@@ -95,15 +92,6 @@ class _MainScreenState extends State<MainScreen> {
                     icon: const Icon(Icons.home),
                     title: Text(
                       'Home',
-                      style: Theme.of(context).textTheme.bodyText2,
-                    ),
-                    activeColor: Theme.of(context).highlightColor,
-                    inactiveColor: kInactiveNavyBar,
-                  ),
-                  BottomNavyBarItem(
-                    icon: const Icon(Icons.favorite),
-                    title: Text(
-                      'Favourites',
                       style: Theme.of(context).textTheme.bodyText2,
                     ),
                     activeColor: Theme.of(context).highlightColor,

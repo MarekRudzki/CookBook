@@ -13,9 +13,9 @@ class MealCharacteristics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<MealsProvider>(
-      builder: (context, meals, _) {
+      builder: (context, mealsProvider, _) {
         FocusManager.instance.primaryFocus?.unfocus();
-        final Complexity complexity = meals.complexity;
+        final Complexity complexity = mealsProvider.complexity;
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -31,7 +31,7 @@ class MealCharacteristics extends StatelessWidget {
                       value: Complexity.easy,
                       groupValue: complexity,
                       onChanged: (Complexity? complexity) {
-                        meals.setComplexity(
+                        mealsProvider.setComplexity(
                           selectedComplexity: complexity!,
                         );
                       },
@@ -41,7 +41,7 @@ class MealCharacteristics extends StatelessWidget {
                       value: Complexity.medium,
                       groupValue: complexity,
                       onChanged: (Complexity? complexity) {
-                        meals.setComplexity(
+                        mealsProvider.setComplexity(
                           selectedComplexity: complexity!,
                         );
                       },
@@ -51,7 +51,7 @@ class MealCharacteristics extends StatelessWidget {
                       value: Complexity.hard,
                       groupValue: complexity,
                       onChanged: (Complexity? complexity) {
-                        meals.setComplexity(
+                        mealsProvider.setComplexity(
                           selectedComplexity: complexity!,
                         );
                       },
@@ -69,9 +69,9 @@ class MealCharacteristics extends StatelessWidget {
                 ),
                 Switch(
                   activeColor: Theme.of(context).highlightColor,
-                  value: meals.isPublic,
+                  value: mealsProvider.isPublic,
                   onChanged: (bool switchPublic) {
-                    meals.togglePublic(
+                    mealsProvider.togglePublic(
                       switchPublic: switchPublic,
                     );
                   },
@@ -86,11 +86,11 @@ class MealCharacteristics extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    meals.toggleFavorite();
+                    mealsProvider.toggleFavorite();
                   },
                   icon: Icon(
                     Icons.favorite,
-                    color: meals.isFavorite ? Colors.red : Colors.grey,
+                    color: mealsProvider.isFavorite ? Colors.red : Colors.grey,
                   ),
                 ),
               ],

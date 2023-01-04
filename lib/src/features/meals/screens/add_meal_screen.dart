@@ -12,19 +12,19 @@ import '../../../services/hive_services.dart';
 import '../../../services/firebase/auth.dart';
 import '../../../core/theme_provider.dart';
 import '../../common_widgets/error_handling.dart';
-import '../widgets/add_recipe_meal_characteristics.dart';
-import '../widgets/add_recipe_photo_picker.dart';
-import '../widgets/add_recipe_text_field.dart';
+import '../widgets/add_meal_characteristics.dart';
+import '../widgets/add_meal_photo_picker.dart';
+import '../widgets/add_meal_text_field.dart';
 import '../meals_provider.dart';
 
-class AddRecipeScreen extends StatefulWidget {
-  const AddRecipeScreen({super.key});
+class AddMealScreen extends StatefulWidget {
+  const AddMealScreen({super.key});
 
   @override
-  State<AddRecipeScreen> createState() => _AddRecipeScreenState();
+  State<AddMealScreen> createState() => _AddMealScreenState();
 }
 
-class _AddRecipeScreenState extends State<AddRecipeScreen> {
+class _AddMealScreenState extends State<AddMealScreen> {
   late final TextEditingController _mealNameController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _ingredientsController;
@@ -55,7 +55,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     super.dispose();
   }
 
-  Future<void> saveRecipe({
+  Future<void> saveMeal({
     required TextEditingController mealNameTec,
     required TextEditingController ingredientsTec,
     required TextEditingController descriptionTec,
@@ -105,7 +105,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       }
     }
 
-    _errorHandling.toggleRecipeLoadingSpinner(context);
+    _errorHandling.toggleMealLoadingSpinner(context);
 
     await _storage
         .uploadImage(
@@ -152,7 +152,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           errorText,
         );
       } else {
-        _errorHandling.toggleRecipeLoadingSpinner(context);
+        _errorHandling.toggleMealLoadingSpinner(context);
         mealsProvider.resetFields();
         _mealNameController.clear();
         mealsProvider.getUserMeals();
@@ -265,7 +265,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                AddRecipeTextField(
+                AddMealTextField(
                   controller: _mealNameController,
                   labelText: 'Meal name',
                   hintText: _mealNameController.text.isEmpty ? '' : 'Meal name',
@@ -274,7 +274,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                AddRecipeTextField(
+                AddMealTextField(
                   controller: _ingredientsController,
                   labelText: 'Ingredients',
                   hintText:
@@ -283,7 +283,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                AddRecipeTextField(
+                AddMealTextField(
                   controller: _descriptionController,
                   labelText: 'Description',
                   hintText:
@@ -301,7 +301,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   height: 10,
                 ),
                 Consumer<MealsProvider>(
-                  builder: (context, meals, _) {
+                  builder: (context, mealsProvider, _) {
                     return MaterialButton(
                       color: Theme.of(context).highlightColor,
                       child: Row(
@@ -315,11 +315,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         ],
                       ),
                       onPressed: () async {
-                        saveRecipe(
+                        saveMeal(
                           mealNameTec: _mealNameController,
                           ingredientsTec: _ingredientsController,
                           descriptionTec: _descriptionController,
-                          mealsProvider: meals,
+                          mealsProvider: mealsProvider,
                         );
                       },
                     );

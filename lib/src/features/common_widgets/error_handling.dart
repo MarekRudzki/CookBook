@@ -45,7 +45,7 @@ class ErrorHandling {
         : Navigator.of(context).pop();
   }
 
-  void toggleRecipeLoadingSpinner(BuildContext context) {
+  void toggleMealLoadingSpinner(BuildContext context) {
     final mealsProvider = Provider.of<MealsProvider>(context, listen: false);
     mealsProvider.toggleLoading();
     context.read<MealsProvider>().isLoading

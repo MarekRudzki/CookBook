@@ -21,7 +21,7 @@ class PhotoPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<MealsProvider>(
-      builder: (context, meals, _) {
+      builder: (context, mealsProvider, _) {
         return Column(
           children: [
             Container(
@@ -33,13 +33,13 @@ class PhotoPicker extends StatelessWidget {
                   width: 10,
                 ),
               ),
-              child: meals.selectedPhotoType != null
-                  ? meals.selectedPhotoType == PhotoType.url
+              child: mealsProvider.selectedPhotoType != null
+                  ? mealsProvider.selectedPhotoType == PhotoType.url
                       ? FittedBox(
                           child: Image.network(_imageUrlController.text),
                           fit: BoxFit.fill,
                         )
-                      : Image.file(meals.imageFile!)
+                      : Image.file(mealsProvider.imageFile!)
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -49,16 +49,16 @@ class PhotoPicker extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         PhotoFromCamera(
-                          meals: meals,
+                          mealsProvider: mealsProvider,
                         ),
                         const SizedBox(height: 10),
                         PhotoFromGallery(
-                          meals: meals,
+                          mealsProvider: mealsProvider,
                         ),
                         const SizedBox(height: 10),
                         PhotoFromURL(
                           imageUrlController: _imageUrlController,
-                          meals: meals,
+                          mealsProvider: mealsProvider,
                         ),
                       ],
                     ),
@@ -66,10 +66,10 @@ class PhotoPicker extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            if (meals.selectedPhotoType != null)
+            if (mealsProvider.selectedPhotoType != null)
               ElevatedButton(
                 onPressed: () {
-                  meals.removeCurrentPhoto();
+                  mealsProvider.removeCurrentPhoto();
                   _imageUrlController.clear();
                 },
                 child: const Text('Pick other photo'),
@@ -86,10 +86,10 @@ class PhotoPicker extends StatelessWidget {
 class PhotoFromCamera extends StatelessWidget {
   const PhotoFromCamera({
     super.key,
-    required this.meals,
+    required this.mealsProvider,
   });
 
-  final MealsProvider meals;
+  final MealsProvider mealsProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -106,10 +106,10 @@ class PhotoFromCamera extends StatelessWidget {
           maxWidth: 640,
         );
         if (pickedFile != null) {
-          meals.setImage(
+          mealsProvider.setImage(
             File(pickedFile.path),
           );
-          meals.changePhotoType(PhotoType.camera);
+          mealsProvider.changePhotoType(PhotoType.camera);
         }
       },
     );
@@ -119,10 +119,10 @@ class PhotoFromCamera extends StatelessWidget {
 class PhotoFromGallery extends StatelessWidget {
   const PhotoFromGallery({
     super.key,
-    required this.meals,
+    required this.mealsProvider,
   });
 
-  final MealsProvider meals;
+  final MealsProvider mealsProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -139,10 +139,10 @@ class PhotoFromGallery extends StatelessWidget {
           maxWidth: 640,
         );
         if (pickedImage != null) {
-          meals.setImage(
+          mealsProvider.setImage(
             File(pickedImage.path),
           );
-          meals.changePhotoType(PhotoType.gallery);
+          mealsProvider.changePhotoType(PhotoType.gallery);
         }
       },
     );
@@ -152,12 +152,12 @@ class PhotoFromGallery extends StatelessWidget {
 class PhotoFromURL extends StatelessWidget {
   const PhotoFromURL({
     super.key,
-    required this.meals,
+    required this.mealsProvider,
     required this.imageUrlController,
   });
 
   final TextEditingController imageUrlController;
-  final MealsProvider meals;
+  final MealsProvider mealsProvider;
 
   Future<void> validateUrl({
     required BuildContext context,
@@ -186,19 +186,19 @@ class PhotoFromURL extends StatelessWidget {
     }
 
     if (imageUrlController.text.trim().isEmpty) {
-      meals.addErrorMessage('Field is empty');
-      meals.resetErrorMessage();
+      mealsProvider.addErrorMessage('Field is empty');
+      mealsProvider.resetErrorMessage();
     } else {
-      errorHandling.toggleRecipeLoadingSpinner(context);
+      errorHandling.toggleMealLoadingSpinner(context);
       await validateStatusAndType().then(
         (bool isValid) {
           if (!isValid) {
-            errorHandling.toggleRecipeLoadingSpinner(context);
-            meals.addErrorMessage('Provided URL is not valid');
-            meals.resetErrorMessage();
+            errorHandling.toggleMealLoadingSpinner(context);
+            mealsProvider.addErrorMessage('Provided URL is not valid');
+            mealsProvider.resetErrorMessage();
           } else {
-            errorHandling.toggleRecipeLoadingSpinner(context);
-            meals.changePhotoType(PhotoType.url);
+            errorHandling.toggleMealLoadingSpinner(context);
+            mealsProvider.changePhotoType(PhotoType.url);
             Navigator.of(context).pop();
           }
         },
@@ -231,15 +231,15 @@ class PhotoFromURL extends StatelessWidget {
                           controller: imageUrlController,
                           textAlign: TextAlign.center,
                         ),
-                        if (context.select(
-                                (MealsProvider meals) => meals.errorMessage) ==
+                        if (context.select((MealsProvider mealsProvider) =>
+                                mealsProvider.errorMessage) ==
                             '')
                           const SizedBox.shrink()
                         else
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              meals.errorMessage,
+                              mealsProvider.errorMessage,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Theme.of(context).errorColor,

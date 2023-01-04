@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cookbook/src/domain/models/meal_model.dart';
 
 import 'auth.dart';
+import '../../domain/models/meal_model.dart';
 
 class Firestore {
   final Auth _auth = Auth();
@@ -103,6 +103,31 @@ class Firestore {
     return errorText;
   }
 
+  Future<List<MealModel>> getMeals() async {
+    try {
+      final collection = _firestore.collection('meals');
+      final querySnapshot = await collection.get();
+
+      return querySnapshot.docs
+          .map(
+            (doc) => MealModel(
+              id: doc['mealId'] as String,
+              name: doc['mealName'] as String,
+              description: doc['description'] as List<dynamic>,
+              ingredients: doc['ingredients'] as List<dynamic>,
+              imageUrl: doc['image_url'] as String,
+              mealAuthor: doc['authorName'] as String,
+              authorId: doc['authorId'] as String,
+              isPublic: doc['isPublic'] as bool,
+              complexity: doc['complexity'] as String,
+            ),
+          )
+          .toList();
+    } on Exception catch (e) {
+      throw Exception(e);
+    }
+  }
+
   Future<List<String>> getUserMealsId() async {
     final String? uid = _auth.uid;
     final List<String> userMeals = [];
@@ -126,25 +151,54 @@ class Firestore {
     return userMeals;
   }
 
-  Future<List<MealModel>> getUserMeals() async {
-    try {
-      final collection = _firestore.collection('meals');
-      final querySnapshot = await collection.get();
+  Future<List<String>> getUserFavoriteMealsId() async {
+    final String? uid = _auth.uid;
+    final List<String> userFavoriteMealsIds = [];
 
-      return querySnapshot.docs
-          .map(
-            (doc) => MealModel(
-              doc['mealId'] as String,
-              doc['mealName'] as String,
-              doc['description'] as List<dynamic>,
-              doc['ingredients'] as List<dynamic>,
-              doc['image_url'] as String,
-              doc['authorName'] as String,
-              doc['isPublic'] as bool,
-              doc['complexity'] as String,
-            ),
-          )
-          .toList();
+    try {
+      final collection = _firestore.collection('users');
+      final docSnapshot = await collection.doc(uid).get();
+      if (docSnapshot.exists) {
+        final Map<String, dynamic>? data = docSnapshot.data();
+
+        final dynamicList = data?['favoriteMeals'] as List<dynamic>;
+        for (final value in dynamicList) {
+          final String meal = value.toString();
+          userFavoriteMealsIds.add(meal);
+        }
+      }
+    } on Exception catch (e) {
+      throw Exception(e);
+    }
+
+    return userFavoriteMealsIds;
+  }
+
+  Future<void> toggleMealFavorite(String mealId) async {
+    final String? uid = _auth.uid;
+    final List<String> mealList = [mealId];
+
+    try {
+      final collection = _firestore.collection('users').doc(uid);
+      final docSnapshot = await collection.get();
+
+      if (docSnapshot.exists) {
+        final Map<String, dynamic>? data = docSnapshot.data();
+
+        final dynamicList = data?['favoriteMeals'] as List<dynamic>;
+
+        if (dynamicList.contains(mealId)) {
+          await collection.update(
+            {
+              'favoriteMeals': FieldValue.arrayRemove(mealList),
+            },
+          );
+        } else {
+          await collection.update(
+            {'favoriteMeals': FieldValue.arrayUnion(mealList)},
+          );
+        }
+      }
     } on Exception catch (e) {
       throw Exception(e);
     }

@@ -1,17 +1,17 @@
 import 'dart:math';
 
-import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:cookbook/src/features/meals/meals_provider.dart';
-import 'package:cookbook/src/features/meals/widgets/meal_item.dart';
-import 'package:cookbook/src/features/meals/widgets/meals_toggle_button.dart';
-import 'package:cookbook/src/services/firebase/firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/theme_provider.dart';
+import '../../../domain/models/meal_model.dart';
 import '../../../services/hive_services.dart';
+import '../../../core/theme_provider.dart';
 import '../../account/account_provider.dart';
+import '../widgets/meals_toggle_button.dart';
+import '../widgets/meal_item.dart';
+import '../meals_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,7 +20,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final HiveServices _hiveServices = HiveServices();
     final AccountProvider _accountProvider = AccountProvider();
-    final Firestore _firestore = Firestore();
     String? username;
     // Get username from firestore in case, where user created account on
     // different device and there is no username in local storage//TODO check if this works
@@ -34,7 +33,7 @@ class HomeScreen extends StatelessWidget {
       return true;
     }
 
-    String getRandomGreeting(String username) {
+    String getRandomGreeting(String? username) {
       final rng = Random();
       final List<String> greetingsList = [
         'Let`s cook $username!',
@@ -75,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                             isRepeatingAnimation: false,
                             animatedTexts: [
                               TyperAnimatedText(
-                                getRandomGreeting(username!),
+                                getRandomGreeting(username),
                                 speed: const Duration(
                                   milliseconds: 80,
                                 ),
@@ -100,13 +99,24 @@ class HomeScreen extends StatelessWidget {
                   builder: (context, mealsProvider, _) {
                     if (mealsProvider.selectedCategory ==
                         CategoryType.myMeals) {
-                      return MyMealsGrid(mealsProvider: mealsProvider);
+                      return MealsGrid(
+                        //TODO add pullToRefresh
+                        mealsProvider: mealsProvider,
+                        future: mealsProvider.getUserMeals(),
+                        textIfEmpty:
+                            'You don\'t have any own recipes, try adding them or use others users recipes!',
+                      );
                     } else if (mealsProvider.selectedCategory ==
                         CategoryType.allMeals) {
-                      return AllMealsGrid(mealsProvider: mealsProvider);
+                      return MealsGrid(
+                        mealsProvider: mealsProvider,
+                        future: mealsProvider.getPublicMeals(),
+                      );
                     } else {
-                      return Container(
-                        child: const Text('Favorites'),
+                      return MealsGrid(
+                        mealsProvider: mealsProvider,
+                        future: mealsProvider.getUserFavorites(),
+                        textIfEmpty: 'No favorites meals yet, try add some!',
                       );
                     }
                   },
@@ -120,64 +130,22 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class AllMealsGrid extends StatelessWidget {
-  const AllMealsGrid({
+class MealsGrid extends StatelessWidget {
+  const MealsGrid({
     super.key,
     required this.mealsProvider,
+    required this.future,
+    this.textIfEmpty = '',
   });
 
   final MealsProvider mealsProvider;
+  final Future<List<MealModel>> future;
+  final String textIfEmpty;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: mealsProvider.getPublicMeals(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Expanded(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        if (snapshot.hasData) {
-          return Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 3 / 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-              ),
-              itemBuilder: (context, index) {
-                return MealItem(
-                  mealName: snapshot.data![index].name,
-                  imageUrl: snapshot.data![index].imageUrl,
-                );
-              },
-              itemCount: snapshot.data!.length,
-            ),
-          );
-        }
-        return const SizedBox.shrink();
-      },
-    );
-  }
-}
-
-class MyMealsGrid extends StatelessWidget {
-  const MyMealsGrid({
-    super.key,
-    required this.mealsProvider,
-  });
-
-  final MealsProvider mealsProvider;
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: mealsProvider.getUserMeals(),
+      future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Expanded(
@@ -193,7 +161,7 @@ class MyMealsGrid extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Text(
-                  'You don\'t have any own recipes, try adding them or use others users recipes!',
+                  textIfEmpty,
                   style: Theme.of(context).textTheme.bodyText2,
                   textAlign: TextAlign.center,
                 ),
@@ -214,8 +182,7 @@ class MyMealsGrid extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 return MealItem(
-                  mealName: snapshot.data![index].name,
-                  imageUrl: snapshot.data![index].imageUrl,
+                  mealModel: snapshot.data![index],
                 );
               },
               itemCount: snapshot.data!.length,

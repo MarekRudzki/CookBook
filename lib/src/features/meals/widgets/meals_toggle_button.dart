@@ -14,7 +14,7 @@ class MealsToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width * 0.9;
     return Consumer<MealsProvider>(
-      builder: (context, meals, _) {
+      builder: (context, mealsProvider, _) {
         return Padding(
           padding: const EdgeInsets.all(15.0),
           child: Center(
@@ -30,11 +30,13 @@ class MealsToggleButton extends StatelessWidget {
               child: Stack(
                 children: [
                   AnimatedAlign(
-                    alignment: meals.selectedCategory == CategoryType.myMeals
-                        ? Alignment.centerLeft
-                        : meals.selectedCategory == CategoryType.allMeals
-                            ? Alignment.center
-                            : Alignment.centerRight,
+                    alignment:
+                        mealsProvider.selectedCategory == CategoryType.myMeals
+                            ? Alignment.centerLeft
+                            : mealsProvider.selectedCategory ==
+                                    CategoryType.allMeals
+                                ? Alignment.center
+                                : Alignment.centerRight,
                     duration: const Duration(milliseconds: 300),
                     child: Container(
                       width: width * 0.33,
@@ -58,18 +60,18 @@ class MealsToggleButton extends StatelessWidget {
                           'My meals',
                           style: TextStyle(
                             fontSize: 15,
-                            color:
-                                meals.selectedCategory == CategoryType.myMeals
-                                    ? Colors.white
-                                    : Colors.black45,
+                            color: mealsProvider.selectedCategory ==
+                                    CategoryType.myMeals
+                                ? Colors.white
+                                : Colors.black45,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
                     onTap: () async {
-                      await meals.getUserMeals();
-                      meals.setMealsCategory(CategoryType.myMeals);
+                      await mealsProvider.getUserMeals();
+                      mealsProvider.setMealsCategory(CategoryType.myMeals);
                     },
                   ),
                   GestureDetector(
@@ -82,17 +84,17 @@ class MealsToggleButton extends StatelessWidget {
                           'All meals',
                           style: TextStyle(
                             fontSize: 15,
-                            color:
-                                meals.selectedCategory == CategoryType.allMeals
-                                    ? Colors.white
-                                    : Colors.black45,
+                            color: mealsProvider.selectedCategory ==
+                                    CategoryType.allMeals
+                                ? Colors.white
+                                : Colors.black45,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
                     onTap: () {
-                      meals.setMealsCategory(CategoryType.allMeals);
+                      mealsProvider.setMealsCategory(CategoryType.allMeals);
                     },
                   ),
                   GestureDetector(
@@ -106,17 +108,17 @@ class MealsToggleButton extends StatelessWidget {
                           'Favorites',
                           style: TextStyle(
                             fontSize: 15,
-                            color:
-                                meals.selectedCategory == CategoryType.favorites
-                                    ? Colors.white
-                                    : Colors.black45,
+                            color: mealsProvider.selectedCategory ==
+                                    CategoryType.favorites
+                                ? Colors.white
+                                : Colors.black45,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
                     onTap: () async {
-                      meals.setMealsCategory(CategoryType.favorites);
+                      mealsProvider.setMealsCategory(CategoryType.favorites);
                     },
                   ),
                 ],
