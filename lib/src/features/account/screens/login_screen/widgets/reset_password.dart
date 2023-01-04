@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../../../core/constants.dart';
-import '../../../services/firebase/auth.dart';
-import '../../common_widgets/error_handling.dart';
-import '../account_provider.dart';
+import '../../../../../services/firebase/auth.dart';
+import '../../../../../core/constants.dart';
+import '../../../../common_widgets/error_handling.dart';
+import '../../../account_provider.dart';
 
 void resetPassword(BuildContext context, TextEditingController controller) {
   final _accountProvider = Provider.of<AccountProvider>(context, listen: false);

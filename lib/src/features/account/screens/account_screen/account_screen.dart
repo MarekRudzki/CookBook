@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:provider/provider.dart';
 
-import '../../../features/common_widgets/error_handling.dart';
-import '../../../services/firebase/firestore.dart';
-import '../../../services/firebase/auth.dart';
-import '../../../services/hive_services.dart';
-import '../../../core/theme_provider.dart';
-import '../../../core/constants.dart';
-import '../widgets/custom_alert_dialog.dart';
-import '../widgets/settings_tile.dart';
-import '../account_provider.dart';
-import 'login_screen.dart';
+import '../../../../services/firebase/firestore.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../../services/hive_services.dart';
+import '../../../../core/theme_provider.dart';
+import '../../../../core/constants.dart';
+import '../../../common_widgets/error_handling.dart';
+import '../../account_provider.dart';
+import '../login_screen/login_screen.dart';
+import 'widgets/custom_alert_dialog.dart';
+import 'widgets/settings_tile.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({

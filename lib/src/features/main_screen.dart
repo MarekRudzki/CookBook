@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:provider/provider.dart';
 
-import '../../src/core/theme_provider.dart';
+import '../core/theme_provider.dart';
 import '../core/constants.dart';
-import 'meals/screens/add_meal_screen.dart';
-import 'account/screens/account_screen.dart';
-import 'meals/screens/home_screen.dart';
+import 'meals/screens/add_meal_screen/add_meal_screen.dart';
+import 'meals/screens/home_screen/home_screen.dart';
+import 'account/screens/account_screen/account_screen.dart';
 import 'account/account_provider.dart';
 
 class MainScreen extends StatefulWidget {

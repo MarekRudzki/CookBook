@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../../../services/firebase/firestore.dart';
-import '../../../services/hive_services.dart';
-import '../../../services/firebase/auth.dart';
-import '../../common_widgets/error_handling.dart';
-import '../../main_screen.dart';
-import '../widgets/reset_password.dart';
-import '../widgets/register_view.dart';
-import '../widgets/login_view.dart';
-import '../account_provider.dart';
+import '../../../../services/firebase/firestore.dart';
+import '../../../../services/hive_services.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../common_widgets/error_handling.dart';
+import '../../../main_screen.dart';
+import '../../account_provider.dart';
+import 'widgets/reset_password.dart';
+import 'widgets/register_view.dart';
+import 'widgets/login_view.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -55,21 +55,23 @@ class _LoginScreenState extends State<LoginScreen> {
       email: email,
       password: password,
     )
-        .then((errorText) {
-      _errorHandling.toggleLoadingSpinner(context);
-      FocusManager.instance.primaryFocus?.unfocus();
-      if (errorText.isNotEmpty) {
-        _errorHandling.showInfoSnackbar(context, errorText);
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MainScreen(),
-          ),
-        );
-        _hiveServices.setUserEmail(_emailController.text);
-      }
-    });
+        .then(
+      (errorText) {
+        _errorHandling.toggleLoadingSpinner(context);
+        FocusManager.instance.primaryFocus?.unfocus();
+        if (errorText.isNotEmpty) {
+          _errorHandling.showInfoSnackbar(context, errorText);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MainScreen(),
+            ),
+          );
+          _hiveServices.setUserEmail(_emailController.text);
+        }
+      },
+    );
   }
 
   Future<void> register(BuildContext context) async {
@@ -86,31 +88,35 @@ class _LoginScreenState extends State<LoginScreen> {
       username: username,
       confirmedPassword: confirmedPassword,
     )
-        .then((errorText) {
-      _errorHandling.toggleLoadingSpinner(context);
-      FocusManager.instance.primaryFocus?.unfocus();
-      if (errorText.isNotEmpty) {
-        _errorHandling.showInfoSnackbar(context, errorText);
-      } else {
-        _firestore.addUser(username).then((errorText) => {
-              if (errorText.isNotEmpty)
-                {
-                  _errorHandling.showInfoSnackbar(context, errorText),
-                }
-              else
-                {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MainScreen(),
-                    ),
-                  ),
-                  _hiveServices.setUserEmail(_emailController.text),
-                  _hiveServices.setUsername(username: username),
-                }
-            });
-      }
-    });
+        .then(
+      (errorText) {
+        _errorHandling.toggleLoadingSpinner(context);
+        FocusManager.instance.primaryFocus?.unfocus();
+        if (errorText.isNotEmpty) {
+          _errorHandling.showInfoSnackbar(context, errorText);
+        } else {
+          _firestore.addUser(username).then(
+                (errorText) => {
+                  if (errorText.isNotEmpty)
+                    {
+                      _errorHandling.showInfoSnackbar(context, errorText),
+                    }
+                  else
+                    {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MainScreen(),
+                        ),
+                      ),
+                      _hiveServices.setUserEmail(_emailController.text),
+                      _hiveServices.setUsername(username: username),
+                    }
+                },
+              );
+        }
+      },
+    );
   }
 
   @override

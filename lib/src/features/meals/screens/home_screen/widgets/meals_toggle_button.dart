@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../meals_provider.dart';
+import '../../../meals_provider.dart';
 
 class MealsToggleButton extends StatelessWidget {
   const MealsToggleButton({

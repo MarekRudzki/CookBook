@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../../../core/theme_provider.dart';
-import '../../../core/constants.dart';
-import '../account_provider.dart';
+import '../../../../../core/theme_provider.dart';
+import '../../../../../core/constants.dart';
+import '../../../account_provider.dart';
 
 class CustomAlertDialog extends StatelessWidget {
   const CustomAlertDialog({

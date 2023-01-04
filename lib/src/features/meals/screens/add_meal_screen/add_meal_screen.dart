@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:nanoid/nanoid.dart';
 
-import '../../../services/firebase/firestore.dart';
-import '../../../services/firebase/storage.dart';
-import '../../../domain/models/meal_model.dart';
-import '../../../services/hive_services.dart';
-import '../../../services/firebase/auth.dart';
-import '../../../core/theme_provider.dart';
-import '../../common_widgets/error_handling.dart';
-import '../widgets/add_meal_characteristics.dart';
-import '../widgets/add_meal_photo_picker.dart';
-import '../widgets/add_meal_text_field.dart';
-import '../meals_provider.dart';
+import '../../../../services/firebase/firestore.dart';
+import '../../../../services/firebase/storage.dart';
+import '../../../../domain/models/meal_model.dart';
+import '../../../../services/hive_services.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../../core/theme_provider.dart';
+import '../../../common_widgets/error_handling.dart';
+import '../../meals_provider.dart';
+import 'widgets/add_meal_characteristics.dart';
+import 'widgets/add_meal_photo_picker.dart';
+import 'widgets/add_meal_text_field.dart';
 
 class AddMealScreen extends StatefulWidget {
   const AddMealScreen({super.key});

@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-import 'src/features/account/screens/login_screen.dart';
+import 'src/features/account/screens/login_screen/login_screen.dart';
 import '/src/features/account/account_provider.dart';
 import '/src/features/meals/meals_provider.dart';
 import 'src/config/firebase_options.dart';

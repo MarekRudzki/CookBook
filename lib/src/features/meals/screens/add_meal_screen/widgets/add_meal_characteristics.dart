@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../../../domain/models/meal_model.dart';
-import '../meals_provider.dart';
+import '../../../../../domain/models/meal_model.dart';
+import '../../../meals_provider.dart';
 
 class MealCharacteristics extends StatelessWidget {
   const MealCharacteristics({

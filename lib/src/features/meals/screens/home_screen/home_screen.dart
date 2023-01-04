@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
 
-import '../../../domain/models/meal_model.dart';
-import '../../../services/hive_services.dart';
-import '../../../core/theme_provider.dart';
-import '../../account/account_provider.dart';
-import '../widgets/meals_toggle_button.dart';
-import '../widgets/meal_item.dart';
-import '../meals_provider.dart';
+import '../../../../domain/models/meal_model.dart';
+import '../../../../services/hive_services.dart';
+import '../../../../core/theme_provider.dart';
+import '../../../account/account_provider.dart';
+import '../../meals_provider.dart';
+import 'widgets/meals_toggle_button.dart';
+import 'widgets/meal_item.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

@@ -1,8 +1,11 @@
-import 'package:cookbook/src/core/theme_provider.dart';
-import 'package:cookbook/src/domain/models/meal_model.dart';
-import 'package:cookbook/src/features/meals/meals_provider.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
+
+import '../../../../domain/models/meal_model.dart';
+import '../../../../core/theme_provider.dart';
+import '../../meals_provider.dart';
+import 'widgets/details_meal_characteristics.dart';
 
 class MealDetailsScreen extends StatelessWidget {
   const MealDetailsScreen({
@@ -88,7 +91,7 @@ class MealDetailsScreen extends StatelessWidget {
                               SliverList(
                                 delegate: SliverChildListDelegate(
                                   [
-                                    MealCharacteristics(
+                                    DetailsMealCharacteristics(
                                       mealModel: mealModel,
                                     ),
                                     const Padding(
@@ -114,78 +117,6 @@ class MealDetailsScreen extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class MealCharacteristics extends StatelessWidget {
-  const MealCharacteristics({
-    super.key,
-    required this.mealModel,
-  });
-
-  final MealModel mealModel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Column(
-            children: [
-              Text(
-                'Difficulty:',
-                style: Theme.of(context).textTheme.headline1,
-              ),
-              if (mealModel.complexity == 'Easy')
-                const Text(
-                  'Easy',
-                  style: TextStyle(color: Colors.green),
-                )
-              else
-                mealModel.complexity == 'Medium'
-                    ? const Text(
-                        'Medium',
-                        style: TextStyle(color: Colors.orange),
-                      )
-                    : const Text(
-                        'Hard',
-                        style: TextStyle(color: Colors.red),
-                      ),
-            ],
-          ),
-          Row(
-            children: [
-              Column(
-                children: [
-                  Text(
-                    'Author:',
-                    style: Theme.of(context).textTheme.headline1,
-                  ),
-                  Text(mealModel.mealAuthor)
-                ],
-              ),
-            ],
-          ),
-          Consumer<MealsProvider>(
-            builder: (context, meals, _) {
-              return IconButton(
-                onPressed: () async {
-                  await meals.toggleMealFavorite(mealModel.id);
-                },
-                icon: Icon(
-                  Icons.favorite,
-                  color: meals.favoritesId.contains(mealModel.id)
-                      ? Colors.red
-                      : Colors.white,
-                ),
-              );
-            },
-          ),
-        ],
       ),
     );
   }

@@ -1,8 +1,8 @@
-import 'package:cookbook/src/features/meals/meals_provider.dart';
-import 'package:cookbook/src/features/meals/screens/meal_details_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../../../domain/models/meal_model.dart';
+import '../../../../../domain/models/meal_model.dart';
+import '../../../meals_provider.dart';
+import '../../meal_detail_screen/meal_details_screen.dart';
 
 class MealItem extends StatelessWidget {
   const MealItem({

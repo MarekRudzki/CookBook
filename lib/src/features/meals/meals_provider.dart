@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:cookbook/src/services/firebase/auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/firebase/firestore.dart';
 import '../../domain/models/meal_model.dart';
+import '../../services/firebase/auth.dart';
 
 enum PhotoType { camera, gallery, url }
 
