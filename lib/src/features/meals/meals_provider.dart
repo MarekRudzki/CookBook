@@ -29,8 +29,12 @@ class MealsProvider with ChangeNotifier {
   String errorMessage = '';
   bool isLoading = false;
 
-  String getAuthorId() {
-    return _auth.uid!;
+  bool checkIfAuthor(String authorId) {
+    if (_auth.uid == authorId) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /// Meals
@@ -119,14 +123,12 @@ class MealsProvider with ChangeNotifier {
         await _firestore.getUserFavoriteMealsId();
     favoritesId = mealsFavoritesId;
     notifyListeners();
-    //  print(favoritesId);
   }
 
   Future<List<String>> getFavoritesMealsId() async {
     final List<String> mealsFavoritesId =
         await _firestore.getUserFavoriteMealsId();
     favoritesId = mealsFavoritesId;
-    // print(favoritesId);
     notifyListeners();
     return mealsFavoritesId;
   }

@@ -21,7 +21,7 @@ class MealItem extends StatelessWidget {
         child: Hero(
           tag: mealModel.id,
           child: GridTile(
-            header: mealModel.authorId == mealsProvider.getAuthorId()
+            header: mealsProvider.checkIfAuthor(mealModel.authorId)
                 ? Align(
                     alignment: Alignment.topRight,
                     child: Card(
@@ -52,7 +52,10 @@ class MealItem extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MealDetailsScreen(mealModel: mealModel),
+              builder: (context) => MealDetailsScreen(
+                mealModel: mealModel,
+                mealsProvider: mealsProvider,
+              ),
             ),
           );
         },

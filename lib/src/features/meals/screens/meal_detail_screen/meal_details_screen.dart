@@ -6,14 +6,17 @@ import '../../../../domain/models/meal_model.dart';
 import '../../../../core/theme_provider.dart';
 import '../../meals_provider.dart';
 import 'widgets/details_meal_characteristics.dart';
+import 'widgets/meal_element.dart';
 
 class MealDetailsScreen extends StatelessWidget {
   const MealDetailsScreen({
     super.key,
     required this.mealModel,
+    required this.mealsProvider,
   });
 
   final MealModel mealModel;
+  final MealsProvider mealsProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +56,10 @@ class MealDetailsScreen extends StatelessWidget {
                             ),
                             Flexible(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 8, 56, 8),
+                                padding: mealsProvider
+                                        .checkIfAuthor(mealModel.authorId)
+                                    ? const EdgeInsets.fromLTRB(8, 8, 8, 8)
+                                    : const EdgeInsets.fromLTRB(8, 8, 56, 8),
                                 child: Align(
                                   child: Text(
                                     mealModel.name,
@@ -67,45 +73,88 @@ class MealDetailsScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            )
+                            ),
+                            if (mealsProvider.checkIfAuthor(mealModel.authorId))
+                              IconButton(
+                                onPressed: () {
+                                  //TODO add meal editing
+                                },
+                                icon: const Icon(
+                                  Icons.edit,
+                                ),
+                              )
+                            else
+                              const SizedBox.shrink(),
                           ],
                         ),
                         Expanded(
-                          child: CustomScrollView(
-                            slivers: [
-                              SliverAppBar(
-                                backgroundColor: Colors.transparent,
-                                expandedHeight:
-                                    MediaQuery.of(context).size.height * 0.4,
-                                leading: const SizedBox.shrink(),
-                                flexibleSpace: FlexibleSpaceBar(
-                                  background: Hero(
-                                    tag: mealModel.id,
-                                    child: Image.network(
-                                      fit: BoxFit.cover,
-                                      mealModel.imageUrl,
+                          child: NestedScrollView(
+                            headerSliverBuilder: (context, innerBoxIsScrolled) {
+                              return [
+                                SliverAppBar(
+                                  backgroundColor: Colors.transparent,
+                                  expandedHeight:
+                                      MediaQuery.of(context).size.height * 0.4,
+                                  leading: const SizedBox.shrink(),
+                                  flexibleSpace: FlexibleSpaceBar(
+                                    background: Hero(
+                                      tag: mealModel.id,
+                                      child: Image.network(
+                                        fit: BoxFit.cover,
+                                        mealModel.imageUrl,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              SliverList(
-                                delegate: SliverChildListDelegate(
-                                  [
-                                    DetailsMealCharacteristics(
-                                      mealModel: mealModel,
+                              ];
+                            },
+                            body: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  DetailsMealCharacteristics(
+                                    mealModel: mealModel,
+                                  ),
+                                  Center(
+                                    child: Text(
+                                      'Ingredients',
+                                      style:
+                                          Theme.of(context).textTheme.headline3,
                                     ),
-                                    const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 25),
-                                      child: Divider(
-                                        height: 2,
-                                        color: Colors.grey,
-                                      ),
-                                    )
-                                  ],
-                                ),
+                                  ),
+                                  ListView.builder(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    itemBuilder: (context, index) {
+                                      return MealElement(
+                                        elementText: mealModel
+                                            .ingredients[index] as String,
+                                      );
+                                    },
+                                    itemCount: mealModel.ingredients.length,
+                                  ),
+                                  Center(
+                                    child: Text(
+                                      'Description',
+                                      style:
+                                          Theme.of(context).textTheme.headline3,
+                                    ),
+                                  ),
+                                  ListView.builder(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    itemBuilder: (context, index) {
+                                      return MealElement(
+                                        elementText: mealModel
+                                            .description[index] as String,
+                                      );
+                                    },
+                                    itemCount: mealModel.description.length,
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],

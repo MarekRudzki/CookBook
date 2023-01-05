@@ -29,6 +29,10 @@ class ThemeProvider with ChangeNotifier {
         color: Colors.white,
         fontSize: 16,
       ),
+      headline3: GoogleFonts.oswald(
+        color: Colors.white,
+        fontSize: 20,
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(backgroundColor: kLightBlue),

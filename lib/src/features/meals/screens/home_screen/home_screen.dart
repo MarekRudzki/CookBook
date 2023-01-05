@@ -100,7 +100,6 @@ class HomeScreen extends StatelessWidget {
                     if (mealsProvider.selectedCategory ==
                         CategoryType.myMeals) {
                       return MealsGrid(
-                        //TODO add pullToRefresh
                         mealsProvider: mealsProvider,
                         future: mealsProvider.getUserMeals(),
                         textIfEmpty:
