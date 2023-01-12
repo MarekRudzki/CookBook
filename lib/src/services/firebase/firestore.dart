@@ -20,6 +20,8 @@ class Firestore {
     try {
       await _firestore.collection('users').doc(uid).set({
         'username': username,
+        'favoriteMeals': [],
+        'mealsList': [],
       });
     } on Exception catch (e) {
       errorText = e.toString();
@@ -199,6 +201,24 @@ class Firestore {
           );
         }
       }
+    } on Exception catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<void> deleteMeal({
+    required String mealId,
+    required String userId,
+  }) async {
+    try {
+      final collection = _firestore.collection('meals');
+      await collection.doc(mealId).delete();
+    } on Exception catch (e) {
+      throw Exception(e);
+    }
+    try {
+      final collection = _firestore.collection('users');
+      await collection.doc(userId).delete();
     } on Exception catch (e) {
       throw Exception(e);
     }

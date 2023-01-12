@@ -1,8 +1,10 @@
+import 'package:cookbook/src/features/meals/meals_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../domain/models/meal_model.dart';
 import '../../../../services/firebase/firestore.dart';
 import '../../../../services/firebase/auth.dart';
 import '../../../../services/hive_services.dart';
@@ -30,10 +32,10 @@ class _AccountScreenState extends State<AccountScreen> {
   late final TextEditingController _confirmedNewPasswordController;
 
   final ErrorHandling _errorHandling = ErrorHandling();
+  final MealsProvider mealsProvider = MealsProvider();
   final HiveServices _hiveServices = HiveServices();
   final Firestore _firestore = Firestore();
   final Auth _auth = Auth();
-  String? username;
 
   @override
   void initState() {
@@ -55,15 +57,16 @@ class _AccountScreenState extends State<AccountScreen> {
 
   // Get username from firestore in case, where user created account on
   // different device and there is no username in local storage
-  //TODO check if this works
-  Future<bool> setUsername({required AccountProvider accountProvider}) async {
-    if (_hiveServices.getUsername() != null) {
-      username = _hiveServices.getUsername();
-    } else {
+  Future<String> setUsername({required AccountProvider accountProvider}) async {
+    final String savedUsername = _hiveServices.getUsername();
+    String currentUsername;
+    if (savedUsername == 'no-username') {
       await accountProvider.setUsername();
-      username = accountProvider.username;
+      currentUsername = accountProvider.username;
+    } else {
+      currentUsername = _hiveServices.getUsername();
     }
-    return true;
+    return currentUsername;
   }
 
   Future<void> changeUsername(
@@ -129,9 +132,12 @@ class _AccountScreenState extends State<AccountScreen> {
     _confirmedNewPasswordController.clear();
   }
 
+//TODO secure firestore/storage rules
   Future<void> deleteAccount({required AccountProvider accountProvider}) async {
-    final String uid = _auth.uid!;
     _errorHandling.toggleLoadingSpinner(context);
+    final String uid = _auth.uid!;
+    final List<MealModel> userMeals = await mealsProvider.getUserMeals();
+
     await _auth.deleteUser(password: _currentPasswordController.text).then(
       (errorText) async {
         if (errorText.isNotEmpty) {
@@ -144,11 +150,20 @@ class _AccountScreenState extends State<AccountScreen> {
         }
         FocusManager.instance.primaryFocus?.unfocus();
         _currentPasswordController.clear();
-        _errorHandling.toggleLoadingSpinner(context);
+
         _hiveServices.removeUser();
         _hiveServices.removeUsername();
 
+        if (accountProvider.deleteAllRecipes) {
+          await mealsProvider.deleteMeals(
+              deleteAll: true, userMeals: userMeals);
+        } else {
+          await mealsProvider.deleteMeals(
+              deleteAll: false, userMeals: userMeals);
+        }
+        _errorHandling.toggleLoadingSpinner(context);
         accountProvider.isCreatingAccount = false;
+        if (!mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const LoginScreen(),
@@ -226,26 +241,20 @@ class _AccountScreenState extends State<AccountScreen> {
                               const SizedBox(
                                 width: 7,
                               ),
-                              Consumer<AccountProvider>(
-                                builder: (context, value, child) {
-                                  return FutureBuilder(
-                                    future: setUsername(
-                                      accountProvider: _accountProvider,
-                                    ),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return Text(
-                                          'Username: $username',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText2,
-                                        );
-                                      }
-                                      return const SizedBox.shrink();
-                                    },
-                                  );
+                              FutureBuilder(
+                                future: setUsername(
+                                    accountProvider: _accountProvider),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return Text(
+                                      'Username: ${snapshot.data}',
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
+                                    );
+                                  }
+                                  return const SizedBox.shrink();
                                 },
-                              ),
+                              )
                             ],
                           ),
                           const SizedBox(height: 5),
@@ -340,6 +349,57 @@ class _AccountScreenState extends State<AccountScreen> {
                             firstController: _currentPasswordController,
                             firstLabel: 'Current password',
                             obscureText: true,
+                            additionalWidget: Consumer<AccountProvider>(
+                              builder: (context, accountProvider, _) {
+                                return Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text('Delete only private recipes',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText1!
+                                                .copyWith(
+                                                  color: Theme.of(context)
+                                                      .primaryColorDark,
+                                                )),
+                                        Checkbox(
+                                            value: accountProvider
+                                                .deletePrivateRecipes,
+                                            onChanged: (value) {
+                                              accountProvider
+                                                  .toggleDeleteOptions();
+                                            }),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text('Delete all recipes',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText1!
+                                                .copyWith(
+                                                  color: Theme.of(context)
+                                                      .primaryColorDark,
+                                                )),
+                                        Checkbox(
+                                            value: accountProvider
+                                                .deleteAllRecipes,
+                                            onChanged: (value) {
+                                              accountProvider
+                                                  .toggleDeleteOptions();
+                                            }),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
                             onConfirmed: () async {
                               deleteAccount(
                                 accountProvider: _accountProvider,

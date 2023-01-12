@@ -20,6 +20,7 @@ class CustomAlertDialog extends StatelessWidget {
     this.firstController,
     this.secondController,
     this.thirdController,
+    this.additionalWidget,
   });
 
   final String title;
@@ -33,6 +34,7 @@ class CustomAlertDialog extends StatelessWidget {
   final String? firstLabel;
   final String? secondLabel;
   final String? thirdLabel;
+  final Widget? additionalWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +119,9 @@ class CustomAlertDialog extends StatelessWidget {
                       ),
                     )
                   : const SizedBox.shrink(),
+            ),
+            SizedBox(
+              child: additionalWidget,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

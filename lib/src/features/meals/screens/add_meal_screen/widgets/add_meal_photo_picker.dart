@@ -32,7 +32,8 @@ class PhotoPicker extends StatelessWidget {
                   color: kLightBlue,
                   width: 10,
                 ),
-              ),
+              ), //TODO add multiple images
+              //https://pub.dev/packages/card_swiper
               child: mealsProvider.selectedPhotoType != null
                   ? mealsProvider.selectedPhotoType == PhotoType.url
                       ? FittedBox(

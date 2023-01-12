@@ -9,6 +9,14 @@ class AccountProvider with ChangeNotifier {
   String errorMessage = '';
   bool isCreatingAccount = false;
   bool isLoading = false;
+  bool deletePrivateRecipes = true;
+  bool deleteAllRecipes = false;
+
+  void toggleDeleteOptions() {
+    deletePrivateRecipes = !deletePrivateRecipes;
+    deleteAllRecipes = !deleteAllRecipes;
+    notifyListeners();
+  }
 
   Future<void> setUsername() async {
     await _firestore.getUsername().then((value) {

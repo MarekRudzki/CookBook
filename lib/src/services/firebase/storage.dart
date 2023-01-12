@@ -27,4 +27,12 @@ class Storage {
     final String url = await ref.child('${mealId}.jpg').getDownloadURL();
     return url;
   }
+
+  Future<void> deleteImage({required String imageId}) async {
+    try {
+      await ref.child('${imageId}.jpg').delete();
+    } on FirebaseException catch (e) {
+      throw Exception(e);
+    }
+  }
 }

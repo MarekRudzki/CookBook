@@ -13,7 +13,12 @@ class ThemeProvider with ChangeNotifier {
     primaryColorDark: Colors.grey,
     errorColor: Colors.red,
     backgroundColor: kLightBlue,
+    cardColor: kDarkBlue,
     highlightColor: kLightGreen,
+    checkboxTheme: CheckboxThemeData(
+      checkColor: MaterialStateProperty.all(Colors.red),
+      fillColor: MaterialStateProperty.all(Colors.transparent),
+    ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(backgroundColor: kLightBlue),
     ),

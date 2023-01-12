@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cookbook/src/services/firebase/storage.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/firebase/firestore.dart';
@@ -12,6 +13,7 @@ enum CategoryType { myMeals, allMeals, favorites }
 
 class MealsProvider with ChangeNotifier {
   final Firestore _firestore = Firestore();
+  final Storage _storage = Storage();
   final Auth _auth = Auth();
 
   /// Meals
@@ -131,6 +133,31 @@ class MealsProvider with ChangeNotifier {
     favoritesId = mealsFavoritesId;
     notifyListeners();
     return mealsFavoritesId;
+  }
+
+  Future<void> deleteMeals(
+      {required bool deleteAll, required List<MealModel> userMeals}) async {
+    final List<String> recipesIdToDelete = [];
+
+    for (final meal in userMeals) {
+      if (deleteAll) {
+        recipesIdToDelete.add(meal.id);
+        await _storage.deleteImage(imageId: meal.id);
+        await _firestore.deleteMeal(
+          mealId: meal.id,
+          userId: meal.authorId,
+        );
+      } else {
+        if (meal.isPublic) {
+          recipesIdToDelete.add(meal.id);
+          await _storage.deleteImage(imageId: meal.id);
+          await _firestore.deleteMeal(
+            mealId: meal.id,
+            userId: meal.authorId,
+          );
+        }
+      }
+    }
   }
 
   /// MealsToggleButton

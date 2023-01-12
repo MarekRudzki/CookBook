@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cookbook/src/features/account/account_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -79,6 +80,21 @@ class _AddMealScreenState extends State<AddMealScreen> {
       return;
     }
 
+    // Get username from firestore in case, where user created account on
+    // different device and there is no username in local storage
+    Future<String> setUsername() async {
+      final AccountProvider accountProvider = AccountProvider();
+      final String savedUsername = _hiveServices.getUsername();
+      String currentUsername;
+      if (savedUsername == 'no-username') {
+        await accountProvider.setUsername();
+        currentUsername = accountProvider.username;
+      } else {
+        currentUsername = _hiveServices.getUsername();
+      }
+      return currentUsername;
+    }
+
     String getComplexity() {
       if (mealsProvider.complexity == Complexity.easy) {
         return 'Easy';
@@ -131,6 +147,8 @@ class _AddMealScreenState extends State<AddMealScreen> {
       imageUrl = await _storage.getUrl(mealId: generatedUid);
     }
 
+    final String username = await setUsername();
+
     await _firestore
         .addMeal(
       mealId: generatedUid,
@@ -140,7 +158,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
       complexity: getComplexity(),
       isPublic: mealsProvider.isPublic,
       authorId: _auth.uid!,
-      authorName: _hiveServices.getUsername()!,
+      authorName: username,
       imageUrl: imageUrl,
       generatedUid: generatedUid,
     )
@@ -188,6 +206,9 @@ class _AddMealScreenState extends State<AddMealScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    const SizedBox(
+                      width: 48,
+                    ),
                     Text(
                       'Add new recipe',
                       style: Theme.of(context).textTheme.headline1!.copyWith(
@@ -236,6 +257,11 @@ class _AddMealScreenState extends State<AddMealScreen> {
                                       ),
                                     ),
                                     TextButton(
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Theme.of(context)
+                                            .cardColor
+                                            .withOpacity(0.5),
+                                      ),
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },

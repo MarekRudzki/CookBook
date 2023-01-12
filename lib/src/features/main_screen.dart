@@ -76,10 +76,10 @@ class _MainScreenState extends State<MainScreen> {
                   selectedIndex = value;
                 });
               },
-              children: const [
-                HomeScreen(),
-                AddMealScreen(),
-                AccountScreen(),
+              children: [
+                const HomeScreen(),
+                const AddMealScreen(),
+                const AccountScreen(),
               ],
             ),
           ),

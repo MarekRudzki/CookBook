@@ -18,9 +18,15 @@ class HiveServices {
     return email;
   }
 
-  String? getUsername() {
+  String getUsername() {
     final String email = _userBox.get('email').toString();
-    final String username = _userBox.get('${email}_username').toString();
+    final bool usernameExists = _userBox.containsKey('${email}_username');
+    String username = '';
+    if (usernameExists) {
+      username = _userBox.get('${email}_username').toString();
+    } else {
+      username = 'no-username';
+    }
     return username;
   }
 

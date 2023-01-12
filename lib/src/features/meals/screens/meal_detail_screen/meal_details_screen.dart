@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../domain/models/meal_model.dart';
 import '../../../../core/theme_provider.dart';
+import '../../edit_meal_screen/edit_meal_screen.dart';
 import '../../meals_provider.dart';
 import 'widgets/details_meal_characteristics.dart';
 import 'widgets/meal_element.dart';
@@ -77,7 +78,12 @@ class MealDetailsScreen extends StatelessWidget {
                             if (mealsProvider.checkIfAuthor(mealModel.authorId))
                               IconButton(
                                 onPressed: () {
-                                  //TODO add meal editing
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const EditMealScreen(),
+                                    ),
+                                  );
                                 },
                                 icon: const Icon(
                                   Icons.edit,
