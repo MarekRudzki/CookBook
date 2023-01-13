@@ -2,8 +2,10 @@ import 'package:cookbook/src/features/meals/meals_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:day_night_switcher/day_night_switcher.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/internet_not_connected.dart';
 import '../../../../domain/models/meal_model.dart';
 import '../../../../services/firebase/firestore.dart';
 import '../../../../services/firebase/auth.dart';
@@ -80,6 +82,8 @@ class _AccountScreenState extends State<AccountScreen> {
           accountProvider.addErrorMessage(errorText);
           accountProvider.resetErrorMessage();
         } else {
+          mealsProvider.updateMealAuthor(
+              newUsername: _changeUsernameConroller.text);
           _errorHandling.toggleLoadingSpinner(context);
           FocusManager.instance.primaryFocus?.unfocus();
           accountProvider.changeUsername(
@@ -132,7 +136,6 @@ class _AccountScreenState extends State<AccountScreen> {
     _confirmedNewPasswordController.clear();
   }
 
-//TODO secure firestore/storage rules
   Future<void> deleteAccount({required AccountProvider accountProvider}) async {
     _errorHandling.toggleLoadingSpinner(context);
     final String uid = _auth.uid!;
@@ -154,13 +157,17 @@ class _AccountScreenState extends State<AccountScreen> {
         _hiveServices.removeUser();
         _hiveServices.removeUsername();
 
-        if (accountProvider.deleteAllRecipes) {
-          await mealsProvider.deleteMeals(
-              deleteAll: true, userMeals: userMeals);
-        } else {
-          await mealsProvider.deleteMeals(
-              deleteAll: false, userMeals: userMeals);
+        if (userMeals.isNotEmpty) {
+          if (accountProvider.deleteAllRecipes) {
+            await mealsProvider.deleteMeals(
+                deleteAll: true, userMeals: userMeals);
+          } else {
+            await mealsProvider.deleteMeals(
+                deleteAll: false, userMeals: userMeals);
+          }
         }
+
+        if (!mounted) return;
         _errorHandling.toggleLoadingSpinner(context);
         accountProvider.isCreatingAccount = false;
         if (!mounted) return;
@@ -197,7 +204,6 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     final _accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
-
     return Consumer<ThemeProvider>(
       builder: (context, theme, _) {
         return Scaffold(
@@ -209,253 +215,333 @@ class _AccountScreenState extends State<AccountScreen> {
                 end: Alignment.bottomCenter,
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Profile',
-                    style: Theme.of(context).textTheme.headline1,
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).primaryColorDark,
-                      ),
-                    ),
+            child: Column(
+              children: [
+                Visibility(
+                  visible: Provider.of<InternetConnectionStatus>(context) ==
+                      InternetConnectionStatus.disconnected,
+                  child: const InternetNotConnected(),
+                ),
+                Visibility(
+                  visible: Provider.of<InternetConnectionStatus>(context) ==
+                      InternetConnectionStatus.connected,
+                  child: Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(15.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.person,
-                                color: Theme.of(context).primaryColor,
+                          Text(
+                            'Profile',
+                            style: Theme.of(context).textTheme.headline1,
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Theme.of(context).primaryColorDark,
                               ),
-                              const SizedBox(
-                                width: 7,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.person,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      const SizedBox(
+                                        width: 7,
+                                      ),
+                                      if (_accountProvider.username == '')
+                                        FutureBuilder(
+                                          future: setUsername(
+                                              accountProvider:
+                                                  _accountProvider),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasData) {
+                                              return Text(
+                                                'Username: ${snapshot.data}',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText2,
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
+                                        )
+                                      else
+                                        Text(
+                                          'Username: ${context.select((AccountProvider account) => account.username)}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyText2,
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.mail,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Text(
+                                        'Email: ${_hiveServices.getEmail()}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                              FutureBuilder(
-                                future: setUsername(
-                                    accountProvider: _accountProvider),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return Text(
-                                      'Username: ${snapshot.data}',
-                                      style:
-                                          Theme.of(context).textTheme.bodyText2,
-                                    );
-                                  }
-                                  return const SizedBox.shrink();
-                                },
-                              )
-                            ],
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            'Edit profile',
+                            style: Theme.of(context).textTheme.headline1,
                           ),
                           const SizedBox(height: 5),
+                          SettingsTile(
+                            icon: Icons.edit,
+                            tileText: 'Change username',
+                            onPressed: () {
+                              showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (context) {
+                                  return CustomAlertDialog(
+                                    title: 'Change username?',
+                                    content:
+                                        'Enter new username you want to use',
+                                    firstLabel: 'Input new username',
+                                    firstController: _changeUsernameConroller,
+                                    onConfirmed: () async {
+                                      await changeUsername(
+                                        accountProvider: _accountProvider,
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 5),
+                          SettingsTile(
+                            icon: Icons.key,
+                            tileText: 'Change password',
+                            onPressed: () {
+                              showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (context) {
+                                  return CustomAlertDialog(
+                                      title: 'Change password?',
+                                      content:
+                                          'Please type in your current and new password',
+                                      firstController:
+                                          _currentPasswordController,
+                                      secondController: _newPasswordController,
+                                      thirdController:
+                                          _confirmedNewPasswordController,
+                                      firstLabel: 'Current password',
+                                      secondLabel: 'New password',
+                                      thirdLabel: 'Confirm new password',
+                                      obscureText: true,
+                                      onConfirmed: () async {
+                                        await changePassword(
+                                          accountProvider: _accountProvider,
+                                        );
+                                      });
+                                },
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 5),
+                          SettingsTile(
+                            icon: Icons.delete_forever,
+                            tileText: 'Delete account',
+                            onPressed: () async {
+                              final List<MealModel> userMeals =
+                                  await mealsProvider.getUserMeals();
+                              if (userMeals.isEmpty) {
+                                _accountProvider.setUserHasRecipes(
+                                    value: false);
+                              }
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return CustomAlertDialog(
+                                    title: 'Are you sure?',
+                                    content:
+                                        'This action will permanently delete your account. To continue provide current password',
+                                    contentColor: Theme.of(context).errorColor,
+                                    firstController: _currentPasswordController,
+                                    firstLabel: 'Current password',
+                                    obscureText: true,
+                                    additionalWidget: Consumer<AccountProvider>(
+                                      builder: (context, accountProvider, _) {
+                                        if (accountProvider.userHasRecipes) {
+                                          return Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                      'Delete only private recipes',
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyText1!
+                                                          .copyWith(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColorDark,
+                                                          )),
+                                                  Checkbox(
+                                                      side: MaterialStateBorderSide
+                                                          .resolveWith((Set<
+                                                                  MaterialState>
+                                                              states) {
+                                                        if (states.contains(
+                                                            MaterialState
+                                                                .selected)) {
+                                                          return const BorderSide(
+                                                              color:
+                                                                  Colors.red);
+                                                        } else {
+                                                          return const BorderSide(
+                                                              color:
+                                                                  Colors.grey);
+                                                        }
+                                                      }),
+                                                      value: accountProvider
+                                                          .deletePrivateRecipes,
+                                                      onChanged: (value) {
+                                                        accountProvider
+                                                            .setDeletePrivate(
+                                                                value: value!);
+                                                      }),
+                                                  const SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Text('Delete all my recipes',
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyText1!
+                                                          .copyWith(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColorDark,
+                                                          )),
+                                                  Checkbox(
+                                                      side: MaterialStateBorderSide
+                                                          .resolveWith((Set<
+                                                                  MaterialState>
+                                                              states) {
+                                                        if (states.contains(
+                                                            MaterialState
+                                                                .selected)) {
+                                                          return const BorderSide(
+                                                              color:
+                                                                  Colors.red);
+                                                        } else {
+                                                          return const BorderSide(
+                                                              color:
+                                                                  Colors.grey);
+                                                        }
+                                                      }),
+                                                      value: accountProvider
+                                                          .deleteAllRecipes,
+                                                      onChanged: (value) {
+                                                        accountProvider
+                                                            .setDeleteAll(
+                                                                value: value!);
+                                                      }),
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return const SizedBox.shrink();
+                                        }
+                                      },
+                                    ),
+                                    onConfirmed: () async {
+                                      deleteAccount(
+                                        accountProvider: _accountProvider,
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                          const Spacer(),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.mail,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              const SizedBox(width: 7),
                               Text(
-                                'Email: ${_hiveServices.getEmail()}',
+                                'Light',
+                                style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                              const SizedBox(
+                                width: 8,
+                              ),
+                              SizedBox(
+                                child: Center(
+                                  child: DayNightSwitcher(
+                                    nightBackgroundColor:
+                                        kLightBlue.withBlue(180),
+                                    isDarkModeEnabled: theme.isDark(),
+                                    onStateChanged: (_) {
+                                      theme.swapTheme();
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Dark',
                                 style: Theme.of(context).textTheme.bodyText2,
                               ),
                             ],
+                          ),
+                          const Spacer(),
+                          Center(
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.logout),
+                              onPressed: () async {
+                                logOut(
+                                  accountProvider: _accountProvider,
+                                );
+                              },
+                              label: Text(
+                                'Log out',
+                                style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 15),
-                  Text(
-                    'Edit profile',
-                    style: Theme.of(context).textTheme.headline1,
-                  ),
-                  const SizedBox(height: 5),
-                  SettingsTile(
-                    icon: Icons.edit,
-                    tileText: 'Change username',
-                    onPressed: () {
-                      showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        builder: (context) {
-                          return CustomAlertDialog(
-                            title: 'Change username?',
-                            content: 'Enter new username you want to use',
-                            firstLabel: 'Input new username',
-                            firstController: _changeUsernameConroller,
-                            onConfirmed: () async {
-                              await changeUsername(
-                                accountProvider: _accountProvider,
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 5),
-                  SettingsTile(
-                    icon: Icons.key,
-                    tileText: 'Change password',
-                    onPressed: () {
-                      showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        builder: (context) {
-                          return CustomAlertDialog(
-                              title: 'Change password?',
-                              content:
-                                  'Please type in your current and new password',
-                              firstController: _currentPasswordController,
-                              secondController: _newPasswordController,
-                              thirdController: _confirmedNewPasswordController,
-                              firstLabel: 'Current password',
-                              secondLabel: 'New password',
-                              thirdLabel: 'Confirm new password',
-                              obscureText: true,
-                              onConfirmed: () async {
-                                await changePassword(
-                                  accountProvider: _accountProvider,
-                                );
-                              });
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 5),
-                  SettingsTile(
-                    icon: Icons.delete_forever,
-                    tileText: 'Delete account',
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return CustomAlertDialog(
-                            title: 'Are you sure?',
-                            content:
-                                'This action will permanently delete your account. To continue provide current password',
-                            contentColor: Theme.of(context).errorColor,
-                            firstController: _currentPasswordController,
-                            firstLabel: 'Current password',
-                            obscureText: true,
-                            additionalWidget: Consumer<AccountProvider>(
-                              builder: (context, accountProvider, _) {
-                                return Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text('Delete only private recipes',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1!
-                                                .copyWith(
-                                                  color: Theme.of(context)
-                                                      .primaryColorDark,
-                                                )),
-                                        Checkbox(
-                                            value: accountProvider
-                                                .deletePrivateRecipes,
-                                            onChanged: (value) {
-                                              accountProvider
-                                                  .toggleDeleteOptions();
-                                            }),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text('Delete all recipes',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1!
-                                                .copyWith(
-                                                  color: Theme.of(context)
-                                                      .primaryColorDark,
-                                                )),
-                                        Checkbox(
-                                            value: accountProvider
-                                                .deleteAllRecipes,
-                                            onChanged: (value) {
-                                              accountProvider
-                                                  .toggleDeleteOptions();
-                                            }),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                            onConfirmed: () async {
-                              deleteAccount(
-                                accountProvider: _accountProvider,
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Light',
-                        style: Theme.of(context).textTheme.bodyText2,
-                      ),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                      SizedBox(
-                        child: Center(
-                          child: DayNightSwitcher(
-                            nightBackgroundColor: kLightBlue.withBlue(180),
-                            isDarkModeEnabled: theme.isDark(),
-                            onStateChanged: (_) {
-                              theme.swapTheme();
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Dark',
-                        style: Theme.of(context).textTheme.bodyText2,
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Center(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.logout),
-                      onPressed: () async {
-                        logOut(
-                          accountProvider: _accountProvider,
-                        );
-                      },
-                      label: Text(
-                        'Log out',
-                        style: Theme.of(context).textTheme.bodyText2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

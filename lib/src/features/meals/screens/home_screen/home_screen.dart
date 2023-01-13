@@ -1,8 +1,10 @@
 import 'dart:math';
 
+import 'package:cookbook/src/core/internet_not_connected.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../services/hive_services.dart';
@@ -63,63 +65,79 @@ class HomeScreen extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: DefaultTextStyle(
-                    style: Theme.of(context).textTheme.headline1!,
-                    child: FutureBuilder(
-                      future: setUsername(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return AnimatedTextKit(
-                            isRepeatingAnimation: false,
-                            animatedTexts: [
-                              TyperAnimatedText(
-                                getRandomGreeting(snapshot.data),
-                                speed: const Duration(
-                                  milliseconds: 80,
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                        return const Text('');
-                      },
+                Visibility(
+                  visible: Provider.of<InternetConnectionStatus>(context) ==
+                      InternetConnectionStatus.disconnected,
+                  child: const InternetNotConnected(),
+                ),
+                Visibility(
+                  visible: Provider.of<InternetConnectionStatus>(context) ==
+                      InternetConnectionStatus.connected,
+                  child: Expanded(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: DefaultTextStyle(
+                            style: Theme.of(context).textTheme.headline1!,
+                            child: FutureBuilder(
+                              future: setUsername(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return AnimatedTextKit(
+                                    isRepeatingAnimation: false,
+                                    animatedTexts: [
+                                      TyperAnimatedText(
+                                        getRandomGreeting(snapshot.data),
+                                        speed: const Duration(
+                                          milliseconds: 80,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+                                return const Text('');
+                              },
+                            ),
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 25),
+                          child: Divider(
+                            color: Colors.grey,
+                            height: 2,
+                          ),
+                        ),
+                        const MealsToggleButton(),
+                        Consumer<MealsProvider>(
+                          builder: (context, mealsProvider, _) {
+                            if (mealsProvider.selectedCategory ==
+                                CategoryType.myMeals) {
+                              return MealsGrid(
+                                mealsProvider: mealsProvider,
+                                future: mealsProvider.getUserMeals(),
+                                textIfEmpty:
+                                    'You don\'t have any own recipes, try adding them or use others users recipes!',
+                              );
+                            } else if (mealsProvider.selectedCategory ==
+                                CategoryType.allMeals) {
+                              return MealsGrid(
+                                mealsProvider: mealsProvider,
+                                future: mealsProvider.getPublicMeals(),
+                              );
+                            } else {
+                              return MealsGrid(
+                                mealsProvider: mealsProvider,
+                                future: mealsProvider.getUserFavorites(),
+                                textIfEmpty:
+                                    'No favorites meals yet, try add some!',
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 25),
-                  child: Divider(
-                    color: Colors.grey,
-                    height: 2,
-                  ),
-                ),
-                const MealsToggleButton(),
-                Consumer<MealsProvider>(
-                  builder: (context, mealsProvider, _) {
-                    if (mealsProvider.selectedCategory ==
-                        CategoryType.myMeals) {
-                      return MealsGrid(
-                        mealsProvider: mealsProvider,
-                        future: mealsProvider.getUserMeals(),
-                        textIfEmpty:
-                            'You don\'t have any own recipes, try adding them or use others users recipes!',
-                      );
-                    } else if (mealsProvider.selectedCategory ==
-                        CategoryType.allMeals) {
-                      return MealsGrid(
-                        mealsProvider: mealsProvider,
-                        future: mealsProvider.getPublicMeals(),
-                      );
-                    } else {
-                      return MealsGrid(
-                        mealsProvider: mealsProvider,
-                        future: mealsProvider.getUserFavorites(),
-                        textIfEmpty: 'No favorites meals yet, try add some!',
-                      );
-                    }
-                  },
                 ),
               ],
             ),

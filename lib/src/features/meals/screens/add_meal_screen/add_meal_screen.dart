@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:cookbook/src/features/account/account_provider.dart';
+import 'package:cookbook/src/features/meals/screens/add_meal_screen/widgets/recipe_info_button.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import 'package:provider/provider.dart';
 import 'package:nanoid/nanoid.dart';
 
+import '../../../../core/internet_not_connected.dart';
 import '../../../../services/firebase/firestore.dart';
 import '../../../../services/firebase/storage.dart';
 import '../../../../domain/models/meal_model.dart';
@@ -14,9 +17,9 @@ import '../../../../services/firebase/auth.dart';
 import '../../../../core/theme_provider.dart';
 import '../../../common_widgets/error_handling.dart';
 import '../../meals_provider.dart';
-import 'widgets/add_meal_characteristics.dart';
-import 'widgets/add_meal_photo_picker.dart';
-import 'widgets/add_meal_text_field.dart';
+import 'widgets/meal_characteristics.dart';
+import 'widgets/meal_photo_picker.dart';
+import 'widgets/meal_text_field.dart';
 
 class AddMealScreen extends StatefulWidget {
   const AddMealScreen({super.key});
@@ -198,165 +201,130 @@ class _AddMealScreenState extends State<AddMealScreen> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(
-                      width: 48,
-                    ),
-                    Text(
-                      'Add new recipe',
-                      style: Theme.of(context).textTheme.headline1!.copyWith(
-                            fontSize: 25,
-                          ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return Dialog(
-                              backgroundColor:
-                                  Theme.of(context).backgroundColor,
-                              child: Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        'Filling recipe fields',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline1,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 8,
-                                    ),
-                                    Text(
-                                      'For beter formatting you should separate each element by new line in ingredients and description fields.',
-                                      style:
-                                          Theme.of(context).textTheme.bodyText2,
-                                    ),
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                    Center(
-                                      child: Container(
-                                        height: 200,
-                                        child: Image.asset(
-                                            'assets/recipe_example.jpg'),
-                                      ),
-                                    ),
-                                    TextButton(
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Theme.of(context)
-                                            .cardColor
-                                            .withOpacity(0.5),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text(
-                                        'Okay',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+        child: Column(
+          children: [
+            Visibility(
+              visible: Provider.of<InternetConnectionStatus>(context) ==
+                  InternetConnectionStatus.disconnected,
+              child: const InternetNotConnected(),
+            ),
+            Visibility(
+              visible: Provider.of<InternetConnectionStatus>(context) ==
+                  InternetConnectionStatus.connected,
+              child: Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const SizedBox(
+                              width: 48,
+                            ),
+                            Text(
+                              'Add new recipe',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headline1!
+                                  .copyWith(
+                                    fontSize: 25,
+                                  ),
+                            ),
+                            const RecipeInfoButton(),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        MealTextField(
+                          controller: _mealNameController,
+                          labelText: 'Meal name',
+                          hintText: _mealNameController.text.isEmpty
+                              ? ''
+                              : 'Meal name',
+                          textInputAction: TextInputAction.next,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        MealTextField(
+                          controller: _ingredientsController,
+                          labelText: 'Ingredients',
+                          hintText: _ingredientsController.text.isEmpty
+                              ? ''
+                              : 'Ingredients',
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        MealTextField(
+                          controller: _descriptionController,
+                          labelText: 'Description',
+                          hintText: _descriptionController.text.isEmpty
+                              ? ''
+                              : 'Description',
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Consumer<MealsProvider>(
+                          builder: (context, mealsProvider, _) {
+                            return MealCharacteristics(
+                              mealsProvider: mealsProvider,
                             );
                           },
-                        );
-                      },
-                      icon: Icon(
-                        Icons.info_outline,
-                        color: Theme.of(context).primaryColor,
-                        size: 25,
-                      ),
-                    )
-                  ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Consumer<MealsProvider>(
+                          builder: (context, mealsProvider, _) {
+                            return MealPhotoPicker(
+                              mealsProvider: mealsProvider,
+                              imageUrlController: _imageUrlController,
+                            );
+                          },
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Consumer<MealsProvider>(
+                          builder: (context, mealsProvider, _) {
+                            return MaterialButton(
+                              color: Theme.of(context).highlightColor,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.save),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  const Text('Save recipe'),
+                                ],
+                              ),
+                              onPressed: () async {
+                                saveMeal(
+                                  mealNameTec: _mealNameController,
+                                  ingredientsTec: _ingredientsController,
+                                  descriptionTec: _descriptionController,
+                                  mealsProvider: mealsProvider,
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(
+                          height: 25,
+                        )
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                AddMealTextField(
-                  controller: _mealNameController,
-                  labelText: 'Meal name',
-                  hintText: _mealNameController.text.isEmpty ? '' : 'Meal name',
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                AddMealTextField(
-                  controller: _ingredientsController,
-                  labelText: 'Ingredients',
-                  hintText:
-                      _ingredientsController.text.isEmpty ? '' : 'Ingredients',
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                AddMealTextField(
-                  controller: _descriptionController,
-                  labelText: 'Description',
-                  hintText:
-                      _descriptionController.text.isEmpty ? '' : 'Description',
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                const MealCharacteristics(),
-                const SizedBox(
-                  height: 10,
-                ),
-                PhotoPicker(imageUrlController: _imageUrlController),
-                const SizedBox(
-                  height: 10,
-                ),
-                Consumer<MealsProvider>(
-                  builder: (context, mealsProvider, _) {
-                    return MaterialButton(
-                      color: Theme.of(context).highlightColor,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.save),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Text('Save recipe'),
-                        ],
-                      ),
-                      onPressed: () async {
-                        saveMeal(
-                          mealNameTec: _mealNameController,
-                          ingredientsTec: _ingredientsController,
-                          descriptionTec: _descriptionController,
-                          mealsProvider: mealsProvider,
-                        );
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(
-                  height: 25,
-                )
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -11,10 +11,22 @@ class AccountProvider with ChangeNotifier {
   bool isLoading = false;
   bool deletePrivateRecipes = true;
   bool deleteAllRecipes = false;
+  bool userHasRecipes = true;
 
-  void toggleDeleteOptions() {
-    deletePrivateRecipes = !deletePrivateRecipes;
-    deleteAllRecipes = !deleteAllRecipes;
+  void setUserHasRecipes({required bool value}) {
+    userHasRecipes = value;
+    notifyListeners();
+  }
+
+  void setDeleteAll({required bool value}) {
+    deleteAllRecipes = value;
+    deletePrivateRecipes = !value;
+    notifyListeners();
+  }
+
+  void setDeletePrivate({required bool value}) {
+    deletePrivateRecipes = value;
+    deleteAllRecipes = !value;
     notifyListeners();
   }
 

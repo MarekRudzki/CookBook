@@ -45,7 +45,7 @@ class MealsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void changePhotoType(PhotoType photoType) {
+  void changePhotoType(PhotoType? photoType) {
     selectedPhotoType = photoType;
     notifyListeners();
   }
@@ -142,7 +142,9 @@ class MealsProvider with ChangeNotifier {
     for (final meal in userMeals) {
       if (deleteAll) {
         recipesIdToDelete.add(meal.id);
-        await _storage.deleteImage(imageId: meal.id);
+        if (meal.imageUrl.contains('firebasestorage')) {
+          await _storage.deleteImage(imageId: meal.id);
+        }
         await _firestore.deleteMeal(
           mealId: meal.id,
           userId: meal.authorId,
@@ -150,7 +152,9 @@ class MealsProvider with ChangeNotifier {
       } else {
         if (meal.isPublic) {
           recipesIdToDelete.add(meal.id);
-          await _storage.deleteImage(imageId: meal.id);
+          if (meal.imageUrl.contains('firebasestorage')) {
+            await _storage.deleteImage(imageId: meal.id);
+          }
           await _firestore.deleteMeal(
             mealId: meal.id,
             userId: meal.authorId,
@@ -158,6 +162,12 @@ class MealsProvider with ChangeNotifier {
         }
       }
     }
+  }
+
+  Future<void> updateMealAuthor({
+    required String newUsername,
+  }) async {
+    await _firestore.updateMealAuthor(newUsername: newUsername);
   }
 
   /// MealsToggleButton

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,76 +12,94 @@ import '../../../../../core/constants.dart';
 import '../../../../common_widgets/error_handling.dart';
 import '../../../meals_provider.dart';
 
-class PhotoPicker extends StatelessWidget {
-  const PhotoPicker({
+class MealPhotoPicker extends StatelessWidget {
+  const MealPhotoPicker({
     super.key,
     required TextEditingController imageUrlController,
+    required this.mealsProvider,
+    this.url = '',
   }) : _imageUrlController = imageUrlController;
 
   final TextEditingController _imageUrlController;
+  final MealsProvider mealsProvider;
+  final String url;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MealsProvider>(
-      builder: (context, mealsProvider, _) {
-        return Column(
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.height * 0.33,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: kLightBlue,
-                  width: 10,
+    return Column(
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height * 0.33,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: kLightBlue,
+              width: 10,
+            ),
+          ),
+          child: mealsProvider.selectedPhotoType != null
+              ? mealsProvider.selectedPhotoType == PhotoType.url
+                  ? FittedBox(
+                      child: Image.network(
+                          url == '' ? _imageUrlController.text : url),
+                      fit: BoxFit.fill,
+                    )
+                  : Image.file(mealsProvider.imageFile!)
+              : InkWell(
+                  child: Icon(
+                    Icons.add_a_photo,
+                    size: 60,
+                    color: Theme.of(context).primaryColorDark,
+                  ),
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          backgroundColor: Theme.of(context).backgroundColor,
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Add photo:',
+                                style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                              const SizedBox(height: 10),
+                              PhotoFromCamera(
+                                mealsProvider: mealsProvider,
+                              ),
+                              const SizedBox(height: 10),
+                              PhotoFromGallery(
+                                mealsProvider: mealsProvider,
+                              ),
+                              const SizedBox(height: 10),
+                              PhotoFromURL(
+                                imageUrlController: _imageUrlController,
+                                mealsProvider: mealsProvider,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              ), //TODO add multiple images
-              //https://pub.dev/packages/card_swiper
-              child: mealsProvider.selectedPhotoType != null
-                  ? mealsProvider.selectedPhotoType == PhotoType.url
-                      ? FittedBox(
-                          child: Image.network(_imageUrlController.text),
-                          fit: BoxFit.fill,
-                        )
-                      : Image.file(mealsProvider.imageFile!)
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Choose a photo:',
-                          style: Theme.of(context).textTheme.bodyText2,
-                        ),
-                        const SizedBox(height: 10),
-                        PhotoFromCamera(
-                          mealsProvider: mealsProvider,
-                        ),
-                        const SizedBox(height: 10),
-                        PhotoFromGallery(
-                          mealsProvider: mealsProvider,
-                        ),
-                        const SizedBox(height: 10),
-                        PhotoFromURL(
-                          imageUrlController: _imageUrlController,
-                          mealsProvider: mealsProvider,
-                        ),
-                      ],
-                    ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            if (mealsProvider.selectedPhotoType != null)
-              ElevatedButton(
-                onPressed: () {
-                  mealsProvider.removeCurrentPhoto();
-                  _imageUrlController.clear();
-                },
-                child: const Text('Pick other photo'),
-              )
-            else
-              const SizedBox.shrink()
-          ],
-        );
-      },
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        if (mealsProvider.selectedPhotoType != null)
+          ElevatedButton(
+            onPressed: () {
+              mealsProvider.removeCurrentPhoto();
+              _imageUrlController.clear();
+            },
+            child: const Text('Pick other photo'),
+          )
+        else
+          const SizedBox.shrink()
+      ],
     );
   }
 }
@@ -112,7 +132,13 @@ class PhotoFromCamera extends StatelessWidget {
           );
           mealsProvider.changePhotoType(PhotoType.camera);
         }
+        Navigator.of(context).pop();
       },
+      style: const ButtonStyle().copyWith(
+        backgroundColor: MaterialStateProperty.all(
+          Theme.of(context).primaryColorDark.withOpacity(0.5),
+        ),
+      ),
     );
   }
 }
@@ -130,7 +156,9 @@ class PhotoFromGallery extends StatelessWidget {
     return TextButton(
       child: Text(
         'From Gallery',
-        style: TextStyle(color: Theme.of(context).primaryColor),
+        style: TextStyle(
+          color: Theme.of(context).primaryColor,
+        ),
       ),
       onPressed: () async {
         final ImagePicker imagePicker = ImagePicker();
@@ -145,7 +173,13 @@ class PhotoFromGallery extends StatelessWidget {
           );
           mealsProvider.changePhotoType(PhotoType.gallery);
         }
+        Navigator.of(context).pop();
       },
+      style: const ButtonStyle().copyWith(
+        backgroundColor: MaterialStateProperty.all(
+          Theme.of(context).primaryColorDark.withOpacity(0.5),
+        ),
+      ),
     );
   }
 }
@@ -200,6 +234,7 @@ class PhotoFromURL extends StatelessWidget {
           } else {
             errorHandling.toggleMealLoadingSpinner(context);
             mealsProvider.changePhotoType(PhotoType.url);
+            Navigator.of(context).pop();
             Navigator.of(context).pop();
           }
         },
@@ -284,6 +319,11 @@ class PhotoFromURL extends StatelessWidget {
           },
         );
       },
+      style: const ButtonStyle().copyWith(
+        backgroundColor: MaterialStateProperty.all(
+          Theme.of(context).primaryColorDark.withOpacity(0.5),
+        ),
+      ),
     );
   }
 }

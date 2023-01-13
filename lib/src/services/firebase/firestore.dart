@@ -17,11 +17,13 @@ class Firestore {
       return errorText;
     }
 
+    final List<String> userMealsId = await getUserMealsId();
+
     try {
       await _firestore.collection('users').doc(uid).set({
         'username': username,
         'favoriteMeals': [],
-        'mealsList': [],
+        'mealsList': userMealsId,
       });
     } on Exception catch (e) {
       errorText = e.toString();
@@ -221,6 +223,20 @@ class Firestore {
       await collection.doc(userId).delete();
     } on Exception catch (e) {
       throw Exception(e);
+    }
+  }
+
+  Future<void> updateMealAuthor({required String newUsername}) async {
+    final List<String> userMealsId = await getUserMealsId();
+    for (final meal in userMealsId) {
+      try {
+        final collection = _firestore.collection('meals');
+        await collection.doc(meal).update(
+          {'authorName': newUsername},
+        );
+      } on Exception catch (e) {
+        throw Exception(e);
+      }
     }
   }
 }

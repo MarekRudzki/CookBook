@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
 import 'src/features/account/screens/login_screen/login_screen.dart';
@@ -21,7 +22,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 //TODO add l10n
-//TODO add error handling for offline user with online functions
   runApp(
     MultiProvider(
       providers: [
@@ -31,10 +31,16 @@ void main() async {
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, theme, _) {
-          return MaterialApp(
-            theme: theme.getTheme(),
-            debugShowCheckedModeBanner: false,
-            home: isLogged ? const MainScreen() : const LoginScreen(),
+          return StreamProvider<InternetConnectionStatus>(
+            initialData: InternetConnectionStatus.connected,
+            create: (_) {
+              return InternetConnectionChecker().onStatusChange;
+            },
+            child: MaterialApp(
+              theme: theme.getTheme(),
+              debugShowCheckedModeBanner: false,
+              home: isLogged ? const MainScreen() : const LoginScreen(),
+            ),
           );
         },
       ),
