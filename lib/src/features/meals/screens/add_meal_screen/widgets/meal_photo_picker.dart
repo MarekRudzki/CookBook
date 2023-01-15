@@ -17,12 +17,10 @@ class MealPhotoPicker extends StatelessWidget {
     super.key,
     required TextEditingController imageUrlController,
     required this.mealsProvider,
-    this.url = '',
   }) : _imageUrlController = imageUrlController;
 
   final TextEditingController _imageUrlController;
   final MealsProvider mealsProvider;
-  final String url;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +38,9 @@ class MealPhotoPicker extends StatelessWidget {
           child: mealsProvider.selectedPhotoType != null
               ? mealsProvider.selectedPhotoType == PhotoType.url
                   ? FittedBox(
-                      child: Image.network(
-                          url == '' ? _imageUrlController.text : url),
+                      child: Image.network(mealsProvider.imageUrl == ''
+                          ? _imageUrlController.text
+                          : mealsProvider.imageUrl),
                       fit: BoxFit.fill,
                     )
                   : Image.file(mealsProvider.imageFile!)
@@ -233,6 +232,7 @@ class PhotoFromURL extends StatelessWidget {
             mealsProvider.resetErrorMessage();
           } else {
             errorHandling.toggleMealLoadingSpinner(context);
+            mealsProvider.imageUrl = imageUrlController.text;
             mealsProvider.changePhotoType(PhotoType.url);
             Navigator.of(context).pop();
             Navigator.of(context).pop();

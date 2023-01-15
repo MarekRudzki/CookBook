@@ -64,6 +64,9 @@ class RegisterView extends StatelessWidget {
         ),
         TextButton(
           onPressed: onLoginTap,
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.transparent,
+          ),
           child: Text(
             'Already have an account? Try login',
             style: TextStyle(color: Colors.grey.shade500, fontSize: 15),

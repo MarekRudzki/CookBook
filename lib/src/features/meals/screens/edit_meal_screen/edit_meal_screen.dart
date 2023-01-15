@@ -1,22 +1,24 @@
 import 'dart:convert';
 
-import 'package:cookbook/src/features/account/account_provider.dart';
+import 'package:cookbook/src/features/account/screens/account_screen/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 
-import 'package:nanoid/nanoid.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/theme_provider.dart';
-import '../../../../domain/models/meal_model.dart';
-import '../../../../services/firebase/auth.dart';
 import '../../../../services/firebase/firestore.dart';
 import '../../../../services/firebase/storage.dart';
+import '../../../../domain/models/meal_model.dart';
+import '../../../../services/firebase/auth.dart';
 import '../../../../services/hive_services.dart';
+import '../../../../core/theme_provider.dart';
+import '../../../account/account_provider.dart';
 import '../../../common_widgets/error_handling.dart';
+import '../../../main_screen.dart';
 import '../../meals_provider.dart';
 import '../add_meal_screen/widgets/meal_characteristics.dart';
-import '../add_meal_screen/widgets/meal_text_field.dart';
 import '../add_meal_screen/widgets/recipe_info_button.dart';
+import '../add_meal_screen/widgets/meal_photo_picker.dart';
+import '../add_meal_screen/widgets/meal_text_field.dart';
 
 class EditMealScreen extends StatefulWidget {
   const EditMealScreen({
@@ -38,6 +40,7 @@ class _EditMealScreenState extends State<EditMealScreen> {
 
   final ThemeProvider _themeProvider = ThemeProvider();
   final ErrorHandling _errorHandling = ErrorHandling();
+  final MealsProvider _mealsProvider = MealsProvider();
   final Auth _auth = Auth();
   final HiveServices _hiveServices = HiveServices();
   final Firestore _firestore = Firestore();
@@ -66,11 +69,12 @@ class _EditMealScreenState extends State<EditMealScreen> {
     required TextEditingController ingredientsTec,
     required TextEditingController descriptionTec,
     required MealsProvider mealsProvider,
+    required String currentMealId,
   }) async {
     final List<String> ingredientsList = [];
     final List<String> descriptionList = [];
     String imageUrl;
-    final generatedUid = nanoid(10);
+    final mealId = currentMealId;
 
     const LineSplitter ls = LineSplitter();
     int descriptionCount = 1;
@@ -129,8 +133,8 @@ class _EditMealScreenState extends State<EditMealScreen> {
     _errorHandling.toggleMealLoadingSpinner(context);
 
     await _storage
-        .uploadImage(
-      mealId: generatedUid,
+        .updateImage(
+      mealId: mealId,
       image: mealsProvider.imageFile,
       mealsProvider: mealsProvider,
     )
@@ -149,14 +153,14 @@ class _EditMealScreenState extends State<EditMealScreen> {
     if (mealsProvider.selectedPhotoType == PhotoType.url) {
       imageUrl = _imageUrlController.text;
     } else {
-      imageUrl = await _storage.getUrl(mealId: generatedUid);
+      imageUrl = await _storage.getUrl(mealId: mealId);
     }
 
     final String username = await setUsername();
 
     await _firestore
-        .addMeal(
-      mealId: generatedUid,
+        .updateMeal(
+      mealId: currentMealId,
       mealName: mealNameTec.text,
       ingredientsList: ingredientsList,
       descriptionList: descriptionList,
@@ -165,7 +169,6 @@ class _EditMealScreenState extends State<EditMealScreen> {
       authorId: _auth.uid!,
       authorName: username,
       imageUrl: imageUrl,
-      generatedUid: generatedUid,
     )
         .then((errorText) {
       if (errorText.isNotEmpty) {
@@ -184,17 +187,45 @@ class _EditMealScreenState extends State<EditMealScreen> {
         FocusManager.instance.primaryFocus?.unfocus();
         _errorHandling.showInfoSnackbar(
           context,
-          'Recipe added successfully',
+          'Recipe updated successfully',
           Colors.green,
         );
+        Navigator.of(context).pop();
       }
     });
+  }
+
+  Future<void> deleteMeal({
+    required String mealId,
+    required String authorId,
+    required String imageUrl,
+  }) async {
+    _errorHandling.toggleMealLoadingSpinner(context);
+    await _mealsProvider.deleteMeal(
+      mealId: mealId,
+      authorId: authorId,
+      imageUrl: imageUrl,
+    );
+    _errorHandling.toggleMealLoadingSpinner(context);
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const MainScreen(),
+      ),
+    );
+    _errorHandling.showInfoSnackbar(
+      context,
+      'Recipe deleted successfully',
+      Colors.green,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     int setComplexityOnce = 1;
     int setPublicOnce = 1;
+    int setPhotoOnce = 1;
 
     void setComplexity(MealsProvider mealsProvider) {
       if (setComplexityOnce == 1) {
@@ -220,6 +251,16 @@ class _EditMealScreenState extends State<EditMealScreen> {
           mealsProvider.isPublic = false;
           setPublicOnce++;
         }
+      }
+    }
+
+    void setPhoto(MealsProvider mealsProvider) {
+      if (setPhotoOnce == 1) {
+        mealsProvider.selectedPhotoType = PhotoType.url;
+        mealsProvider.imageUrl = widget.mealModel.imageUrl;
+        setPhotoOnce++;
+      } else {
+        mealsProvider.selectedPhotoType = mealsProvider.selectedPhotoType;
       }
     }
 
@@ -264,6 +305,8 @@ class _EditMealScreenState extends State<EditMealScreen> {
                       IconButton(
                         onPressed: () {
                           Navigator.of(context).pop();
+                          Provider.of<MealsProvider>(context, listen: false)
+                              .selectedPhotoType = null;
                         },
                         icon: const Icon(
                           Icons.arrow_back,
@@ -289,7 +332,6 @@ class _EditMealScreenState extends State<EditMealScreen> {
                         _mealNameController.text.isEmpty ? '' : 'Meal name',
                     textInputAction: TextInputAction.next,
                   ),
-
                   const SizedBox(
                     height: 10,
                   ),
@@ -322,51 +364,83 @@ class _EditMealScreenState extends State<EditMealScreen> {
                       );
                     },
                   ),
-
                   const SizedBox(
                     height: 10,
                   ),
-                  // Consumer<MealsProvider>(
-                  //   builder: (context, mealsProvider, _) {
-                  //     setPhoto(mealsProvider);
-                  //     return MealPhotoPicker(
-                  //       mealsProvider: mealsProvider,
-                  //       url: widget.mealModel.imageUrl,
-                  //       imageUrlController: _imageUrlController,
-                  //     );
-                  //   },//TODO this not work, fix it
-                  // ),
+                  Consumer<MealsProvider>(
+                    builder: (context, mealsProvider, _) {
+                      setPhoto(mealsProvider);
+                      return MealPhotoPicker(
+                        mealsProvider: mealsProvider,
+                        imageUrlController: _imageUrlController,
+                      );
+                    },
+                  ),
                   const SizedBox(
                     height: 10,
                   ),
-                  // Consumer<MealsProvider>(
-                  //   builder: (context, mealsProvider, _) {
-                  //     return MaterialButton(
-                  //       color: Theme.of(context).highlightColor,
-                  //       child: Row(
-                  //         mainAxisAlignment: MainAxisAlignment.center,
-                  //         children: [
-                  //           const Icon(Icons.save),
-                  //           const SizedBox(
-                  //             width: 10,
-                  //           ),
-                  //           const Text('Save recipe'),
-                  //         ],
-                  //       ),
-                  //       onPressed: () async {
-                  //         saveMeal(
-                  //           mealNameTec: _mealNameController,
-                  //           ingredientsTec: _ingredientsController,
-                  //           descriptionTec: _descriptionController,
-                  //           mealsProvider: mealsProvider,
-                  //         );
-                  //       },
-                  //     );
-                  //   },
-                  // ),
-                  // const SizedBox(
-                  //   height: 25,
-                  // )
+                  Consumer<MealsProvider>(
+                    builder: (context, mealsProvider, _) {
+                      return MaterialButton(
+                        color: Theme.of(context).highlightColor,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.save),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            const Text('Save recipe'),
+                          ],
+                        ),
+                        onPressed: () async {
+                          await saveMeal(
+                            currentMealId: widget.mealModel.id,
+                            mealNameTec: _mealNameController,
+                            ingredientsTec: _ingredientsController,
+                            descriptionTec: _descriptionController,
+                            mealsProvider: mealsProvider,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                    ),
+                    child: MaterialButton(
+                      color: Theme.of(context).errorColor,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.delete_forever),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Text('Delete recipe'),
+                        ],
+                      ),
+                      onPressed: () async {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return CustomAlertDialog(
+                              title: 'Are your sure?',
+                              content: 'Do you want to delete this recipe?',
+                              onConfirmed: () async {
+                                await deleteMeal(
+                                  mealId: widget.mealModel.id,
+                                  authorId: widget.mealModel.authorId,
+                                  imageUrl: widget.mealModel.imageUrl,
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

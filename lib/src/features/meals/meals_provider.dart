@@ -22,6 +22,7 @@ class MealsProvider with ChangeNotifier {
   PhotoType? selectedPhotoType;
   bool isFavorite = false;
   bool isPublic = false;
+  String imageUrl = '';
   File? imageFile;
 
   /// MealsToggleButton
@@ -161,6 +162,17 @@ class MealsProvider with ChangeNotifier {
           );
         }
       }
+    }
+  }
+
+  Future<void> deleteMeal({
+    required String mealId,
+    required String authorId,
+    required String imageUrl,
+  }) async {
+    await _firestore.deleteMeal(mealId: mealId, userId: authorId);
+    if (imageUrl.contains('firebasestorage')) {
+      await _storage.deleteImage(imageId: mealId);
     }
   }
 

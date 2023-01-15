@@ -22,6 +22,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 //TODO add l10n
+//TODO expand light theme
+
   runApp(
     MultiProvider(
       providers: [

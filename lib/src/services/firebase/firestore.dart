@@ -107,6 +107,39 @@ class Firestore {
     return errorText;
   }
 
+  Future<String> updateMeal({
+    required String mealId,
+    required String mealName,
+    required List<String> ingredientsList,
+    required List<String> descriptionList,
+    required String complexity,
+    required bool isPublic,
+    required String authorId,
+    required String authorName,
+    required String imageUrl,
+  }) async {
+    String errorText = '';
+
+    try {
+      final mealCollection = _firestore.collection('meals');
+      await mealCollection.doc(mealId).update({
+        'mealId': mealId,
+        'mealName': mealName,
+        'ingredients': ingredientsList,
+        'description': descriptionList,
+        'complexity': complexity,
+        'isPublic': isPublic,
+        'authorId': authorId,
+        'authorName': authorName,
+        'image_url': imageUrl,
+      });
+    } on Exception catch (e) {
+      errorText = e.toString();
+    }
+
+    return errorText;
+  }
+
   Future<List<MealModel>> getMeals() async {
     try {
       final collection = _firestore.collection('meals');
@@ -212,6 +245,8 @@ class Firestore {
     required String mealId,
     required String userId,
   }) async {
+    final List<String> mealList = [mealId];
+
     try {
       final collection = _firestore.collection('meals');
       await collection.doc(mealId).delete();
@@ -219,8 +254,22 @@ class Firestore {
       throw Exception(e);
     }
     try {
-      final collection = _firestore.collection('users');
-      await collection.doc(userId).delete();
+      final collection = _firestore.collection('users').doc(userId);
+      final docSnapshot = await collection.get();
+
+      if (docSnapshot.exists) {
+        final Map<String, dynamic>? data = docSnapshot.data();
+
+        final dynamicList = data?['mealsList'] as List<dynamic>;
+
+        if (dynamicList.contains(mealId)) {
+          await collection.update(
+            {
+              'mealsList': FieldValue.arrayRemove(mealList),
+            },
+          );
+        }
+      }
     } on Exception catch (e) {
       throw Exception(e);
     }

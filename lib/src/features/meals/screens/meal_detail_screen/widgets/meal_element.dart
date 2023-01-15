@@ -55,7 +55,8 @@ class _MealElementState extends State<MealElement> {
               initialData: false,
               builder: (context, snapshot) {
                 return Checkbox(
-                  activeColor: Theme.of(context).highlightColor,
+                  side: BorderSide(color: Theme.of(context).highlightColor),
+                  checkColor: Theme.of(context).highlightColor,
                   value: snapshot.data,
                   onChanged: (changedValue) {
                     _checkBoxController.sink.add(changedValue!);

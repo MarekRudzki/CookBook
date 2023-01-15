@@ -128,7 +128,6 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
-          width: MediaQuery.of(context).size.width * 1,
           decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage('assets/background_login.png'),

@@ -14,7 +14,7 @@ class ThemeProvider with ChangeNotifier {
     errorColor: Colors.red,
     backgroundColor: kLightBlue,
     cardColor: kDarkBlue,
-    highlightColor: kLightGreen,
+    highlightColor: Colors.blueAccent,
     checkboxTheme: CheckboxThemeData(
       checkColor: MaterialStateProperty.all(Colors.red),
       fillColor: MaterialStateProperty.all(Colors.transparent),

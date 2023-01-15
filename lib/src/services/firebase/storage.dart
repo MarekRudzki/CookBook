@@ -23,6 +23,32 @@ class Storage {
     return errorText;
   }
 
+  Future<String> updateImage({
+    String? mealId,
+    File? image,
+    MealsProvider? mealsProvider,
+  }) async {
+    String errorText = '';
+    if (mealsProvider!.selectedPhotoType == PhotoType.url) {
+      try {
+        await ref.child('${mealId}.jpg').getDownloadURL();
+        await deleteImage(imageId: mealId!);
+      } on FirebaseException catch (e) {
+        if (e.code != 'object-not-found') {
+          errorText = e.code;
+        }
+      }
+      return errorText;
+    }
+
+    try {
+      await ref.child('${mealId}.jpg').putFile(image!);
+    } on FirebaseException catch (e) {
+      errorText = e.code;
+    }
+    return errorText;
+  }
+
   Future<String> getUrl({required String mealId}) async {
     final String url = await ref.child('${mealId}.jpg').getDownloadURL();
     return url;
