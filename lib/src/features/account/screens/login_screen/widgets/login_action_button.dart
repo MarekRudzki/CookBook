@@ -18,7 +18,7 @@ class ActionButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: MediaQuery.of(context).size.width * 0.45,
-        height: MediaQuery.of(context).size.height * 0.05,
+        height: MediaQuery.of(context).size.height * 0.045,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: Colors.red,
@@ -28,7 +28,7 @@ class ActionButton extends StatelessWidget {
             text,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 19,
+              fontSize: 17,
             ),
           ),
         ),

@@ -1,40 +1,24 @@
 import 'dart:math';
 
-import 'package:cookbook/src/core/internet_not_connected.dart';
 import 'package:flutter/material.dart';
 
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../services/hive_services.dart';
+import '../../../../core/internet_not_connected.dart';
 import '../../../../core/theme_provider.dart';
 import '../../../account/account_provider.dart';
 import '../../meals_provider.dart';
-import 'widgets/meals_grid.dart';
 import 'widgets/meals_toggle_button.dart';
+import 'widgets/meals_grid.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final HiveServices _hiveServices = HiveServices();
     final AccountProvider _accountProvider = AccountProvider();
-
-    // Get username from firestore in case, where user created account on
-    // different device and there is no username in local storage
-    Future<String> setUsername() async {
-      final String savedUsername = _hiveServices.getUsername();
-      String currentUsername;
-      if (savedUsername == 'no-username') {
-        await _accountProvider.setUsername();
-        currentUsername = _accountProvider.username;
-      } else {
-        currentUsername = _hiveServices.getUsername();
-      }
-      return currentUsername;
-    }
 
     String getRandomGreeting(String? username) {
       final rng = Random();
@@ -81,7 +65,7 @@ class HomeScreen extends StatelessWidget {
                           child: DefaultTextStyle(
                             style: Theme.of(context).textTheme.headline1!,
                             child: FutureBuilder(
-                              future: setUsername(),
+                              future: _accountProvider.getUsername(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
                                   return AnimatedTextKit(

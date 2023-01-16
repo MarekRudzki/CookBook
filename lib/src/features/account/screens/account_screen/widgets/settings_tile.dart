@@ -24,8 +24,8 @@ class SettingsTile extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 15,
+            horizontal: 7,
+            vertical: 11,
           ),
           child: Row(
             children: [

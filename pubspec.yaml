@@ -1,5 +1,5 @@
 name: cookbook
-description: A new Flutter project.
+description: Simple app for aspiring chefs.
 
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -17,7 +17,6 @@ dependencies:
   day_night_switcher: ^0.2.0+1
   firebase_auth: ^3.11.2
   firebase_core: ^1.24.0
-  firebase_database: ^9.1.7
   firebase_storage: ^10.3.11
   flutter:
     sdk: flutter
@@ -52,11 +51,3 @@ flutter:
     - assets/background_login.png
     - assets/recipe_example.jpg
     - assets/meal_loading.jpg
-  #   - images/a_dot_ham.jpeg
-
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic

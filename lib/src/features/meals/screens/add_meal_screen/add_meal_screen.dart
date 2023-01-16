@@ -1,23 +1,13 @@
-import 'dart:convert';
-
-import 'package:cookbook/src/features/account/account_provider.dart';
-import 'package:cookbook/src/features/meals/screens/add_meal_screen/widgets/recipe_info_button.dart';
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
-import 'package:nanoid/nanoid.dart';
 
 import '../../../../core/internet_not_connected.dart';
-import '../../../../services/firebase/firestore.dart';
-import '../../../../services/firebase/storage.dart';
-import '../../../../domain/models/meal_model.dart';
-import '../../../../services/hive_services.dart';
-import '../../../../services/firebase/auth.dart';
 import '../../../../core/theme_provider.dart';
-import '../../../common_widgets/error_handling.dart';
 import '../../meals_provider.dart';
 import 'widgets/meal_characteristics.dart';
+import 'widgets/recipe_info_button.dart';
 import 'widgets/meal_photo_picker.dart';
 import 'widgets/meal_text_field.dart';
 
@@ -29,26 +19,12 @@ class AddMealScreen extends StatefulWidget {
 }
 
 class _AddMealScreenState extends State<AddMealScreen> {
-  late final TextEditingController _mealNameController;
-  late final TextEditingController _descriptionController;
-  late final TextEditingController _ingredientsController;
-  late final TextEditingController _imageUrlController;
+  final _mealNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _ingredientsController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   final ThemeProvider _themeProvider = ThemeProvider();
-  final ErrorHandling _errorHandling = ErrorHandling();
-  final Auth _auth = Auth();
-  final HiveServices _hiveServices = HiveServices();
-  final Firestore _firestore = Firestore();
-  final Storage _storage = Storage();
-
-  @override
-  void initState() {
-    super.initState();
-    _mealNameController = TextEditingController();
-    _ingredientsController = TextEditingController();
-    _descriptionController = TextEditingController();
-    _imageUrlController = TextEditingController();
-  }
 
   @override
   void dispose() {
@@ -57,136 +33,6 @@ class _AddMealScreenState extends State<AddMealScreen> {
     _descriptionController.dispose();
     _imageUrlController.dispose();
     super.dispose();
-  }
-
-  Future<void> saveMeal({
-    required TextEditingController mealNameTec,
-    required TextEditingController ingredientsTec,
-    required TextEditingController descriptionTec,
-    required MealsProvider mealsProvider,
-  }) async {
-    final List<String> ingredientsList = [];
-    final List<String> descriptionList = [];
-    String imageUrl;
-    final generatedUid = nanoid(10);
-
-    const LineSplitter ls = LineSplitter();
-    int descriptionCount = 1;
-
-    if (mealNameTec.text.trim().isEmpty ||
-        ingredientsTec.text.trim().isEmpty ||
-        descriptionTec.text.trim().isEmpty) {
-      _errorHandling.showInfoSnackbar(
-        context,
-        'Please fill in all fields',
-      );
-      return;
-    }
-
-    // Get username from firestore in case, where user created account on
-    // different device and there is no username in local storage
-    Future<String> setUsername() async {
-      final AccountProvider accountProvider = AccountProvider();
-      final String savedUsername = _hiveServices.getUsername();
-      String currentUsername;
-      if (savedUsername == 'no-username') {
-        await accountProvider.setUsername();
-        currentUsername = accountProvider.username;
-      } else {
-        currentUsername = _hiveServices.getUsername();
-      }
-      return currentUsername;
-    }
-
-    String getComplexity() {
-      if (mealsProvider.complexity == Complexity.easy) {
-        return 'Easy';
-      } else if (mealsProvider.complexity == Complexity.medium) {
-        return 'Medium';
-      } else {
-        return 'Hard';
-      }
-    }
-
-    final List<String> ingredients = ls.convert(ingredientsTec.text);
-    for (final element in ingredients) {
-      if (element.trim().isNotEmpty) {
-        ingredientsList.add(element);
-      }
-    }
-
-    final List<String> description = ls.convert(descriptionTec.text);
-    for (var element in description) {
-      if (element.trim().isNotEmpty) {
-        element = '${descriptionCount}. $element';
-        descriptionCount++;
-        descriptionList.add(element);
-      }
-    }
-
-    _errorHandling.toggleMealLoadingSpinner(context);
-
-    await _storage
-        .uploadImage(
-      mealId: generatedUid,
-      image: mealsProvider.imageFile,
-      mealsProvider: mealsProvider,
-    )
-        .then(
-      (errorText) {
-        if (errorText.isNotEmpty) {
-          _errorHandling.toggleLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          mealsProvider.addErrorMessage(errorText);
-          mealsProvider.resetErrorMessage();
-          return;
-        }
-      },
-    );
-
-    if (mealsProvider.selectedPhotoType == PhotoType.url) {
-      imageUrl = _imageUrlController.text;
-    } else {
-      imageUrl = await _storage.getUrl(mealId: generatedUid);
-    }
-
-    final String username = await setUsername();
-
-    await _firestore
-        .addMeal(
-      mealId: generatedUid,
-      mealName: mealNameTec.text,
-      ingredientsList: ingredientsList,
-      descriptionList: descriptionList,
-      complexity: getComplexity(),
-      isPublic: mealsProvider.isPublic,
-      authorId: _auth.uid!,
-      authorName: username,
-      imageUrl: imageUrl,
-      generatedUid: generatedUid,
-    )
-        .then((errorText) {
-      if (errorText.isNotEmpty) {
-        FocusManager.instance.primaryFocus?.unfocus();
-        _errorHandling.showInfoSnackbar(
-          context,
-          errorText,
-        );
-      } else {
-        _errorHandling.toggleMealLoadingSpinner(context);
-        mealsProvider.resetFields();
-        _mealNameController.clear();
-        mealsProvider.getUserMeals();
-        _ingredientsController.clear();
-        _descriptionController.clear();
-        FocusManager.instance.primaryFocus?.unfocus();
-        _errorHandling.showInfoSnackbar(
-          context,
-          'Recipe added successfully',
-          Colors.green,
-        );
-      }
-    });
   }
 
   @override
@@ -229,7 +75,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
                                   .textTheme
                                   .headline1!
                                   .copyWith(
-                                    fontSize: 25,
+                                    fontSize: 22,
                                   ),
                             ),
                             const RecipeInfoButton(),
@@ -297,19 +143,28 @@ class _AddMealScreenState extends State<AddMealScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.save),
+                                  const Icon(
+                                    Icons.save,
+                                    size: 20,
+                                  ),
                                   const SizedBox(
                                     width: 10,
                                   ),
-                                  const Text('Save recipe'),
+                                  const Text(
+                                    'Save recipe',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                    ),
+                                  ),
                                 ],
                               ),
                               onPressed: () async {
-                                saveMeal(
+                                await mealsProvider.saveMeal(
+                                  context: context,
                                   mealNameTec: _mealNameController,
                                   ingredientsTec: _ingredientsController,
                                   descriptionTec: _descriptionController,
-                                  mealsProvider: mealsProvider,
+                                  imageUrlTec: _imageUrlController,
                                 );
                               },
                             );

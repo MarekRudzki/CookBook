@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../domain/models/meal_model.dart';
 import '../../../../core/theme_provider.dart';
-import '../edit_meal_screen/edit_meal_screen.dart';
 import '../../meals_provider.dart';
+import '../edit_meal_screen/edit_meal_screen.dart';
 import 'widgets/details_meal_characteristics.dart';
 import 'widgets/meal_element.dart';
 
@@ -19,7 +19,7 @@ class MealDetailsScreen extends StatelessWidget {
 
   final MealModel mealModel;
   final MealsProvider mealsProvider;
-
+//TODO values are not updating after meal is edited, fix this
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -60,8 +60,8 @@ class MealDetailsScreen extends StatelessWidget {
                             ),
                             Flexible(
                               child: Padding(
-                                padding: mealsProvider
-                                        .checkIfAuthor(mealModel.authorId)
+                                padding: mealsProvider.checkIfAuthor(
+                                        authorId: mealModel.authorId)
                                     ? const EdgeInsets.fromLTRB(8, 8, 8, 8)
                                     : const EdgeInsets.fromLTRB(8, 8, 56, 8),
                                 child: Align(
@@ -78,7 +78,8 @@ class MealDetailsScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            if (mealsProvider.checkIfAuthor(mealModel.authorId))
+                            if (mealsProvider.checkIfAuthor(
+                                authorId: mealModel.authorId))
                               IconButton(
                                 onPressed: () {
                                   Navigator.of(context).push(

@@ -74,7 +74,7 @@ class RegisterView extends StatelessWidget {
                     'Already have an account?',
                     style: TextStyle(
                       color: Colors.grey.shade300,
-                      fontSize: 15,
+                      fontSize: 14,
                     ),
                   ),
                   TextButton(
@@ -87,7 +87,7 @@ class RegisterView extends StatelessWidget {
                       style: TextStyle(
                         backgroundColor: Colors.transparent,
                         color: Colors.blueAccent,
-                        fontSize: 15,
+                        fontSize: 14,
                       ),
                     ),
                   ),

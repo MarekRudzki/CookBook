@@ -6,20 +6,18 @@ import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 import '../../../../../core/constants.dart';
-import '../../../../common_widgets/error_handling.dart';
 import '../../../meals_provider.dart';
 
 class MealPhotoPicker extends StatelessWidget {
   const MealPhotoPicker({
     super.key,
-    required TextEditingController imageUrlController,
+    required this.imageUrlController,
     required this.mealsProvider,
-  }) : _imageUrlController = imageUrlController;
+  });
 
-  final TextEditingController _imageUrlController;
+  final TextEditingController imageUrlController;
   final MealsProvider mealsProvider;
 
   @override
@@ -39,7 +37,7 @@ class MealPhotoPicker extends StatelessWidget {
               ? mealsProvider.selectedPhotoType == PhotoType.url
                   ? FittedBox(
                       child: Image.network(mealsProvider.imageUrl == ''
-                          ? _imageUrlController.text
+                          ? imageUrlController.text
                           : mealsProvider.imageUrl),
                       fit: BoxFit.fill,
                     )
@@ -74,7 +72,7 @@ class MealPhotoPicker extends StatelessWidget {
                               ),
                               const SizedBox(height: 10),
                               PhotoFromURL(
-                                imageUrlController: _imageUrlController,
+                                imageUrlController: imageUrlController,
                                 mealsProvider: mealsProvider,
                               ),
                             ],
@@ -92,7 +90,7 @@ class MealPhotoPicker extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               mealsProvider.removeCurrentPhoto();
-              _imageUrlController.clear();
+              imageUrlController.clear();
             },
             child: const Text('Pick other photo'),
           )
@@ -127,7 +125,7 @@ class PhotoFromCamera extends StatelessWidget {
         );
         if (pickedFile != null) {
           mealsProvider.setImage(
-            File(pickedFile.path),
+            image: File(pickedFile.path),
           );
           mealsProvider.changePhotoType(PhotoType.camera);
         }
@@ -135,7 +133,7 @@ class PhotoFromCamera extends StatelessWidget {
       },
       style: const ButtonStyle().copyWith(
         backgroundColor: MaterialStateProperty.all(
-          Theme.of(context).primaryColorDark.withOpacity(0.5),
+          Theme.of(context).primaryColorDark.withOpacity(0.3),
         ),
       ),
     );
@@ -168,7 +166,7 @@ class PhotoFromGallery extends StatelessWidget {
         );
         if (pickedImage != null) {
           mealsProvider.setImage(
-            File(pickedImage.path),
+            image: File(pickedImage.path),
           );
           mealsProvider.changePhotoType(PhotoType.gallery);
         }
@@ -176,7 +174,7 @@ class PhotoFromGallery extends StatelessWidget {
       },
       style: const ButtonStyle().copyWith(
         backgroundColor: MaterialStateProperty.all(
-          Theme.of(context).primaryColorDark.withOpacity(0.5),
+          Theme.of(context).primaryColorDark.withOpacity(0.3),
         ),
       ),
     );
@@ -192,55 +190,6 @@ class PhotoFromURL extends StatelessWidget {
 
   final TextEditingController imageUrlController;
   final MealsProvider mealsProvider;
-
-  Future<void> validateUrl({
-    required BuildContext context,
-    required TextEditingController urlController,
-  }) async {
-    final ErrorHandling errorHandling = ErrorHandling();
-    Future<bool> validateStatusAndType() async {
-      http.Response res;
-
-      try {
-        res = await http.get(
-          Uri.parse(urlController.text),
-        );
-      } catch (error) {
-        return false;
-      }
-      if (res.statusCode != 200) return false;
-
-      if (imageUrlController.text.endsWith('.jpg') ||
-          imageUrlController.text.endsWith('.jpeg') ||
-          imageUrlController.text.endsWith('.png')) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-    if (imageUrlController.text.trim().isEmpty) {
-      mealsProvider.addErrorMessage('Field is empty');
-      mealsProvider.resetErrorMessage();
-    } else {
-      errorHandling.toggleMealLoadingSpinner(context);
-      await validateStatusAndType().then(
-        (bool isValid) {
-          if (!isValid) {
-            errorHandling.toggleMealLoadingSpinner(context);
-            mealsProvider.addErrorMessage('Provided URL is not valid');
-            mealsProvider.resetErrorMessage();
-          } else {
-            errorHandling.toggleMealLoadingSpinner(context);
-            mealsProvider.imageUrl = imageUrlController.text;
-            mealsProvider.changePhotoType(PhotoType.url);
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          }
-        },
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +237,7 @@ class PhotoFromURL extends StatelessWidget {
                           children: [
                             IconButton(
                               onPressed: () async {
-                                await validateUrl(
+                                await mealsProvider.validateUrl(
                                   context: context,
                                   urlController: imageUrlController,
                                 );
@@ -321,7 +270,7 @@ class PhotoFromURL extends StatelessWidget {
       },
       style: const ButtonStyle().copyWith(
         backgroundColor: MaterialStateProperty.all(
-          Theme.of(context).primaryColorDark.withOpacity(0.5),
+          Theme.of(context).primaryColorDark.withOpacity(0.3),
         ),
       ),
     );

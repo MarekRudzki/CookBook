@@ -3,7 +3,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 class HiveServices {
   final _userBox = Hive.box('userBox');
 
-  //// User services
+  ///
+  ///// User services
+  ///
   bool isLogged() {
     final email = _userBox.get('email');
     if (email != null) {
@@ -13,9 +15,25 @@ class HiveServices {
     }
   }
 
-  String getEmail() {
+  /// Email
+  void setUserEmail(String username) {
+    _userBox.put('email', username.trim());
+  }
+
+  String getUserEmail() {
     final String email = _userBox.get('email').toString();
     return email;
+  }
+
+  void removeUserEmail() {
+    _userBox.delete('email');
+  }
+
+  /// Username
+
+  void setUsername({required String username}) {
+    final String email = _userBox.get('email').toString();
+    _userBox.put('${email}_username', username);
   }
 
   String getUsername() {
@@ -30,25 +48,15 @@ class HiveServices {
     return username;
   }
 
-  void setUserEmail(String username) {
-    _userBox.put('email', username.trim());
-  }
-
-  void setUsername({required String username}) {
-    final String email = _userBox.get('email').toString();
-    _userBox.put('${email}_username', username);
-  }
-
-  void removeUser() {
-    _userBox.delete('email');
-  }
-
   void removeUsername() {
     final String email = _userBox.get('email').toString();
     _userBox.delete('${email}_username');
   }
 
-  //// Theme services
+  ///
+  ///// Theme services
+  ///
+
   void setTheme({required String theme}) {
     final String email = _userBox.get('email').toString();
     _userBox.put('${email}_theme', theme);

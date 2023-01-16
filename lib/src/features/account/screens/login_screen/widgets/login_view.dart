@@ -48,7 +48,7 @@ class LoginView extends StatelessWidget {
                 child: Text('Forgot your password?',
                     style: const TextStyle().copyWith(
                       color: Colors.blueAccent,
-                      fontSize: 15,
+                      fontSize: 14,
                     )),
               ),
               ActionButton(
@@ -66,7 +66,7 @@ class LoginView extends StatelessWidget {
                     'Don\'t have an account?',
                     style: TextStyle(
                       color: Colors.grey.shade300,
-                      fontSize: 15,
+                      fontSize: 14,
                     ),
                   ),
                   TextButton(
@@ -75,7 +75,7 @@ class LoginView extends StatelessWidget {
                       'Register now',
                       style: TextStyle(
                         color: Colors.blueAccent,
-                        fontSize: 15,
+                        fontSize: 14,
                       ),
                     ),
                   ),

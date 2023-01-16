@@ -76,23 +76,6 @@ class MealCharacteristics extends StatelessWidget {
             )
           ],
         ),
-        // Column(
-        //   children: [
-        //     Text(
-        //       'Favorite',
-        //       style: Theme.of(context).textTheme.bodyText2,
-        //     ),
-        //     IconButton(
-        //       onPressed: () {
-        //         mealsProvider.toggleFavorite();
-        //       },
-        //       icon: Icon(
-        //         Icons.favorite,
-        //         color: mealsProvider.isFavorite ? Colors.red : Colors.grey,
-        //       ),
-        //     ),
-        //   ],
-        // )
       ],
     );
   }

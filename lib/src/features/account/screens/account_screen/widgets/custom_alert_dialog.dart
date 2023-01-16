@@ -27,7 +27,7 @@ class CustomAlertDialog extends StatelessWidget {
   final String content;
   final Color contentColor;
   final bool obscureText;
-  final Function() onConfirmed;
+  final void Function() onConfirmed;
   final TextEditingController? firstController;
   final TextEditingController? secondController;
   final TextEditingController? thirdController;
@@ -45,7 +45,7 @@ class CustomAlertDialog extends StatelessWidget {
       title: Text(
         title,
         style: Theme.of(context).textTheme.bodyText2!.copyWith(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
       ),
@@ -115,7 +115,7 @@ class CustomAlertDialog extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Theme.of(context).errorColor,
-                        fontSize: 15,
+                        fontSize: 14,
                       ),
                     )
                   : const SizedBox.shrink(),
@@ -134,7 +134,7 @@ class CustomAlertDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(
-                  width: 10,
+                  width: 8,
                 ),
                 IconButton(
                   onPressed: () {
@@ -147,7 +147,7 @@ class CustomAlertDialog extends StatelessWidget {
                     if (thirdController != null) {
                       thirdController!.clear();
                     }
-                    _accountProvider.addErrorMessage('');
+                    _accountProvider.addErrorMessage(message: '');
                     Navigator.of(context).pop();
                   },
                   icon: const Icon(

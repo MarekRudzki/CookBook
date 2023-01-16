@@ -28,15 +28,15 @@ class ThemeProvider with ChangeNotifier {
       ),
       headline1: GoogleFonts.oswald(
         color: Colors.white,
-        fontSize: 18,
+        fontSize: 16,
       ),
       bodyText2: GoogleFonts.robotoSlab(
         color: Colors.white,
-        fontSize: 16,
+        fontSize: 14,
       ),
       headline3: GoogleFonts.oswald(
         color: Colors.white,
-        fontSize: 20,
+        fontSize: 17,
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -58,11 +58,11 @@ class ThemeProvider with ChangeNotifier {
       ),
       headline1: GoogleFonts.oswald(
         color: Colors.white,
-        fontSize: 18,
+        fontSize: 16,
       ),
       bodyText2: GoogleFonts.robotoSlab(
         color: Colors.white,
-        fontSize: 16,
+        fontSize: 14,
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

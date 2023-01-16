@@ -21,7 +21,7 @@ class MealItem extends StatelessWidget {
         child: Hero(
           tag: mealModel.id,
           child: GridTile(
-            header: mealsProvider.checkIfAuthor(mealModel.authorId)
+            header: mealsProvider.checkIfAuthor(authorId: mealModel.authorId)
                 ? Align(
                     alignment: Alignment.topRight,
                     child: Card(

@@ -1,38 +1,48 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:cookbook/src/services/firebase/storage.dart';
 import 'package:flutter/material.dart';
 
+import 'package:http/http.dart' as http;
+import 'package:nanoid/nanoid.dart';
+
 import '../../services/firebase/firestore.dart';
+import '../../services/firebase/storage.dart';
 import '../../domain/models/meal_model.dart';
 import '../../services/firebase/auth.dart';
+import '../common_widgets/error_handling.dart';
+import '../account/account_provider.dart';
 
 enum PhotoType { camera, gallery, url }
 
 enum CategoryType { myMeals, allMeals, favorites }
 
 class MealsProvider with ChangeNotifier {
+  final ErrorHandling _errorHandling = ErrorHandling();
   final Firestore _firestore = Firestore();
   final Storage _storage = Storage();
   final Auth _auth = Auth();
 
-  /// Meals
   List<String> favoritesId = [];
   Complexity complexity = Complexity.easy;
   PhotoType? selectedPhotoType;
-  bool isFavorite = false;
   bool isPublic = false;
   String imageUrl = '';
   File? imageFile;
+  bool deletePrivateRecipes = true;
+  bool deleteAllRecipes = false;
+  bool userHasRecipes = true;
 
-  /// MealsToggleButton
   CategoryType selectedCategory = CategoryType.allMeals;
 
-  /// Error handling
   String errorMessage = '';
   bool isLoading = false;
 
-  bool checkIfAuthor(String authorId) {
+  ///
+  ////// Meal author
+  ///
+
+  bool checkIfAuthor({required String authorId}) {
     if (_auth.uid == authorId) {
       return true;
     } else {
@@ -40,7 +50,19 @@ class MealsProvider with ChangeNotifier {
     }
   }
 
-  /// Meals
+  Future<void> updateMealAuthor({required String newUsername}) async {
+    await _firestore.updateMealAuthor(newUsername: newUsername);
+  }
+
+  ///
+  ////// Meals characteristics
+  ///
+
+  void setMealsCategory({required CategoryType category}) {
+    selectedCategory = category;
+    notifyListeners();
+  }
+
   void setComplexity({required Complexity selectedComplexity}) {
     complexity = selectedComplexity;
     notifyListeners();
@@ -56,17 +78,12 @@ class MealsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleFavorite() {
-    isFavorite = !isFavorite;
-    notifyListeners();
-  }
-
   void togglePublic({required bool switchPublic}) {
     isPublic = switchPublic;
     notifyListeners();
   }
 
-  void setImage(File image) {
+  void setImage({required File image}) {
     imageFile = image;
     notifyListeners();
   }
@@ -75,9 +92,12 @@ class MealsProvider with ChangeNotifier {
     selectedPhotoType = null;
     complexity = Complexity.easy;
     isPublic = false;
-    isFavorite = false;
     notifyListeners();
   }
+
+  ///
+  ////// Get meals by categories
+  ///
 
   Future<List<MealModel>> getUserMeals() async {
     final List<MealModel> allMeals = await _firestore.getMeals();
@@ -120,7 +140,11 @@ class MealsProvider with ChangeNotifier {
     return userMeals;
   }
 
-  Future<void> toggleMealFavorite(String mealId) async {
+  ///
+  ////// User favorites
+  ///
+
+  Future<void> toggleMealFavorite({required String mealId}) async {
     await _firestore.toggleMealFavorite(mealId);
     final List<String> mealsFavoritesId =
         await _firestore.getUserFavoriteMealsId();
@@ -136,8 +160,103 @@ class MealsProvider with ChangeNotifier {
     return mealsFavoritesId;
   }
 
-  Future<void> deleteMeals(
-      {required bool deleteAll, required List<MealModel> userMeals}) async {
+  ///
+  ////// Error handling
+  ///
+
+  void toggleLoading() {
+    isLoading = !isLoading;
+    notifyListeners();
+  }
+
+  void addErrorMessage({required String message}) {
+    errorMessage = message;
+    notifyListeners();
+  }
+
+  Future<void> resetErrorMessage() async {
+    await Future.delayed(
+      const Duration(
+        seconds: 3,
+      ),
+    );
+    errorMessage = '';
+    notifyListeners();
+  }
+
+  Future<void> validateUrl({
+    required BuildContext context,
+    required TextEditingController urlController,
+  }) async {
+    Future<bool> validateStatusAndType() async {
+      http.Response res;
+
+      try {
+        res = await http.get(
+          Uri.parse(urlController.text),
+        );
+      } catch (error) {
+        return false;
+      }
+      if (res.statusCode != 200) return false;
+
+      if (urlController.text.endsWith('.jpg') ||
+          urlController.text.endsWith('.jpeg') ||
+          urlController.text.endsWith('.png')) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    if (urlController.text.trim().isEmpty) {
+      addErrorMessage(message: 'Field is empty');
+      resetErrorMessage();
+    } else {
+      _errorHandling.toggleMealLoadingSpinner(context);
+      await validateStatusAndType().then(
+        (bool isValid) {
+          if (!isValid) {
+            _errorHandling.toggleMealLoadingSpinner(context);
+            addErrorMessage(message: 'Provided URL is not valid');
+            resetErrorMessage();
+          } else {
+            _errorHandling.toggleMealLoadingSpinner(context);
+            imageUrl = urlController.text;
+            changePhotoType(PhotoType.url);
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          }
+        },
+      );
+    }
+  }
+
+  ///
+  ////// Meal delete
+  ///
+
+  void setUserHasRecipes({required bool value}) {
+    userHasRecipes = value;
+    notifyListeners();
+  }
+
+  void setDeleteAll({required bool value}) {
+    deleteAllRecipes = value;
+    deletePrivateRecipes = !value;
+    notifyListeners();
+  }
+
+  void setDeletePrivate({required bool value}) {
+    deletePrivateRecipes = value;
+    deleteAllRecipes = !value;
+    notifyListeners();
+  }
+
+  Future<void> deleteMeals({
+    required bool deleteAll,
+    required List<MealModel> userMeals,
+  }) async {
     final List<String> recipesIdToDelete = [];
 
     for (final meal in userMeals) {
@@ -165,47 +284,287 @@ class MealsProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteMeal({
+  Future<void> deleteSingleMeal({
+    required BuildContext context,
     required String mealId,
     required String authorId,
-    required String imageUrl,
+    required String mealImageUrl,
+    required void Function() onSuccess,
+    required bool mounted,
   }) async {
+    _errorHandling.toggleMealLoadingSpinner(context);
+
     await _firestore.deleteMeal(mealId: mealId, userId: authorId);
-    if (imageUrl.contains('firebasestorage')) {
+    if (mealImageUrl.contains('firebasestorage')) {
       await _storage.deleteImage(imageId: mealId);
     }
-  }
-
-  Future<void> updateMealAuthor({
-    required String newUsername,
-  }) async {
-    await _firestore.updateMealAuthor(newUsername: newUsername);
-  }
-
-  /// MealsToggleButton
-  void setMealsCategory(CategoryType category) {
-    selectedCategory = category;
-    notifyListeners();
-  }
-
-  /// Error handling
-  void toggleLoading() {
-    isLoading = !isLoading;
-    notifyListeners();
-  }
-
-  void addErrorMessage(String message) {
-    errorMessage = message;
-    notifyListeners();
-  }
-
-  Future<void> resetErrorMessage() async {
-    await Future.delayed(
-      const Duration(
-        seconds: 3,
-      ),
+    imageUrl = '';
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (!mounted) return;
+    _errorHandling.toggleMealLoadingSpinner(context);
+    onSuccess();
+    _errorHandling.showInfoSnackbar(
+      context,
+      'Recipe deleted successfully',
+      Colors.green,
     );
-    errorMessage = '';
-    notifyListeners();
+  }
+
+  ///
+  ////// Save and update meal
+  ///
+
+  Future<void> updateMeal({
+    required BuildContext context,
+    required TextEditingController mealNameTec,
+    required TextEditingController ingredientsTec,
+    required TextEditingController descriptionTec,
+    required TextEditingController imageUrlTec,
+    required String currentMealId,
+  }) async {
+    final AccountProvider accountProvider = AccountProvider();
+    final List<String> ingredientsList = [];
+    final List<String> descriptionList = [];
+    String imageUrl;
+    final mealId = currentMealId;
+
+    const LineSplitter ls = LineSplitter();
+    int descriptionCount = 1;
+
+    if (mealNameTec.text.trim().isEmpty ||
+        ingredientsTec.text.trim().isEmpty ||
+        descriptionTec.text.trim().isEmpty) {
+      _errorHandling.showInfoSnackbar(
+        context,
+        'Please fill in all fields',
+      );
+      return;
+    }
+
+    if (imageUrlTec.text.isEmpty && imageFile == null) {
+      _errorHandling.showInfoSnackbar(
+        context,
+        'Please provide photo',
+      );
+      return;
+    }
+
+    String getComplexity() {
+      if (complexity == Complexity.easy) {
+        return 'Easy';
+      } else if (complexity == Complexity.medium) {
+        return 'Medium';
+      } else {
+        return 'Hard';
+      }
+    }
+
+    final List<String> ingredients = ls.convert(ingredientsTec.text);
+    for (final element in ingredients) {
+      if (element.trim().isNotEmpty) {
+        ingredientsList.add(element);
+      }
+    }
+
+    final List<String> description = ls.convert(descriptionTec.text);
+    for (var element in description) {
+      if (element.trim().isNotEmpty) {
+        element = '${descriptionCount}. $element';
+        descriptionCount++;
+        descriptionList.add(element);
+      }
+    }
+
+    _errorHandling.toggleMealLoadingSpinner(context);
+
+    await _storage
+        .updateImage(
+      mealId: mealId,
+      image: imageFile,
+      selectedPhotoType: selectedPhotoType,
+    )
+        .then(
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          _errorHandling.toggleAccountLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          addErrorMessage(message: errorText);
+          resetErrorMessage();
+          return;
+        }
+      },
+    );
+    if (selectedPhotoType == PhotoType.url) {
+      imageUrl = imageUrlTec.text;
+    } else {
+      imageUrl = await _storage.getUrl(mealId: mealId);
+    }
+
+    final String username = await accountProvider.getUsername();
+
+    await _firestore
+        .updateMeal(
+      mealId: currentMealId,
+      mealName: mealNameTec.text,
+      ingredientsList: ingredientsList,
+      descriptionList: descriptionList,
+      complexity: getComplexity(),
+      isPublic: isPublic,
+      authorId: _auth.uid!,
+      authorName: username,
+      imageUrl: imageUrl,
+    )
+        .then(
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          _errorHandling.showInfoSnackbar(
+            context,
+            errorText,
+          );
+        } else {
+          _errorHandling.toggleMealLoadingSpinner(context);
+          resetFields();
+          mealNameTec.clear();
+          ingredientsTec.clear();
+          descriptionTec.clear();
+          imageUrlTec.clear();
+          FocusManager.instance.primaryFocus?.unfocus();
+          _errorHandling.showInfoSnackbar(
+            context,
+            'Recipe updated successfully',
+            Colors.green,
+          );
+          Navigator.of(context).pop();
+        }
+      },
+    );
+  }
+
+  Future<void> saveMeal({
+    required BuildContext context,
+    required TextEditingController mealNameTec,
+    required TextEditingController ingredientsTec,
+    required TextEditingController descriptionTec,
+    required TextEditingController imageUrlTec,
+  }) async {
+    final AccountProvider accountProvider = AccountProvider();
+    final List<String> ingredientsList = [];
+    final List<String> descriptionList = [];
+    String imageUrl;
+    final generatedUid = nanoid(10);
+
+    const LineSplitter ls = LineSplitter();
+    int descriptionCount = 1;
+
+    if (mealNameTec.text.trim().isEmpty ||
+        ingredientsTec.text.trim().isEmpty ||
+        descriptionTec.text.trim().isEmpty) {
+      _errorHandling.showInfoSnackbar(
+        context,
+        'Please fill in all fields',
+      );
+      return;
+    }
+
+    if (imageUrlTec.text.isEmpty && imageFile == null) {
+      _errorHandling.showInfoSnackbar(
+        context,
+        'Please provide photo',
+      );
+      return;
+    }
+
+    String getComplexity() {
+      if (complexity == Complexity.easy) {
+        return 'Easy';
+      } else if (complexity == Complexity.medium) {
+        return 'Medium';
+      } else {
+        return 'Hard';
+      }
+    }
+
+    final List<String> ingredients = ls.convert(ingredientsTec.text);
+    for (final element in ingredients) {
+      if (element.trim().isNotEmpty) {
+        ingredientsList.add(element);
+      }
+    }
+
+    final List<String> description = ls.convert(descriptionTec.text);
+    for (var element in description) {
+      if (element.trim().isNotEmpty) {
+        element = '${descriptionCount}. $element';
+        descriptionCount++;
+        descriptionList.add(element);
+      }
+    }
+
+    _errorHandling.toggleMealLoadingSpinner(context);
+
+    await _storage
+        .uploadImage(
+      mealId: generatedUid,
+      image: imageFile,
+      selectedPhotoType: selectedPhotoType,
+    )
+        .then(
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          _errorHandling.toggleAccountLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          addErrorMessage(message: errorText);
+          resetErrorMessage();
+          return;
+        }
+      },
+    );
+
+    if (selectedPhotoType == PhotoType.url) {
+      imageUrl = imageUrlTec.text;
+    } else {
+      imageUrl = await _storage.getUrl(mealId: generatedUid);
+    }
+
+    final String username = await accountProvider.getUsername();
+
+    await _firestore
+        .addMeal(
+      mealId: generatedUid,
+      mealName: mealNameTec.text,
+      ingredientsList: ingredientsList,
+      descriptionList: descriptionList,
+      complexity: getComplexity(),
+      isPublic: isPublic,
+      authorId: _auth.uid!,
+      authorName: username,
+      imageUrl: imageUrl,
+      generatedUid: generatedUid,
+    )
+        .then((errorText) {
+      if (errorText.isNotEmpty) {
+        FocusManager.instance.primaryFocus?.unfocus();
+        _errorHandling.showInfoSnackbar(
+          context,
+          errorText,
+        );
+      } else {
+        _errorHandling.toggleMealLoadingSpinner(context);
+        resetFields();
+        getUserMeals();
+        mealNameTec.clear();
+        ingredientsTec.clear();
+        descriptionTec.clear();
+        imageUrlTec.clear();
+
+        FocusManager.instance.primaryFocus?.unfocus();
+        _errorHandling.showInfoSnackbar(
+          context,
+          'Recipe added successfully',
+          Colors.green,
+        );
+      }
+    });
   }
 }

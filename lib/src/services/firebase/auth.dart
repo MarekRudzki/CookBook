@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Auth {
   final FirebaseAuth _user = FirebaseAuth.instance;
+
   String? get email => _user.currentUser!.email;
   String? get uid => _user.currentUser!.uid;
 
@@ -153,7 +154,7 @@ class Auth {
     return errorValue;
   }
 
-  Future<String> deleteUser({required String password}) async {
+  Future<String> validateUserPassword({required String password}) async {
     String errorValue = '';
 
     if (password.trim().isEmpty) {
@@ -175,17 +176,15 @@ class Auth {
       }
       return errorValue;
     }
+    return errorValue;
+  }
 
+  Future<void> deleteUser() async {
     try {
       await _user.currentUser!.delete();
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        errorValue = 'Login data expired, please login again';
-      } else {
-        errorValue = e.code;
-      }
+      throw Exception(e);
     }
-    return errorValue;
   }
 
   Future<String> signOut() async {

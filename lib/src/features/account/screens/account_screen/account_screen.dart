@@ -1,21 +1,18 @@
-import 'package:cookbook/src/features/meals/meals_provider.dart';
 import 'package:flutter/material.dart';
 
-import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/internet_not_connected.dart';
 import '../../../../domain/models/meal_model.dart';
-import '../../../../services/firebase/firestore.dart';
-import '../../../../services/firebase/auth.dart';
-import '../../../../services/hive_services.dart';
 import '../../../../core/theme_provider.dart';
-import '../../../../core/constants.dart';
-import '../../../common_widgets/error_handling.dart';
+import '../../../meals/meals_provider.dart';
 import '../../account_provider.dart';
 import '../login_screen/login_screen.dart';
 import 'widgets/custom_alert_dialog.dart';
+import 'widgets/delete_options.dart';
+import 'widgets/light_dark_switcher.dart';
+import 'widgets/profile_info.dart';
 import 'widgets/settings_tile.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -28,176 +25,20 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  late final TextEditingController _changeUsernameConroller;
-  late final TextEditingController _currentPasswordController;
-  late final TextEditingController _newPasswordController;
-  late final TextEditingController _confirmedNewPasswordController;
+  final _changeUsernameController = TextEditingController();
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmedNewPasswordController = TextEditingController();
 
-  final ErrorHandling _errorHandling = ErrorHandling();
   final MealsProvider mealsProvider = MealsProvider();
-  final HiveServices _hiveServices = HiveServices();
-  final Firestore _firestore = Firestore();
-  final Auth _auth = Auth();
-
-  @override
-  void initState() {
-    super.initState();
-    _changeUsernameConroller = TextEditingController();
-    _currentPasswordController = TextEditingController();
-    _newPasswordController = TextEditingController();
-    _confirmedNewPasswordController = TextEditingController();
-  }
 
   @override
   void dispose() {
-    _changeUsernameConroller.dispose();
+    _changeUsernameController.dispose();
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmedNewPasswordController.dispose();
     super.dispose();
-  }
-
-  // Get username from firestore in case, where user created account on
-  // different device and there is no username in local storage
-  Future<String> setUsername({required AccountProvider accountProvider}) async {
-    final String savedUsername = _hiveServices.getUsername();
-    String currentUsername;
-    if (savedUsername == 'no-username') {
-      await accountProvider.setUsername();
-      currentUsername = accountProvider.username;
-    } else {
-      currentUsername = _hiveServices.getUsername();
-    }
-    return currentUsername;
-  }
-
-  Future<void> changeUsername(
-      {required AccountProvider accountProvider}) async {
-    _errorHandling.toggleLoadingSpinner(context);
-    await _firestore.addUser(_changeUsernameConroller.text).then(
-      (errorText) {
-        if (errorText.isNotEmpty) {
-          _errorHandling.toggleLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          accountProvider.addErrorMessage(errorText);
-          accountProvider.resetErrorMessage();
-        } else {
-          mealsProvider.updateMealAuthor(
-              newUsername: _changeUsernameConroller.text);
-          _errorHandling.toggleLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          accountProvider.changeUsername(
-            _changeUsernameConroller.text,
-          );
-          _hiveServices.setUsername(username: _changeUsernameConroller.text);
-          Navigator.of(context).pop();
-          _errorHandling.showInfoSnackbar(
-            context,
-            'Username changed successfully',
-            Colors.green,
-          );
-        }
-        _changeUsernameConroller.clear();
-      },
-    );
-  }
-
-  Future<void> changePassword(
-      {required AccountProvider accountProvider}) async {
-    _errorHandling.toggleLoadingSpinner(context);
-    _auth
-        .changePassword(
-      currentPassword: _currentPasswordController.text,
-      newPassword: _newPasswordController.text,
-      confirmedNewPassword: _confirmedNewPasswordController.text,
-    )
-        .then(
-      (errorText) {
-        if (errorText.isNotEmpty) {
-          _errorHandling.toggleLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          accountProvider.addErrorMessage(errorText);
-          accountProvider.resetErrorMessage();
-        } else {
-          _errorHandling.toggleLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          Navigator.of(context).pop();
-          _errorHandling.showInfoSnackbar(
-            context,
-            'Password changed successfully',
-            Colors.green,
-          );
-        }
-      },
-    );
-
-    _currentPasswordController.clear();
-    _newPasswordController.clear();
-    _confirmedNewPasswordController.clear();
-  }
-
-  Future<void> deleteAccount({required AccountProvider accountProvider}) async {
-    _errorHandling.toggleLoadingSpinner(context);
-    final String uid = _auth.uid!;
-    final List<MealModel> userMeals = await mealsProvider.getUserMeals();
-
-    await _auth.deleteUser(password: _currentPasswordController.text).then(
-      (errorText) async {
-        if (errorText.isNotEmpty) {
-          _errorHandling.toggleLoadingSpinner(context);
-          accountProvider.addErrorMessage(errorText);
-          accountProvider.resetErrorMessage();
-          _currentPasswordController.clear();
-          FocusManager.instance.primaryFocus?.unfocus();
-          return;
-        }
-        FocusManager.instance.primaryFocus?.unfocus();
-        _currentPasswordController.clear();
-
-        _hiveServices.removeUser();
-        _hiveServices.removeUsername();
-
-        if (userMeals.isNotEmpty) {
-          if (accountProvider.deleteAllRecipes) {
-            await mealsProvider.deleteMeals(
-                deleteAll: true, userMeals: userMeals);
-          } else {
-            await mealsProvider.deleteMeals(
-                deleteAll: false, userMeals: userMeals);
-          }
-        }
-
-        if (!mounted) return;
-        _errorHandling.toggleLoadingSpinner(context);
-        accountProvider.isCreatingAccount = false;
-        if (!mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-        await _firestore.deleteUserData(uid);
-      },
-    );
-  }
-
-  Future<void> logOut({required AccountProvider accountProvider}) async {
-    _errorHandling.toggleLoadingSpinner(context);
-    await _auth.signOut().then((errorText) {
-      if (errorText.isNotEmpty) {
-        _errorHandling.toggleLoadingSpinner(context);
-        _errorHandling.showInfoSnackbar(context, errorText);
-      } else {
-        _errorHandling.toggleLoadingSpinner(context);
-        _hiveServices.removeUser();
-        accountProvider.isCreatingAccount = false;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      }
-    });
   }
 
   @override
@@ -238,71 +79,8 @@ class _AccountScreenState extends State<AccountScreen> {
                           const SizedBox(
                             height: 5,
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Theme.of(context).primaryColorDark,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.person,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
-                                      const SizedBox(
-                                        width: 7,
-                                      ),
-                                      if (_accountProvider.username == '')
-                                        FutureBuilder(
-                                          future: setUsername(
-                                              accountProvider:
-                                                  _accountProvider),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.hasData) {
-                                              return Text(
-                                                'Username: ${snapshot.data}',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText2,
-                                              );
-                                            }
-                                            return const SizedBox.shrink();
-                                          },
-                                        )
-                                      else
-                                        Text(
-                                          'Username: ${context.select((AccountProvider account) => account.username)}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText2,
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.mail,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
-                                      const SizedBox(width: 7),
-                                      Text(
-                                        'Email: ${_hiveServices.getEmail()}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
+                          ProfileInfo(
+                            accountProvider: _accountProvider,
                           ),
                           const SizedBox(height: 15),
                           Text(
@@ -315,18 +93,19 @@ class _AccountScreenState extends State<AccountScreen> {
                             tileText: 'Change username',
                             onPressed: () {
                               showDialog(
-                                barrierDismissible: false,
                                 context: context,
                                 builder: (context) {
                                   return CustomAlertDialog(
                                     title: 'Change username?',
                                     content:
                                         'Enter new username you want to use',
-                                    firstLabel: 'Input new username',
-                                    firstController: _changeUsernameConroller,
+                                    firstLabel: 'New username',
+                                    firstController: _changeUsernameController,
                                     onConfirmed: () async {
-                                      await changeUsername(
-                                        accountProvider: _accountProvider,
+                                      await _accountProvider.changeUsername(
+                                        context: context,
+                                        changeUsernameController:
+                                            _changeUsernameController,
                                       );
                                     },
                                   );
@@ -340,27 +119,32 @@ class _AccountScreenState extends State<AccountScreen> {
                             tileText: 'Change password',
                             onPressed: () {
                               showDialog(
-                                barrierDismissible: false,
                                 context: context,
                                 builder: (context) {
                                   return CustomAlertDialog(
-                                      title: 'Change password?',
-                                      content:
-                                          'Please type in your current and new password',
-                                      firstController:
-                                          _currentPasswordController,
-                                      secondController: _newPasswordController,
-                                      thirdController:
-                                          _confirmedNewPasswordController,
-                                      firstLabel: 'Current password',
-                                      secondLabel: 'New password',
-                                      thirdLabel: 'Confirm new password',
-                                      obscureText: true,
-                                      onConfirmed: () async {
-                                        await changePassword(
-                                          accountProvider: _accountProvider,
-                                        );
-                                      });
+                                    title: 'Change password?',
+                                    content:
+                                        'Please type in your current and new password',
+                                    firstController: _currentPasswordController,
+                                    secondController: _newPasswordController,
+                                    thirdController:
+                                        _confirmedNewPasswordController,
+                                    firstLabel: 'Current password',
+                                    secondLabel: 'New password',
+                                    thirdLabel: 'Confirm new password',
+                                    obscureText: true,
+                                    onConfirmed: () async {
+                                      _accountProvider.changePassword(
+                                        context: context,
+                                        currentPasswordController:
+                                            _currentPasswordController,
+                                        newPasswordController:
+                                            _newPasswordController,
+                                        confirmedNewPasswordController:
+                                            _confirmedNewPasswordController,
+                                      );
+                                    },
+                                  );
                                 },
                               );
                             },
@@ -373,8 +157,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               final List<MealModel> userMeals =
                                   await mealsProvider.getUserMeals();
                               if (userMeals.isEmpty) {
-                                _accountProvider.setUserHasRecipes(
-                                    value: false);
+                                mealsProvider.setUserHasRecipes(value: false);
                               }
                               showDialog(
                                 context: context,
@@ -387,103 +170,21 @@ class _AccountScreenState extends State<AccountScreen> {
                                     firstController: _currentPasswordController,
                                     firstLabel: 'Current password',
                                     obscureText: true,
-                                    additionalWidget: Consumer<AccountProvider>(
-                                      builder: (context, accountProvider, _) {
-                                        if (accountProvider.userHasRecipes) {
-                                          return Column(
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Text(
-                                                      'Delete only private recipes',
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyText1!
-                                                          .copyWith(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColorDark,
-                                                          )),
-                                                  Checkbox(
-                                                      side: MaterialStateBorderSide
-                                                          .resolveWith((Set<
-                                                                  MaterialState>
-                                                              states) {
-                                                        if (states.contains(
-                                                            MaterialState
-                                                                .selected)) {
-                                                          return const BorderSide(
-                                                              color:
-                                                                  Colors.red);
-                                                        } else {
-                                                          return const BorderSide(
-                                                              color:
-                                                                  Colors.grey);
-                                                        }
-                                                      }),
-                                                      value: accountProvider
-                                                          .deletePrivateRecipes,
-                                                      onChanged: (value) {
-                                                        accountProvider
-                                                            .setDeletePrivate(
-                                                                value: value!);
-                                                      }),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Text('Delete all my recipes',
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyText1!
-                                                          .copyWith(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColorDark,
-                                                          )),
-                                                  Checkbox(
-                                                      side: MaterialStateBorderSide
-                                                          .resolveWith((Set<
-                                                                  MaterialState>
-                                                              states) {
-                                                        if (states.contains(
-                                                            MaterialState
-                                                                .selected)) {
-                                                          return const BorderSide(
-                                                              color:
-                                                                  Colors.red);
-                                                        } else {
-                                                          return const BorderSide(
-                                                              color:
-                                                                  Colors.grey);
-                                                        }
-                                                      }),
-                                                      value: accountProvider
-                                                          .deleteAllRecipes,
-                                                      onChanged: (value) {
-                                                        accountProvider
-                                                            .setDeleteAll(
-                                                                value: value!);
-                                                      }),
-                                                ],
-                                              ),
-                                            ],
-                                          );
-                                        } else {
-                                          return const SizedBox.shrink();
-                                        }
-                                      },
-                                    ),
+                                    additionalWidget: const DeleteOptions(),
                                     onConfirmed: () async {
-                                      deleteAccount(
-                                        accountProvider: _accountProvider,
+                                      _accountProvider.deleteAccount(
+                                        context: context,
+                                        currentPasswordController:
+                                            _currentPasswordController,
+                                        mounted: mounted,
+                                        onSuccess: () {
+                                          Navigator.of(context).pushReplacement(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const LoginScreen(),
+                                            ),
+                                          );
+                                        },
                                       );
                                     },
                                   );
@@ -492,42 +193,24 @@ class _AccountScreenState extends State<AccountScreen> {
                             },
                           ),
                           const Spacer(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Light',
-                                style: Theme.of(context).textTheme.bodyText2,
-                              ),
-                              const SizedBox(
-                                width: 8,
-                              ),
-                              SizedBox(
-                                child: Center(
-                                  child: DayNightSwitcher(
-                                    nightBackgroundColor:
-                                        kLightBlue.withBlue(180),
-                                    isDarkModeEnabled: theme.isDark(),
-                                    onStateChanged: (_) {
-                                      theme.swapTheme();
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Dark',
-                                style: Theme.of(context).textTheme.bodyText2,
-                              ),
-                            ],
+                          LightDarkSwitcher(
+                            theme: theme,
                           ),
                           const Spacer(),
                           Center(
                             child: ElevatedButton.icon(
                               icon: const Icon(Icons.logout),
                               onPressed: () async {
-                                logOut(
-                                  accountProvider: _accountProvider,
+                                _accountProvider.logOut(
+                                  context: context,
+                                  onSuccess: () {
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginScreen(),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                               label: Text(

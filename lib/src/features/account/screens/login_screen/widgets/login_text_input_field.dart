@@ -28,6 +28,7 @@ class LoginTextInputField extends StatelessWidget {
           Icon(
             icon,
             color: Colors.white,
+            size: 20,
           ),
           const SizedBox(
             width: 15,
@@ -42,6 +43,7 @@ class LoginTextInputField extends StatelessWidget {
                 labelText: labelText,
                 labelStyle: TextStyle(
                   color: Colors.grey.shade300,
+                  fontSize: 14,
                 ),
               ),
               style: const TextStyle(

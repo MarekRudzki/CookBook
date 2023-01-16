@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 import '../account/account_provider.dart';
@@ -32,10 +32,10 @@ class ErrorHandling {
     );
   }
 
-  void toggleLoadingSpinner(BuildContext context) {
-    final accountProvider =
+  void toggleAccountLoadingSpinner(BuildContext context) {
+    final _accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
-    accountProvider.toggleLoading();
+    _accountProvider.toggleLoading();
     context.read<AccountProvider>().isLoading
         ? showDialog(
             context: context,
@@ -52,8 +52,8 @@ class ErrorHandling {
   }
 
   void toggleMealLoadingSpinner(BuildContext context) {
-    final mealsProvider = Provider.of<MealsProvider>(context, listen: false);
-    mealsProvider.toggleLoading();
+    final _mealsProvider = Provider.of<MealsProvider>(context, listen: false);
+    _mealsProvider.toggleLoading();
     context.read<MealsProvider>().isLoading
         ? showDialog(
             context: context,

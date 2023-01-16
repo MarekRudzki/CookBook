@@ -10,10 +10,10 @@ class Storage {
   Future<String> uploadImage({
     String? mealId,
     File? image,
-    MealsProvider? mealsProvider,
+    PhotoType? selectedPhotoType,
   }) async {
     String errorText = '';
-    if (mealsProvider!.selectedPhotoType == PhotoType.url) return errorText;
+    if (selectedPhotoType == PhotoType.url) return errorText;
 
     try {
       await ref.child('${mealId}.jpg').putFile(image!);
@@ -23,13 +23,18 @@ class Storage {
     return errorText;
   }
 
+  Future<String> getUrl({required String mealId}) async {
+    final String url = await ref.child('${mealId}.jpg').getDownloadURL();
+    return url;
+  }
+
   Future<String> updateImage({
     String? mealId,
     File? image,
-    MealsProvider? mealsProvider,
+    PhotoType? selectedPhotoType,
   }) async {
     String errorText = '';
-    if (mealsProvider!.selectedPhotoType == PhotoType.url) {
+    if (selectedPhotoType == PhotoType.url) {
       try {
         await ref.child('${mealId}.jpg').getDownloadURL();
         await deleteImage(imageId: mealId!);
@@ -47,11 +52,6 @@ class Storage {
       errorText = e.code;
     }
     return errorText;
-  }
-
-  Future<String> getUrl({required String mealId}) async {
-    final String url = await ref.child('${mealId}.jpg').getDownloadURL();
-    return url;
   }
 
   Future<void> deleteImage({required String imageId}) async {

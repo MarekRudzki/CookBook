@@ -55,7 +55,7 @@ class RecipeInfoButton extends StatelessWidget {
                         'Okay',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -69,7 +69,7 @@ class RecipeInfoButton extends StatelessWidget {
       icon: Icon(
         Icons.info_outline,
         color: Theme.of(context).primaryColor,
-        size: 25,
+        size: 22,
       ),
     );
   }

@@ -62,7 +62,7 @@ class DetailsMealCharacteristics extends StatelessWidget {
                 builder: (context, meals, _) {
                   return IconButton(
                     onPressed: () async {
-                      await meals.toggleMealFavorite(mealModel.id);
+                      await meals.toggleMealFavorite(mealId: mealModel.id);
                     },
                     icon: Icon(
                       Icons.favorite,

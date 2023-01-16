@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
 import 'src/features/account/screens/login_screen/login_screen.dart';
-import '/src/features/account/account_provider.dart';
-import '/src/features/meals/meals_provider.dart';
+import 'src/features/account/account_provider.dart';
+import 'src/features/meals/meals_provider.dart';
 import 'src/config/firebase_options.dart';
-import '/src/services/hive_services.dart';
+import 'src/services/hive_services.dart';
 import 'src/features/main_screen.dart';
 import 'src/core/theme_provider.dart';
 
@@ -21,10 +21,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-//TODO add l10n
 //TODO expand light theme
-// TODO Maybe add Flavors
-
+//TODO Maybe add Flavors
   runApp(
     MultiProvider(
       providers: [

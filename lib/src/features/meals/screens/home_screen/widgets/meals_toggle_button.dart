@@ -8,7 +8,6 @@ class MealsToggleButton extends StatelessWidget {
   const MealsToggleButton({
     super.key,
   });
-  final double height = 40.0;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,7 @@ class MealsToggleButton extends StatelessWidget {
           child: Center(
             child: Container(
               width: width,
-              height: height,
+              height: 35,
               decoration: BoxDecoration(
                 color: Colors.grey.shade400,
                 borderRadius: const BorderRadius.all(
@@ -40,7 +39,7 @@ class MealsToggleButton extends StatelessWidget {
                     duration: const Duration(milliseconds: 300),
                     child: Container(
                       width: width * 0.33,
-                      height: height,
+                      height: 35,
                       decoration: BoxDecoration(
                         color: Theme.of(context).highlightColor,
                         borderRadius: const BorderRadius.all(
@@ -71,7 +70,8 @@ class MealsToggleButton extends StatelessWidget {
                     ),
                     onTap: () async {
                       await mealsProvider.getUserMeals();
-                      mealsProvider.setMealsCategory(CategoryType.myMeals);
+                      mealsProvider.setMealsCategory(
+                          category: CategoryType.myMeals);
                     },
                   ),
                   GestureDetector(
@@ -94,7 +94,8 @@ class MealsToggleButton extends StatelessWidget {
                       ),
                     ),
                     onTap: () {
-                      mealsProvider.setMealsCategory(CategoryType.allMeals);
+                      mealsProvider.setMealsCategory(
+                          category: CategoryType.allMeals);
                     },
                   ),
                   GestureDetector(
@@ -118,7 +119,8 @@ class MealsToggleButton extends StatelessWidget {
                       ),
                     ),
                     onTap: () async {
-                      mealsProvider.setMealsCategory(CategoryType.favorites);
+                      mealsProvider.setMealsCategory(
+                          category: CategoryType.favorites);
                     },
                   ),
                 ],

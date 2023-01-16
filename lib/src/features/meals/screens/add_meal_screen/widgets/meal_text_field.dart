@@ -24,11 +24,18 @@ class MealTextField extends StatelessWidget {
       cursorColor: Theme.of(context).primaryColor,
       decoration: InputDecoration(
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Theme.of(context).highlightColor),
+          borderSide: BorderSide(
+            color: Theme.of(context).highlightColor,
+          ),
         ),
         border: const OutlineInputBorder(),
-        floatingLabelStyle: TextStyle(color: Theme.of(context).highlightColor),
+        floatingLabelStyle: TextStyle(
+          color: Theme.of(context).highlightColor,
+        ),
         labelText: labelText,
+        labelStyle: const TextStyle(
+          fontSize: 14,
+        ),
         hintText: hintText,
       ),
     );

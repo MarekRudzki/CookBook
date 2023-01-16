@@ -117,7 +117,7 @@ class ResetPassword extends StatelessWidget {
                     IconButton(
                       onPressed: () {
                         controller.clear();
-                        accountProvider.addErrorMessage('');
+                        accountProvider.addErrorMessage(message: '');
                         Navigator.of(context).pop();
                       },
                       icon: const Icon(
