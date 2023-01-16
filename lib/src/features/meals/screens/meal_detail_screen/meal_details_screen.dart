@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:provider/provider.dart';
 
@@ -36,12 +37,14 @@ class MealDetailsScreen extends StatelessWidget {
             child: Scaffold(
               backgroundColor: Colors.transparent,
               body: FutureBuilder(
-                future: Provider.of<MealsProvider>(context, listen: false)
-                    .getFavoritesMealsId(),
+                future: mealsProvider.getFavoritesMealsId(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: SpinKitThreeBounce(
+                        color: Colors.white,
+                        size: 25,
+                      ),
                     );
                   }
                   if (snapshot.hasData) {

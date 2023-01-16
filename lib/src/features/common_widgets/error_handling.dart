@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:provider/provider.dart';
 
@@ -39,7 +40,12 @@ class ErrorHandling {
         ? showDialog(
             context: context,
             builder: (context) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: SpinKitThreeBounce(
+                  color: Colors.white,
+                  size: 25,
+                ),
+              );
             },
           )
         : Navigator.of(context).pop();
@@ -52,7 +58,11 @@ class ErrorHandling {
         ? showDialog(
             context: context,
             builder: (context) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                  child: SpinKitThreeBounce(
+                color: Colors.white,
+                size: 25,
+              ));
             },
           )
         : Navigator.of(context).pop();

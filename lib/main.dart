@@ -23,6 +23,7 @@ void main() async {
   );
 //TODO add l10n
 //TODO expand light theme
+// TODO Maybe add Flavors
 
   runApp(
     MultiProvider(

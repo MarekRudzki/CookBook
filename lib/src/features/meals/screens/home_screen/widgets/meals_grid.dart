@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../../../../domain/models/meal_model.dart';
 import '../../../meals_provider.dart';
@@ -24,7 +25,10 @@ class MealsGrid extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Expanded(
             child: Center(
-              child: CircularProgressIndicator(),
+              child: SpinKitThreeBounce(
+                color: Colors.white,
+                size: 25,
+              ),
             ),
           );
         }

@@ -149,7 +149,6 @@ class _EditMealScreenState extends State<EditMealScreen> {
         }
       },
     );
-
     if (mealsProvider.selectedPhotoType == PhotoType.url) {
       imageUrl = _imageUrlController.text;
     } else {
@@ -181,7 +180,6 @@ class _EditMealScreenState extends State<EditMealScreen> {
         _errorHandling.toggleMealLoadingSpinner(context);
         mealsProvider.resetFields();
         _mealNameController.clear();
-        mealsProvider.getUserMeals();
         _ingredientsController.clear();
         _descriptionController.clear();
         FocusManager.instance.primaryFocus?.unfocus();
@@ -208,7 +206,7 @@ class _EditMealScreenState extends State<EditMealScreen> {
     );
     _errorHandling.toggleMealLoadingSpinner(context);
     FocusManager.instance.primaryFocus?.unfocus();
-
+    _mealsProvider.imageUrl = '';
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const MainScreen(),
@@ -394,6 +392,10 @@ class _EditMealScreenState extends State<EditMealScreen> {
                           ],
                         ),
                         onPressed: () async {
+                          if (_imageUrlController.text.isEmpty) {
+                            _imageUrlController.text =
+                                widget.mealModel.imageUrl;
+                          }
                           await saveMeal(
                             currentMealId: widget.mealModel.id,
                             mealNameTec: _mealNameController,

@@ -17,8 +17,8 @@ class ActionButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.5,
-        height: MediaQuery.of(context).size.height * 0.06,
+        width: MediaQuery.of(context).size.width * 0.45,
+        height: MediaQuery.of(context).size.height * 0.05,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: Colors.red,
@@ -26,7 +26,10 @@ class ActionButton extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 19,
+            ),
           ),
         ),
       ),

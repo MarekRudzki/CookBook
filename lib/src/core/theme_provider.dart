@@ -19,9 +19,9 @@ class ThemeProvider with ChangeNotifier {
       checkColor: MaterialStateProperty.all(Colors.red),
       fillColor: MaterialStateProperty.all(Colors.transparent),
     ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(backgroundColor: kLightBlue),
-    ),
+    // textButtonTheme: TextButtonThemeData(
+    //   style: TextButton.styleFrom(backgroundColor: kLightBlue),
+    // ),
     textTheme: TextTheme(
       bodyText1: const TextStyle(
         color: Colors.white,

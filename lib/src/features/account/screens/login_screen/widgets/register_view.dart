@@ -18,61 +18,90 @@ class RegisterView extends StatelessWidget {
   final TextEditingController passwordController;
   final TextEditingController nameController;
   final TextEditingController confirmedPasswordController;
-  final Function() onLoginTap;
-  final Function() onRegisterTap;
+  final void Function() onLoginTap;
+  final void Function() onRegisterTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.17,
-        ),
-        LoginTextInputField(
-          controller: nameController,
-          labelText: 'Enter your name',
-          icon: Icons.person,
-        ),
-        LoginTextInputField(
-          controller: emailController,
-          labelText: 'Enter your email',
-          icon: Icons.email_outlined,
-        ),
-        LoginTextInputField(
-          controller: passwordController,
-          labelText: 'Enter your password',
-          obscure: true,
-          icon: Icons.key,
-        ),
-        LoginTextInputField(
-          controller: confirmedPasswordController,
-          labelText: 'Confirm your password',
-          obscure: true,
-          inputAction: TextInputAction.done,
-          icon: Icons.key,
-        ),
-        const SizedBox(
-          height: 14,
-        ),
-        ActionButton(
-          text: 'Register',
-          context: context,
-          onTap: onRegisterTap,
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        TextButton(
-          onPressed: onLoginTap,
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.transparent,
+    return Center(
+      child: SingleChildScrollView(
+        reverse: true,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 18, 76, 135).withOpacity(0.75),
+            borderRadius: BorderRadius.circular(30),
           ),
-          child: Text(
-            'Already have an account? Try login',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
+          child: Column(
+            children: [
+              LoginTextInputField(
+                controller: nameController,
+                labelText: 'Enter your name',
+                icon: Icons.person,
+              ),
+              LoginTextInputField(
+                controller: emailController,
+                labelText: 'Enter your email',
+                icon: Icons.email_outlined,
+              ),
+              LoginTextInputField(
+                controller: passwordController,
+                labelText: 'Enter your password',
+                obscure: true,
+                icon: Icons.key,
+              ),
+              LoginTextInputField(
+                controller: confirmedPasswordController,
+                labelText: 'Confirm your password',
+                obscure: true,
+                inputAction: TextInputAction.done,
+                icon: Icons.key,
+              ),
+              const SizedBox(
+                height: 14,
+              ),
+              ActionButton(
+                text: 'Register',
+                context: context,
+                onTap: onRegisterTap,
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Already have an account?',
+                    style: TextStyle(
+                      color: Colors.grey.shade300,
+                      fontSize: 15,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: onLoginTap,
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                    ),
+                    child: const Text(
+                      'Try login',
+                      style: TextStyle(
+                        backgroundColor: Colors.transparent,
+                        color: Colors.blueAccent,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

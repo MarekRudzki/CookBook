@@ -19,7 +19,10 @@ class LoginTextInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 10,
+      ),
       child: Row(
         children: [
           Icon(
@@ -41,7 +44,9 @@ class LoginTextInputField extends StatelessWidget {
                   color: Colors.grey.shade300,
                 ),
               ),
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(
+                color: Colors.white70,
+              ),
             ),
           ),
         ],

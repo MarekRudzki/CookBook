@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../../../../services/firebase/firestore.dart';
-import '../../../../services/hive_services.dart';
-import '../../../../services/firebase/auth.dart';
-import '../../../common_widgets/error_handling.dart';
+import '../../../../core/constants.dart';
 import '../../../main_screen.dart';
 import '../../account_provider.dart';
 import 'widgets/reset_password.dart';
@@ -20,19 +17,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final Auth _auth = Auth();
-  final Firestore _firestore = Firestore();
-  final ErrorHandling _errorHandling = ErrorHandling();
-  final HiveServices _hiveServices = HiveServices();
+  final AccountProvider _accountProvider = AccountProvider();
 
   final _nameController = TextEditingController();
-
   final _emailController = TextEditingController();
-
   final _passwordController = TextEditingController();
-
   final _confirmedPasswordController = TextEditingController();
-
   final _passwordResetController = TextEditingController();
 
   @override
@@ -49,27 +39,18 @@ class _LoginScreenState extends State<LoginScreen> {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
-    _errorHandling.toggleLoadingSpinner(context);
-    await _auth
-        .logIn(
+    await _accountProvider.logIn(
       email: email,
       password: password,
-    )
-        .then(
-      (errorText) {
-        _errorHandling.toggleLoadingSpinner(context);
-        FocusManager.instance.primaryFocus?.unfocus();
-        if (errorText.isNotEmpty) {
-          _errorHandling.showInfoSnackbar(context, errorText);
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const MainScreen(),
-            ),
-          );
-          _hiveServices.setUserEmail(_emailController.text);
-        }
+      context: context,
+      emailController: _emailController,
+      onSuccess: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainScreen(),
+          ),
+        );
       },
     );
   }
@@ -80,42 +61,47 @@ class _LoginScreenState extends State<LoginScreen> {
     final String password = _passwordController.text.trim();
     final String confirmedPassword = _confirmedPasswordController.text.trim();
 
-    _errorHandling.toggleLoadingSpinner(context);
-    await _auth
-        .register(
+    _accountProvider.register(
+      context: context,
       email: email,
       password: password,
       username: username,
       confirmedPassword: confirmedPassword,
-    )
-        .then(
-      (errorText) {
-        _errorHandling.toggleLoadingSpinner(context);
-        FocusManager.instance.primaryFocus?.unfocus();
-        if (errorText.isNotEmpty) {
-          _errorHandling.showInfoSnackbar(context, errorText);
-        } else {
-          _firestore.addUser(username).then(
-                (errorText) => {
-                  if (errorText.isNotEmpty)
-                    {
-                      _errorHandling.showInfoSnackbar(context, errorText),
-                    }
-                  else
-                    {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainScreen(),
-                        ),
-                      ),
-                      _hiveServices.setUserEmail(_emailController.text),
-                      _hiveServices.setUsername(username: username),
-                    }
-                },
-              );
-        }
+      emailController: _emailController,
+      onSuccess: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainScreen(),
+          ),
+        );
       },
+    );
+  }
+
+  Future<bool> _onWillPop(BuildContext context) async {
+    final bool? exitResult = await showDialog(
+      context: context,
+      builder: (context) => _buildExitDialog(context),
+    );
+    return exitResult ?? false;
+  }
+
+  AlertDialog _buildExitDialog(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Please confirm'),
+      content: const Text('Do you want to exit the app?'),
+      backgroundColor: kLightBlue,
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('No'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Yes'),
+        ),
+      ],
     );
   }
 
@@ -125,45 +111,55 @@ class _LoginScreenState extends State<LoginScreen> {
         Provider.of<AccountProvider>(context, listen: false);
 
     return SafeArea(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/background_login.png'),
-              fit: BoxFit.cover,
-            ),
+      child: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/background_login.png'),
+            fit: BoxFit.cover,
           ),
-          child: context.select(
-                  (AccountProvider provider) => provider.isCreatingAccount)
-              ? RegisterView(
-                  emailController: _emailController,
-                  passwordController: _passwordController,
-                  nameController: _nameController,
-                  confirmedPasswordController: _confirmedPasswordController,
-                  onRegisterTap: () => register(context),
-                  onLoginTap: () {
-                    accountProvider.switchLoginRegister();
-                    _emailController.clear();
-                    _passwordController.clear();
-                    _confirmedPasswordController.clear();
-                    _nameController.clear();
-                  },
-                )
-              : LoginView(
-                  emailController: _emailController,
-                  passwordController: _passwordController,
-                  onLoginTap: () => logIn(context),
-                  onRegisterTap: () {
-                    accountProvider.switchLoginRegister();
-                    _emailController.clear();
-                    _passwordController.clear();
-                  },
-                  onPasswordResetTap: () => resetPassword(
-                    context,
-                    _passwordResetController,
+        ),
+        child: WillPopScope(
+          onWillPop: () => _onWillPop(context),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            //resizeToAvoidBottomInset: false,
+            body: context.select(
+                    (AccountProvider provider) => provider.isCreatingAccount)
+                ? RegisterView(
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                    nameController: _nameController,
+                    confirmedPasswordController: _confirmedPasswordController,
+                    onRegisterTap: () => register(context),
+                    onLoginTap: () {
+                      accountProvider.switchLoginRegister();
+                      _emailController.clear();
+                      _passwordController.clear();
+                      _confirmedPasswordController.clear();
+                      _nameController.clear();
+                    },
+                  )
+                : LoginView(
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                    onLoginTap: () => logIn(context),
+                    onRegisterTap: () {
+                      accountProvider.switchLoginRegister();
+                      _emailController.clear();
+                      _passwordController.clear();
+                    },
+                    onPasswordResetTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return ResetPassword(
+                            controller: _passwordResetController,
+                          );
+                        },
+                      );
+                    },
                   ),
-                ),
+          ),
         ),
       ),
     );
