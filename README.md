@@ -17,9 +17,10 @@ My first bigger project created mainly for learning purposes.
 - Error handling
 - Dark and light mode
 
+https://user-images.githubusercontent.com/102899533/213205810-2a81aada-4891-45e4-aad8-7c657afaf842.mp4
 
-https://user-images.githubusercontent.com/102899533/213199423-e9f4b835-5671-46c8-9aa4-7358b5a8a2ec.mp4
-![GIF 18 01 2023 15-35-30](https://user-images.githubusercontent.com/102899533/213199368-20e98ad5-9cb2-4b92-939b-8997f3aa6bf4.gif)
+https://user-images.githubusercontent.com/102899533/213205820-8874304b-4099-412a-9d1f-c498d77b18ad.mp4
+
 
 ## Technologies
 Project is created with:
