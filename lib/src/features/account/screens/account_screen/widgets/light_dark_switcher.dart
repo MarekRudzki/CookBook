@@ -28,7 +28,7 @@ class LightDarkSwitcher extends StatelessWidget {
         SizedBox(
           child: Center(
             child: DayNightSwitcher(
-              nightBackgroundColor: kLightBlue.withBlue(180),
+              nightBackgroundColor: kDarkModeLighter.withBlue(180),
               isDarkModeEnabled: theme.isDark(),
               onStateChanged: (_) {
                 theme.swapTheme();

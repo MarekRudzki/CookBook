@@ -10,7 +10,9 @@ import 'widgets/register_view.dart';
 import 'widgets/login_view.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -45,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       emailController: _emailController,
       onSuccess: () {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => const MainScreen(),
@@ -69,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
       confirmedPassword: confirmedPassword,
       emailController: _emailController,
       onSuccess: () {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => const MainScreen(),
@@ -91,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return AlertDialog(
       title: const Text('Please confirm'),
       content: const Text('Do you want to exit the app?'),
-      backgroundColor: kLightBlue,
+      backgroundColor: kDarkModeLighter,
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

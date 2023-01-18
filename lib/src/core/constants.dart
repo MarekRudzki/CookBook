@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-Color kLightBlue = const Color(0xFF243B5B);
-Color kDarkBlue = const Color(0xFF152238);
-Color kLightGreen = const Color.fromARGB(255, 73, 145, 69);
-Color kDarkGreen = const Color.fromARGB(255, 40, 84, 37);
-Color kInactiveNavyBar = const Color.fromARGB(255, 255, 255, 255);
+Color kDarkModeLighter = const Color(0xFF243B5B);
+Color kDarkModeDarker = const Color(0xFF152238);
+Color kLightModeLighter = const Color.fromARGB(255, 223, 224, 240);
+Color kLightModeDarker = const Color.fromARGB(255, 161, 175, 255);

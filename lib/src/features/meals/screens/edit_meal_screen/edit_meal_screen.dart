@@ -25,22 +25,13 @@ class EditMealScreen extends StatefulWidget {
 }
 
 class _EditMealScreenState extends State<EditMealScreen> {
-  late final TextEditingController _mealNameController;
-  late final TextEditingController _descriptionController;
-  late final TextEditingController _ingredientsController;
-  late final TextEditingController _imageUrlController;
+  final _mealNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _ingredientsController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   final ThemeProvider _themeProvider = ThemeProvider();
   final MealsProvider _mealsProvider = MealsProvider();
-
-  @override
-  void initState() {
-    super.initState();
-    _mealNameController = TextEditingController();
-    _ingredientsController = TextEditingController();
-    _descriptionController = TextEditingController();
-    _imageUrlController = TextEditingController();
-  }
 
   @override
   void dispose() {
@@ -217,11 +208,19 @@ class _EditMealScreenState extends State<EditMealScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.save),
+                            const Icon(
+                              Icons.save,
+                              color: Colors.white,
+                            ),
                             const SizedBox(
                               width: 10,
                             ),
-                            const Text('Save recipe'),
+                            const Text(
+                              'Save recipe',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
                           ],
                         ),
                         onPressed: () async {
@@ -250,11 +249,19 @@ class _EditMealScreenState extends State<EditMealScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.delete_forever),
+                          const Icon(
+                            Icons.delete_forever,
+                            color: Colors.white,
+                          ),
                           const SizedBox(
                             width: 10,
                           ),
-                          const Text('Delete recipe'),
+                          const Text(
+                            'Delete recipe',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
                         ],
                       ),
                       onPressed: () async {
@@ -264,6 +271,7 @@ class _EditMealScreenState extends State<EditMealScreen> {
                             return CustomAlertDialog(
                               title: 'Are your sure?',
                               content: 'Do you want to delete this recipe?',
+                              contentColor: Colors.blue.shade400,
                               onConfirmed: () async {
                                 await _mealsProvider.deleteSingleMeal(
                                   context: context,

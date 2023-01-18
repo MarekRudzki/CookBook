@@ -48,6 +48,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return Consumer<ThemeProvider>(
       builder: (context, theme, _) {
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -101,6 +102,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                         'Enter new username you want to use',
                                     firstLabel: 'New username',
                                     firstController: _changeUsernameController,
+                                    contentColor: Colors.blue.shade400,
                                     onConfirmed: () async {
                                       await _accountProvider.changeUsername(
                                         context: context,
@@ -133,6 +135,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                     secondLabel: 'New password',
                                     thirdLabel: 'Confirm new password',
                                     obscureText: true,
+                                    contentColor: Colors.blue.shade400,
                                     onConfirmed: () async {
                                       _accountProvider.changePassword(
                                         context: context,
@@ -156,33 +159,40 @@ class _AccountScreenState extends State<AccountScreen> {
                             onPressed: () async {
                               final List<MealModel> userMeals =
                                   await mealsProvider.getUserMeals();
-                              if (userMeals.isEmpty) {
-                                mealsProvider.setUserHasRecipes(value: false);
-                              }
                               showDialog(
                                 context: context,
                                 builder: (context) {
-                                  return CustomAlertDialog(
-                                    title: 'Are you sure?',
-                                    content:
-                                        'This action will permanently delete your account. To continue provide current password',
-                                    contentColor: Theme.of(context).errorColor,
-                                    firstController: _currentPasswordController,
-                                    firstLabel: 'Current password',
-                                    obscureText: true,
-                                    additionalWidget: const DeleteOptions(),
-                                    onConfirmed: () async {
-                                      _accountProvider.deleteAccount(
-                                        context: context,
-                                        currentPasswordController:
+                                  return Consumer<MealsProvider>(
+                                    builder: (context, mealsProvider, _) {
+                                      return CustomAlertDialog(
+                                        title: 'Are you sure?',
+                                        content:
+                                            'This action will permanently delete your account. To continue provide current password',
+                                        contentColor:
+                                            Theme.of(context).errorColor,
+                                        firstController:
                                             _currentPasswordController,
-                                        mounted: mounted,
-                                        onSuccess: () {
-                                          Navigator.of(context).pushReplacement(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const LoginScreen(),
-                                            ),
+                                        firstLabel: 'Current password',
+                                        obscureText: true,
+                                        additionalWidget: userMeals.isNotEmpty
+                                            ? const DeleteOptions()
+                                            : const SizedBox.shrink(),
+                                        onConfirmed: () async {
+                                          _accountProvider.deleteAccount(
+                                            context: context,
+                                            currentPasswordController:
+                                                _currentPasswordController,
+                                            mealsProvider: mealsProvider,
+                                            mounted: mounted,
+                                            onSuccess: () {
+                                              Navigator.of(context)
+                                                  .pushReplacement(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const LoginScreen(),
+                                                ),
+                                              );
+                                            },
                                           );
                                         },
                                       );
@@ -199,7 +209,10 @@ class _AccountScreenState extends State<AccountScreen> {
                           const Spacer(),
                           Center(
                             child: ElevatedButton.icon(
-                              icon: const Icon(Icons.logout),
+                              icon: const Icon(
+                                Icons.logout,
+                                color: Colors.white,
+                              ),
                               onPressed: () async {
                                 _accountProvider.logOut(
                                   context: context,
@@ -215,7 +228,12 @@ class _AccountScreenState extends State<AccountScreen> {
                               },
                               label: Text(
                                 'Log out',
-                                style: Theme.of(context).textTheme.bodyText2,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText2!
+                                    .copyWith(
+                                      color: Colors.white,
+                                    ),
                               ),
                             ),
                           ),

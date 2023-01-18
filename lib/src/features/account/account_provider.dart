@@ -57,6 +57,13 @@ class AccountProvider with ChangeNotifier {
     required TextEditingController changeUsernameController,
   }) async {
     final MealsProvider _mealsProvider = MealsProvider();
+
+    if (changeUsernameController.text.trim().isEmpty) {
+      addErrorMessage(message: 'Field is empty');
+      resetErrorMessage();
+      return;
+    }
+
     _errorHandling.toggleAccountLoadingSpinner(context);
     await _firestore.addUser(changeUsernameController.text).then(
       (errorText) {
@@ -241,12 +248,12 @@ class AccountProvider with ChangeNotifier {
     required BuildContext context,
     required TextEditingController currentPasswordController,
     required bool mounted,
+    required MealsProvider mealsProvider,
     required void Function() onSuccess,
   }) async {
-    final MealsProvider _mealsProvider = MealsProvider();
     _errorHandling.toggleAccountLoadingSpinner(context);
 
-    final List<MealModel> userMeals = await _mealsProvider.getUserMeals();
+    final List<MealModel> userMeals = await mealsProvider.getUserMeals();
     final String uid = _auth.uid!;
 
     await _auth
@@ -268,14 +275,12 @@ class AccountProvider with ChangeNotifier {
     }
 
     if (userMeals.isNotEmpty) {
-      if (_mealsProvider.deleteAllRecipes) {
-        await _mealsProvider.deleteMeals(deleteAll: true, userMeals: userMeals);
+      if (mealsProvider.deleteAllRecipes) {
+        await mealsProvider.deleteMeals(deleteAll: true, userMeals: userMeals);
       } else {
-        await _mealsProvider.deleteMeals(
-            deleteAll: false, userMeals: userMeals);
+        await mealsProvider.deleteMeals(deleteAll: false, userMeals: userMeals);
       }
     }
-
     await _auth.deleteUser();
     FocusManager.instance.primaryFocus?.unfocus();
     currentPasswordController.clear();
@@ -289,6 +294,12 @@ class AccountProvider with ChangeNotifier {
     if (!mounted) return;
     onSuccess();
     await _firestore.deleteUserData(uid);
+    if (!mounted) return;
+    _errorHandling.showInfoSnackbar(
+      context,
+      'Account deleted successfully',
+      Colors.green,
+    );
   }
 
   Future<void> logOut({

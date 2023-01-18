@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/internet_not_connected.dart';
 import '../../../../core/theme_provider.dart';
+import '../../../../domain/models/meal_model.dart';
 import '../../meals_provider.dart';
 import 'widgets/meal_characteristics.dart';
 import 'widgets/recipe_info_button.dart';
@@ -37,6 +38,19 @@ class _AddMealScreenState extends State<AddMealScreen> {
 
   @override
   Widget build(BuildContext context) {
+    int setMealOnce = 1;
+
+    void resetFields(MealsProvider mealsProvider) {
+      if (setMealOnce == 1) {
+        mealsProvider.complexity = Complexity.easy;
+        mealsProvider.isPublic = false;
+        mealsProvider.imageUrl = '';
+        mealsProvider.imageFile = null;
+        mealsProvider.selectedPhotoType = null;
+        setMealOnce++;
+      }
+    }
+
     return Scaffold(
       body: Container(
         height: double.infinity,
@@ -117,6 +131,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
                         ),
                         Consumer<MealsProvider>(
                           builder: (context, mealsProvider, _) {
+                            resetFields(mealsProvider);
                             return MealCharacteristics(
                               mealsProvider: mealsProvider,
                             );
@@ -145,6 +160,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
                                 children: [
                                   const Icon(
                                     Icons.save,
+                                    color: Colors.white,
                                     size: 20,
                                   ),
                                   const SizedBox(
@@ -153,8 +169,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
                                   const Text(
                                     'Save recipe',
                                     style: TextStyle(
-                                      fontSize: 15,
-                                    ),
+                                        fontSize: 15, color: Colors.white),
                                   ),
                                 ],
                               ),

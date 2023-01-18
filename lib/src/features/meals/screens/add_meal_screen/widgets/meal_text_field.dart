@@ -20,6 +20,7 @@ class MealTextField extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.multiline,
       maxLines: null,
+      style: Theme.of(context).textTheme.bodyText2,
       textInputAction: textInputAction,
       cursorColor: Theme.of(context).primaryColor,
       decoration: InputDecoration(

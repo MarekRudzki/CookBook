@@ -12,6 +12,7 @@ import '../../domain/models/meal_model.dart';
 import '../../services/firebase/auth.dart';
 import '../common_widgets/error_handling.dart';
 import '../account/account_provider.dart';
+import 'screens/meal_detail_screen/meal_details_screen.dart';
 
 enum PhotoType { camera, gallery, url }
 
@@ -31,7 +32,6 @@ class MealsProvider with ChangeNotifier {
   File? imageFile;
   bool deletePrivateRecipes = true;
   bool deleteAllRecipes = false;
-  bool userHasRecipes = true;
 
   CategoryType selectedCategory = CategoryType.allMeals;
 
@@ -236,11 +236,6 @@ class MealsProvider with ChangeNotifier {
   ////// Meal delete
   ///
 
-  void setUserHasRecipes({required bool value}) {
-    userHasRecipes = value;
-    notifyListeners();
-  }
-
   void setDeleteAll({required bool value}) {
     deleteAllRecipes = value;
     deletePrivateRecipes = !value;
@@ -258,7 +253,6 @@ class MealsProvider with ChangeNotifier {
     required List<MealModel> userMeals,
   }) async {
     final List<String> recipesIdToDelete = [];
-
     for (final meal in userMeals) {
       if (deleteAll) {
         recipesIdToDelete.add(meal.id);
@@ -270,7 +264,7 @@ class MealsProvider with ChangeNotifier {
           userId: meal.authorId,
         );
       } else {
-        if (meal.isPublic) {
+        if (!meal.isPublic) {
           recipesIdToDelete.add(meal.id);
           if (meal.imageUrl.contains('firebasestorage')) {
             await _storage.deleteImage(imageId: meal.id);
@@ -313,133 +307,6 @@ class MealsProvider with ChangeNotifier {
   ///
   ////// Save and update meal
   ///
-
-  Future<void> updateMeal({
-    required BuildContext context,
-    required TextEditingController mealNameTec,
-    required TextEditingController ingredientsTec,
-    required TextEditingController descriptionTec,
-    required TextEditingController imageUrlTec,
-    required String currentMealId,
-  }) async {
-    final AccountProvider accountProvider = AccountProvider();
-    final List<String> ingredientsList = [];
-    final List<String> descriptionList = [];
-    String imageUrl;
-    final mealId = currentMealId;
-
-    const LineSplitter ls = LineSplitter();
-    int descriptionCount = 1;
-
-    if (mealNameTec.text.trim().isEmpty ||
-        ingredientsTec.text.trim().isEmpty ||
-        descriptionTec.text.trim().isEmpty) {
-      _errorHandling.showInfoSnackbar(
-        context,
-        'Please fill in all fields',
-      );
-      return;
-    }
-
-    if (imageUrlTec.text.isEmpty && imageFile == null) {
-      _errorHandling.showInfoSnackbar(
-        context,
-        'Please provide photo',
-      );
-      return;
-    }
-
-    String getComplexity() {
-      if (complexity == Complexity.easy) {
-        return 'Easy';
-      } else if (complexity == Complexity.medium) {
-        return 'Medium';
-      } else {
-        return 'Hard';
-      }
-    }
-
-    final List<String> ingredients = ls.convert(ingredientsTec.text);
-    for (final element in ingredients) {
-      if (element.trim().isNotEmpty) {
-        ingredientsList.add(element);
-      }
-    }
-
-    final List<String> description = ls.convert(descriptionTec.text);
-    for (var element in description) {
-      if (element.trim().isNotEmpty) {
-        element = '${descriptionCount}. $element';
-        descriptionCount++;
-        descriptionList.add(element);
-      }
-    }
-
-    _errorHandling.toggleMealLoadingSpinner(context);
-
-    await _storage
-        .updateImage(
-      mealId: mealId,
-      image: imageFile,
-      selectedPhotoType: selectedPhotoType,
-    )
-        .then(
-      (errorText) {
-        if (errorText.isNotEmpty) {
-          _errorHandling.toggleAccountLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          addErrorMessage(message: errorText);
-          resetErrorMessage();
-          return;
-        }
-      },
-    );
-    if (selectedPhotoType == PhotoType.url) {
-      imageUrl = imageUrlTec.text;
-    } else {
-      imageUrl = await _storage.getUrl(mealId: mealId);
-    }
-
-    final String username = await accountProvider.getUsername();
-
-    await _firestore
-        .updateMeal(
-      mealId: currentMealId,
-      mealName: mealNameTec.text,
-      ingredientsList: ingredientsList,
-      descriptionList: descriptionList,
-      complexity: getComplexity(),
-      isPublic: isPublic,
-      authorId: _auth.uid!,
-      authorName: username,
-      imageUrl: imageUrl,
-    )
-        .then(
-      (errorText) {
-        if (errorText.isNotEmpty) {
-          FocusManager.instance.primaryFocus?.unfocus();
-          _errorHandling.showInfoSnackbar(
-            context,
-            errorText,
-          );
-        } else {
-          _errorHandling.toggleMealLoadingSpinner(context);
-          resetFields();
-          mealNameTec.clear();
-          ingredientsTec.clear();
-          descriptionTec.clear();
-          imageUrlTec.clear();
-          FocusManager.instance.primaryFocus?.unfocus();
-          _errorHandling.showInfoSnackbar(
-            context,
-            'Recipe updated successfully',
-            Colors.green,
-          );
-          Navigator.of(context).pop();
-        }
-      },
-    );
-  }
 
   Future<void> saveMeal({
     required BuildContext context,
@@ -566,5 +433,150 @@ class MealsProvider with ChangeNotifier {
         );
       }
     });
+  }
+
+  Future<void> updateMeal({
+    required BuildContext context,
+    required TextEditingController mealNameTec,
+    required TextEditingController ingredientsTec,
+    required TextEditingController descriptionTec,
+    required TextEditingController imageUrlTec,
+    required String currentMealId,
+  }) async {
+    final AccountProvider accountProvider = AccountProvider();
+    final List<String> ingredientsList = [];
+    final List<String> descriptionList = [];
+    String imageUrl;
+    final mealId = currentMealId;
+
+    const LineSplitter ls = LineSplitter();
+    int descriptionCount = 1;
+
+    if (mealNameTec.text.trim().isEmpty ||
+        ingredientsTec.text.trim().isEmpty ||
+        descriptionTec.text.trim().isEmpty) {
+      _errorHandling.showInfoSnackbar(
+        context,
+        'Please fill in all fields',
+      );
+      return;
+    }
+
+    if (imageUrlTec.text.isEmpty && imageFile == null) {
+      _errorHandling.showInfoSnackbar(
+        context,
+        'Please provide photo',
+      );
+      return;
+    }
+
+    String getComplexity() {
+      if (complexity == Complexity.easy) {
+        return 'Easy';
+      } else if (complexity == Complexity.medium) {
+        return 'Medium';
+      } else {
+        return 'Hard';
+      }
+    }
+
+    final List<String> ingredients = ls.convert(ingredientsTec.text);
+    for (final element in ingredients) {
+      if (element.trim().isNotEmpty) {
+        ingredientsList.add(element);
+      }
+    }
+
+    final List<String> description = ls.convert(descriptionTec.text);
+    for (var element in description) {
+      if (element.trim().isNotEmpty) {
+        element = '${descriptionCount}. $element';
+        descriptionCount++;
+        descriptionList.add(element);
+      }
+    }
+
+    _errorHandling.toggleMealLoadingSpinner(context);
+
+    await _storage
+        .updateImage(
+      mealId: mealId,
+      image: imageFile,
+      selectedPhotoType: selectedPhotoType,
+    )
+        .then(
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          _errorHandling.toggleAccountLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          addErrorMessage(message: errorText);
+          resetErrorMessage();
+          return;
+        }
+      },
+    );
+    if (selectedPhotoType == PhotoType.url) {
+      imageUrl = imageUrlTec.text;
+    } else {
+      imageUrl = await _storage.getUrl(mealId: mealId);
+    }
+
+    final String username = await accountProvider.getUsername();
+
+    await _firestore
+        .updateMeal(
+      mealId: currentMealId,
+      mealName: mealNameTec.text,
+      ingredientsList: ingredientsList,
+      descriptionList: descriptionList,
+      complexity: getComplexity(),
+      isPublic: isPublic,
+      authorId: _auth.uid!,
+      authorName: username,
+      imageUrl: imageUrl,
+    )
+        .then(
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          _errorHandling.showInfoSnackbar(
+            context,
+            errorText,
+          );
+        } else {
+          final mealModel = MealModel(
+            id: currentMealId,
+            name: mealNameTec.text,
+            description: descriptionList,
+            ingredients: ingredientsList,
+            imageUrl: imageUrl,
+            mealAuthor: username,
+            authorId: _auth.uid!,
+            isPublic: isPublic,
+            complexity: getComplexity(),
+          );
+
+          _errorHandling.toggleMealLoadingSpinner(context);
+          resetFields();
+          mealNameTec.clear();
+          ingredientsTec.clear();
+          descriptionTec.clear();
+          imageUrlTec.clear();
+          FocusManager.instance.primaryFocus?.unfocus();
+          _errorHandling.showInfoSnackbar(
+            context,
+            'Recipe updated successfully',
+            Colors.green,
+          );
+          Navigator.of(context).pop();
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => MealDetailsScreen(
+              mealModel: mealModel,
+              mealsProvider: this,
+            ),
+          ));
+        }
+      },
+    );
   }
 }

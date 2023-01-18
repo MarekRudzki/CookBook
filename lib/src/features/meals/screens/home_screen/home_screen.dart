@@ -38,92 +38,94 @@ class HomeScreen extends StatelessWidget {
 
     return Consumer<ThemeProvider>(
       builder: (context, theme, _) {
-        return Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: theme.getGradient(),
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Column(
-              children: [
-                Visibility(
-                  visible: Provider.of<InternetConnectionStatus>(context) ==
-                      InternetConnectionStatus.disconnected,
-                  child: const InternetNotConnected(),
+        return SafeArea(
+          child: Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: theme.getGradient(),
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
-                Visibility(
-                  visible: Provider.of<InternetConnectionStatus>(context) ==
-                      InternetConnectionStatus.connected,
-                  child: Expanded(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: DefaultTextStyle(
-                            style: Theme.of(context).textTheme.headline1!,
-                            child: FutureBuilder(
-                              future: _accountProvider.getUsername(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return AnimatedTextKit(
-                                    isRepeatingAnimation: false,
-                                    animatedTexts: [
-                                      TyperAnimatedText(
-                                        getRandomGreeting(snapshot.data),
-                                        speed: const Duration(
-                                          milliseconds: 80,
+              ),
+              child: Column(
+                children: [
+                  Visibility(
+                    visible: Provider.of<InternetConnectionStatus>(context) ==
+                        InternetConnectionStatus.disconnected,
+                    child: const InternetNotConnected(),
+                  ),
+                  Visibility(
+                    visible: Provider.of<InternetConnectionStatus>(context) ==
+                        InternetConnectionStatus.connected,
+                    child: Expanded(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: DefaultTextStyle(
+                              style: Theme.of(context).textTheme.headline1!,
+                              child: FutureBuilder(
+                                future: _accountProvider.getUsername(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return AnimatedTextKit(
+                                      isRepeatingAnimation: false,
+                                      animatedTexts: [
+                                        TyperAnimatedText(
+                                          getRandomGreeting(snapshot.data),
+                                          speed: const Duration(
+                                            milliseconds: 80,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                }
-                                return const Text('');
-                              },
+                                      ],
+                                    );
+                                  }
+                                  return const Text('');
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 25),
-                          child: Divider(
-                            color: Colors.grey,
-                            height: 2,
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 25),
+                            child: Divider(
+                              color: Colors.grey,
+                              height: 2,
+                            ),
                           ),
-                        ),
-                        const MealsToggleButton(),
-                        Consumer<MealsProvider>(
-                          builder: (context, mealsProvider, _) {
-                            if (mealsProvider.selectedCategory ==
-                                CategoryType.myMeals) {
-                              return MealsGrid(
-                                mealsProvider: mealsProvider,
-                                future: mealsProvider.getUserMeals(),
-                                textIfEmpty:
-                                    'You don\'t have any own recipes, try adding them or use others users recipes!',
-                              );
-                            } else if (mealsProvider.selectedCategory ==
-                                CategoryType.allMeals) {
-                              return MealsGrid(
-                                mealsProvider: mealsProvider,
-                                future: mealsProvider.getPublicMeals(),
-                              );
-                            } else {
-                              return MealsGrid(
-                                mealsProvider: mealsProvider,
-                                future: mealsProvider.getUserFavorites(),
-                                textIfEmpty:
-                                    'No favorites meals yet, try add some!',
-                              );
-                            }
-                          },
-                        ),
-                      ],
+                          const MealsToggleButton(),
+                          Consumer<MealsProvider>(
+                            builder: (context, mealsProvider, _) {
+                              if (mealsProvider.selectedCategory ==
+                                  CategoryType.myMeals) {
+                                return MealsGrid(
+                                  mealsProvider: mealsProvider,
+                                  future: mealsProvider.getUserMeals(),
+                                  textIfEmpty:
+                                      'You don\'t have any own recipes, try adding them or use others users recipes!',
+                                );
+                              } else if (mealsProvider.selectedCategory ==
+                                  CategoryType.allMeals) {
+                                return MealsGrid(
+                                  mealsProvider: mealsProvider,
+                                  future: mealsProvider.getPublicMeals(),
+                                );
+                              } else {
+                                return MealsGrid(
+                                  mealsProvider: mealsProvider,
+                                  future: mealsProvider.getUserFavorites(),
+                                  textIfEmpty:
+                                      'No favorites meals yet, try add some!',
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

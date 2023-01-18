@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../core/constants.dart';
 import '../../../meals_provider.dart';
 
 class MealPhotoPicker extends StatelessWidget {
@@ -29,7 +28,7 @@ class MealPhotoPicker extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             border: Border.all(
-              color: kLightBlue,
+              color: Theme.of(context).backgroundColor,
               width: 10,
             ),
           ),

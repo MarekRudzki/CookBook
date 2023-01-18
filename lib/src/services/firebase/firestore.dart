@@ -12,11 +12,6 @@ class Firestore {
     final String? uid = _auth.uid;
     String errorText = '';
 
-    if (username == '') {
-      errorText = 'Field is empty';
-      return errorText;
-    }
-
     final List<String> userMealsId = await getUserMealsId();
 
     try {

@@ -33,7 +33,7 @@ class ResetPassword extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          backgroundColor: kLightBlue,
+          backgroundColor: kDarkModeLighter,
           actions: [
             Column(
               children: [
@@ -89,7 +89,7 @@ class ResetPassword extends StatelessWidget {
                                     'You should find link to reset your password in your mailbox.',
                                     style: TextStyle(color: Colors.white70),
                                   ),
-                                  backgroundColor: kLightBlue,
+                                  backgroundColor: kDarkModeLighter,
                                   actions: [
                                     Center(
                                       child: IconButton(

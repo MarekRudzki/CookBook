@@ -18,11 +18,14 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('userBox');
   final bool isLogged = HiveServices().isLogged();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-//TODO expand light theme
-//TODO Maybe add Flavors
+
+//TODO fix theme
+//TODO think about l10n
+
   runApp(
     MultiProvider(
       providers: [
@@ -30,20 +33,20 @@ void main() async {
         ListenableProvider<AccountProvider>(create: (_) => AccountProvider()),
         ListenableProvider<MealsProvider>(create: (_) => MealsProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, theme, _) {
-          return StreamProvider<InternetConnectionStatus>(
-            initialData: InternetConnectionStatus.connected,
-            create: (_) {
-              return InternetConnectionChecker().onStatusChange;
-            },
-            child: MaterialApp(
-              theme: theme.getTheme(),
+      child: StreamProvider<InternetConnectionStatus>(
+        initialData: InternetConnectionStatus.connected,
+        create: (_) {
+          return InternetConnectionChecker().onStatusChange;
+        },
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return MaterialApp(
+              theme: themeProvider.getTheme(),
               debugShowCheckedModeBanner: false,
               home: isLogged ? const MainScreen() : const LoginScreen(),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     ),
   );

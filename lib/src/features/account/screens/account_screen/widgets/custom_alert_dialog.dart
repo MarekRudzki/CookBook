@@ -45,7 +45,7 @@ class CustomAlertDialog extends StatelessWidget {
       title: Text(
         title,
         style: Theme.of(context).textTheme.bodyText2!.copyWith(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
       ),
@@ -54,9 +54,11 @@ class CustomAlertDialog extends StatelessWidget {
         content,
         style: TextStyle(
           color: contentColor,
+          fontSize: 14,
         ),
       ),
-      backgroundColor: _themeProvider.isDark() ? kLightBlue : kLightGreen,
+      backgroundColor:
+          _themeProvider.isDark() ? kDarkModeLighter : kLightModeLighter,
       actions: [
         Column(
           children: [
@@ -70,7 +72,7 @@ class CustomAlertDialog extends StatelessWidget {
                     child: Text(firstLabel!),
                   ),
                   labelStyle: TextStyle(
-                    color: Theme.of(context).primaryColorDark,
+                    color: Theme.of(context).primaryColorLight,
                   ),
                 ),
                 style: Theme.of(context).textTheme.bodyText1,
@@ -85,7 +87,7 @@ class CustomAlertDialog extends StatelessWidget {
                     child: Text(secondLabel!),
                   ),
                   labelStyle: TextStyle(
-                    color: Theme.of(context).primaryColorDark,
+                    color: Theme.of(context).primaryColorLight,
                   ),
                 ),
                 style: Theme.of(context).textTheme.bodyText1,
@@ -100,13 +102,13 @@ class CustomAlertDialog extends StatelessWidget {
                     child: Text(thirdLabel!),
                   ),
                   labelStyle: TextStyle(
-                    color: Theme.of(context).primaryColorDark,
+                    color: Theme.of(context).primaryColorLight,
                   ),
                 ),
                 style: Theme.of(context).textTheme.bodyText1,
               ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
               child: context.select((AccountProvider provider) =>
                           provider.errorMessage) !=
                       ''

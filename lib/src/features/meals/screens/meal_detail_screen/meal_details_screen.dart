@@ -19,7 +19,7 @@ class MealDetailsScreen extends StatelessWidget {
 
   final MealModel mealModel;
   final MealsProvider mealsProvider;
-//TODO values are not updating after meal is edited, fix this
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -67,6 +67,7 @@ class MealDetailsScreen extends StatelessWidget {
                                 child: Align(
                                   child: Text(
                                     mealModel.name,
+                                    textAlign: TextAlign.center,
                                     softWrap: true,
                                     style: Theme.of(context)
                                         .textTheme

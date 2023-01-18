@@ -50,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
     return AlertDialog(
       title: const Text('Please confirm'),
       content: const Text('Do you want to exit the app?'),
-      backgroundColor: kLightBlue,
+      backgroundColor: kDarkModeLighter,
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
@@ -70,6 +70,8 @@ class _MainScreenState extends State<MainScreen> {
       onWillPop: () => _onWillPop(context),
       child: SafeArea(
         child: Scaffold(
+          // ignore: avoid_bool_literals_in_conditional_expressions
+          resizeToAvoidBottomInset: selectedIndex == 1 ? true : false,
           body: SizedBox.expand(
             child: PageView(
               controller: pageController,
@@ -88,7 +90,8 @@ class _MainScreenState extends State<MainScreen> {
           bottomNavigationBar: Consumer<ThemeProvider>(
             builder: (context, theme, _) {
               return BottomNavyBar(
-                backgroundColor: theme.isDark() ? kLightBlue : kLightGreen,
+                backgroundColor:
+                    theme.isDark() ? kDarkModeLighter : kLightModeLighter,
                 items: [
                   BottomNavyBarItem(
                     icon: const Icon(Icons.home),
@@ -97,7 +100,8 @@ class _MainScreenState extends State<MainScreen> {
                       style: Theme.of(context).textTheme.bodyText2,
                     ),
                     activeColor: Theme.of(context).highlightColor,
-                    inactiveColor: kInactiveNavyBar,
+                    inactiveColor:
+                        theme.isDark() ? kLightModeLighter : kDarkModeDarker,
                   ),
                   BottomNavyBarItem(
                     icon: const Icon(Icons.add),
@@ -106,7 +110,8 @@ class _MainScreenState extends State<MainScreen> {
                       style: Theme.of(context).textTheme.bodyText2,
                     ),
                     activeColor: Theme.of(context).highlightColor,
-                    inactiveColor: kInactiveNavyBar,
+                    inactiveColor:
+                        theme.isDark() ? kLightModeLighter : kDarkModeDarker,
                   ),
                   BottomNavyBarItem(
                     icon: const Icon(Icons.person),
@@ -115,7 +120,8 @@ class _MainScreenState extends State<MainScreen> {
                       style: Theme.of(context).textTheme.bodyText2,
                     ),
                     activeColor: Theme.of(context).highlightColor,
-                    inactiveColor: kInactiveNavyBar,
+                    inactiveColor:
+                        theme.isDark() ? kLightModeLighter : kDarkModeDarker,
                   ),
                 ],
                 selectedIndex: selectedIndex,
