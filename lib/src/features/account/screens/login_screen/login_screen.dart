@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
+import '../../../../services/firebase/firestore.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../../services/hive_services.dart';
 import '../../../../core/constants.dart';
+import '../../../common_widgets/error_handling.dart';
 import '../../../main_screen.dart';
 import '../../account_provider.dart';
 import 'widgets/reset_password.dart';
@@ -19,7 +23,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AccountProvider _accountProvider = AccountProvider();
+  final AccountProvider _accountProvider = AccountProvider(
+    Firestore(),
+    HiveServices(),
+    Auth(),
+    ErrorHandling(),
+  );
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -45,7 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
       email: email,
       password: password,
       context: context,
-      emailController: _emailController,
       onSuccess: () {
         Navigator.pushReplacement(
           context,
@@ -69,7 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
       password: password,
       username: username,
       confirmedPassword: confirmedPassword,
-      emailController: _emailController,
       onSuccess: () {
         Navigator.pushReplacement(
           context,
@@ -124,7 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
           onWillPop: () => _onWillPop(context),
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            //resizeToAvoidBottomInset: false,
             body: context.select(
                     (AccountProvider provider) => provider.isCreatingAccount)
                 ? RegisterView(

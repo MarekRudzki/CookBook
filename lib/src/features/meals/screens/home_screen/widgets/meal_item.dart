@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../services/firebase/firestore.dart';
+import '../../../../../services/firebase/storage.dart';
 import '../../../../../domain/models/meal_model.dart';
+import '../../../../../services/firebase/auth.dart';
+import '../../../../common_widgets/error_handling.dart';
 import '../../../meals_provider.dart';
 import '../../meal_detail_screen/meal_details_screen.dart';
 
@@ -14,7 +18,12 @@ class MealItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MealsProvider mealsProvider = MealsProvider();
+    final MealsProvider mealsProvider = MealsProvider(
+      Firestore(),
+      Auth(),
+      Storage(),
+      ErrorHandling(),
+    );
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
       child: InkWell(

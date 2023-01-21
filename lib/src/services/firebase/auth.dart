@@ -3,19 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 class Auth {
   final FirebaseAuth _user = FirebaseAuth.instance;
 
-  String? get email => _user.currentUser!.email;
-  String? get uid => _user.currentUser!.uid;
+  String getUid() {
+    return _user.currentUser!.uid;
+  }
+
+  String? getEmail() {
+    return _user.currentUser!.email;
+  }
 
   Future<String> logIn({
     required String email,
     required String password,
   }) async {
     String errorValue = '';
-
-    if (email.isEmpty || password.isEmpty) {
-      errorValue = 'Please fill in all fields';
-      return errorValue;
-    }
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -129,7 +129,7 @@ class Auth {
 
     try {
       final credential = EmailAuthProvider.credential(
-        email: email!,
+        email: getEmail()!,
         password: currentPassword,
       );
       await _user.currentUser!.reauthenticateWithCredential(credential);
@@ -164,7 +164,7 @@ class Auth {
 
     try {
       final credential = EmailAuthProvider.credential(
-        email: email!,
+        email: getEmail()!,
         password: password,
       );
       await _user.currentUser!.reauthenticateWithCredential(credential);

@@ -7,7 +7,11 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/internet_not_connected.dart';
+import '../../../../services/firebase/firestore.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../../services/hive_services.dart';
 import '../../../../core/theme_provider.dart';
+import '../../../common_widgets/error_handling.dart';
 import '../../../account/account_provider.dart';
 import '../../meals_provider.dart';
 import 'widgets/meals_toggle_button.dart';
@@ -18,7 +22,12 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AccountProvider _accountProvider = AccountProvider();
+    final AccountProvider _accountProvider = AccountProvider(
+      Firestore(),
+      HiveServices(),
+      Auth(),
+      ErrorHandling(),
+    );
 
     String getRandomGreeting(String? username) {
       final rng = Random();

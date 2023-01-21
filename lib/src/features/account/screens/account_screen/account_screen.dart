@@ -6,6 +6,10 @@ import 'package:provider/provider.dart';
 import '../../../../core/internet_not_connected.dart';
 import '../../../../domain/models/meal_model.dart';
 import '../../../../core/theme_provider.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../../services/firebase/firestore.dart';
+import '../../../../services/firebase/storage.dart';
+import '../../../common_widgets/error_handling.dart';
 import '../../../meals/meals_provider.dart';
 import '../../account_provider.dart';
 import '../login_screen/login_screen.dart';
@@ -30,7 +34,8 @@ class _AccountScreenState extends State<AccountScreen> {
   final _newPasswordController = TextEditingController();
   final _confirmedNewPasswordController = TextEditingController();
 
-  final MealsProvider mealsProvider = MealsProvider();
+  final MealsProvider mealsProvider =
+      MealsProvider(Firestore(), Auth(), Storage(), ErrorHandling());
 
   @override
   void dispose() {
@@ -108,6 +113,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                         context: context,
                                         changeUsernameController:
                                             _changeUsernameController,
+                                        onSuccess: () =>
+                                            Navigator.of(context).pop(),
                                       );
                                     },
                                   );
@@ -145,6 +152,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                             _newPasswordController,
                                         confirmedNewPasswordController:
                                             _confirmedNewPasswordController,
+                                        onSuccess: () =>
+                                            Navigator.of(context).pop(),
                                       );
                                     },
                                   );

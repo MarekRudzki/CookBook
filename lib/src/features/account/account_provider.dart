@@ -8,10 +8,17 @@ import '../common_widgets/error_handling.dart';
 import '/src/services/firebase/firestore.dart';
 
 class AccountProvider with ChangeNotifier {
-  final ErrorHandling _errorHandling = ErrorHandling();
-  final HiveServices _hiveServices = HiveServices();
-  final Firestore _firestore = Firestore();
-  final Auth _auth = Auth();
+  AccountProvider(
+    this._firestore,
+    this._hiveServices,
+    this._auth,
+    this._errorHandling,
+  );
+
+  final ErrorHandling _errorHandling;
+  final HiveServices _hiveServices;
+  final Firestore _firestore;
+  final Auth _auth;
 
   String email = '';
   String username = '';
@@ -55,9 +62,8 @@ class AccountProvider with ChangeNotifier {
   Future<void> changeUsername({
     required BuildContext context,
     required TextEditingController changeUsernameController,
+    required void Function() onSuccess,
   }) async {
-    final MealsProvider _mealsProvider = MealsProvider();
-
     if (changeUsernameController.text.trim().isEmpty) {
       addErrorMessage(message: 'Field is empty');
       resetErrorMessage();
@@ -72,22 +78,22 @@ class AccountProvider with ChangeNotifier {
           FocusManager.instance.primaryFocus?.unfocus();
           addErrorMessage(message: errorText);
           resetErrorMessage();
-        } else {
-          _mealsProvider.updateMealAuthor(
-              newUsername: changeUsernameController.text);
-          _errorHandling.toggleAccountLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          username = changeUsernameController.text;
-          notifyListeners();
-
-          _hiveServices.setUsername(username: changeUsernameController.text);
-          Navigator.of(context).pop();
-          _errorHandling.showInfoSnackbar(
-            context,
-            'Username changed successfully',
-            Colors.green,
-          );
+          return;
         }
+        _firestore.updateMealAuthor(newUsername: changeUsernameController.text);
+        _errorHandling.toggleAccountLoadingSpinner(context);
+        FocusManager.instance.primaryFocus?.unfocus();
+        username = changeUsernameController.text;
+        notifyListeners();
+
+        _hiveServices.setUsername(username: changeUsernameController.text);
+        onSuccess();
+        _errorHandling.showInfoSnackbar(
+          context,
+          'Username changed successfully',
+          Colors.green,
+        );
+
         changeUsernameController.clear();
       },
     );
@@ -102,6 +108,7 @@ class AccountProvider with ChangeNotifier {
     required TextEditingController currentPasswordController,
     required TextEditingController newPasswordController,
     required TextEditingController confirmedNewPasswordController,
+    required void Function() onSuccess,
   }) async {
     _errorHandling.toggleAccountLoadingSpinner(context);
     _auth
@@ -117,16 +124,16 @@ class AccountProvider with ChangeNotifier {
           FocusManager.instance.primaryFocus?.unfocus();
           addErrorMessage(message: errorText);
           resetErrorMessage();
-        } else {
-          _errorHandling.toggleAccountLoadingSpinner(context);
-          FocusManager.instance.primaryFocus?.unfocus();
-          Navigator.of(context).pop();
-          _errorHandling.showInfoSnackbar(
-            context,
-            'Password changed successfully',
-            Colors.green,
-          );
+          return;
         }
+        _errorHandling.toggleAccountLoadingSpinner(context);
+        FocusManager.instance.primaryFocus?.unfocus();
+
+        _errorHandling.showInfoSnackbar(
+          context,
+          'Password changed successfully',
+          Colors.green,
+        );
       },
     );
 
@@ -142,21 +149,19 @@ class AccountProvider with ChangeNotifier {
   }) async {
     _errorHandling.toggleAccountLoadingSpinner(context);
     await _auth.resetPassword(passwordResetText: passwordResetText).then(
-          (errorText) => {
-            if (errorText.isNotEmpty)
-              {
-                _errorHandling.toggleAccountLoadingSpinner(context),
-                FocusManager.instance.primaryFocus?.unfocus(),
-                addErrorMessage(message: errorText),
-                resetErrorMessage(),
-              }
-            else
-              {
-                _errorHandling.toggleAccountLoadingSpinner(context),
-                onSuccess(),
-              }
-          },
-        );
+      (errorText) {
+        if (errorText.isNotEmpty) {
+          _errorHandling.toggleAccountLoadingSpinner(context);
+          FocusManager.instance.primaryFocus?.unfocus();
+          addErrorMessage(message: errorText);
+          resetErrorMessage();
+          return;
+        }
+
+        _errorHandling.toggleAccountLoadingSpinner(context);
+        onSuccess();
+      },
+    );
   }
 
   ///
@@ -172,10 +177,14 @@ class AccountProvider with ChangeNotifier {
     required BuildContext context,
     required String email,
     required String password,
-    required TextEditingController emailController,
     required void Function() onSuccess,
   }) async {
     _errorHandling.toggleAccountLoadingSpinner(context);
+
+    if (email.isEmpty || password.isEmpty) {
+      _errorHandling.showInfoSnackbar(context, 'Please fill in all fields');
+      return;
+    }
 
     await _auth
         .logIn(
@@ -190,7 +199,7 @@ class AccountProvider with ChangeNotifier {
           _errorHandling.showInfoSnackbar(context, errorText);
         } else {
           onSuccess();
-          _hiveServices.setUserEmail(emailController.text);
+          _hiveServices.setUserEmail(email);
         }
       },
     );
@@ -202,7 +211,6 @@ class AccountProvider with ChangeNotifier {
     required String password,
     required String username,
     required String confirmedPassword,
-    required TextEditingController emailController,
     required void Function() onSuccess,
   }) async {
     _errorHandling.toggleAccountLoadingSpinner(context);
@@ -216,26 +224,25 @@ class AccountProvider with ChangeNotifier {
     )
         .then(
       (errorText) {
-        _errorHandling.toggleAccountLoadingSpinner(context);
         FocusManager.instance.primaryFocus?.unfocus();
         if (errorText.isNotEmpty) {
+          _errorHandling.toggleAccountLoadingSpinner(context);
           _errorHandling.showInfoSnackbar(context, errorText);
-        } else {
-          _firestore.addUser(username).then(
-                (errorText) => {
-                  if (errorText.isNotEmpty)
-                    {
-                      _errorHandling.showInfoSnackbar(context, errorText),
-                    }
-                  else
-                    {
-                      onSuccess(),
-                      _hiveServices.setUserEmail(emailController.text),
-                      _hiveServices.setUsername(username: username),
-                    }
-                },
-              );
+          return;
         }
+        _firestore.addUser(username).then(
+          (errorText) {
+            if (errorText.isNotEmpty) {
+              _errorHandling.toggleAccountLoadingSpinner(context);
+              _errorHandling.showInfoSnackbar(context, errorText);
+              return;
+            }
+            _errorHandling.toggleAccountLoadingSpinner(context);
+            onSuccess();
+            _hiveServices.setUserEmail(email);
+            _hiveServices.setUsername(username: username);
+          },
+        );
       },
     );
   }
@@ -253,8 +260,8 @@ class AccountProvider with ChangeNotifier {
   }) async {
     _errorHandling.toggleAccountLoadingSpinner(context);
 
+    final String username = _auth.getUid();
     final List<MealModel> userMeals = await mealsProvider.getUserMeals();
-    final String uid = _auth.uid!;
 
     await _auth
         .validateUserPassword(password: currentPasswordController.text)
@@ -293,7 +300,7 @@ class AccountProvider with ChangeNotifier {
     isCreatingAccount = false;
     if (!mounted) return;
     onSuccess();
-    await _firestore.deleteUserData(uid);
+    await _firestore.deleteUserData(username);
     if (!mounted) return;
     _errorHandling.showInfoSnackbar(
       context,

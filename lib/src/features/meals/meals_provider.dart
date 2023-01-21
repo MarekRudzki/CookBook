@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:http/http.dart' as http;
 import 'package:nanoid/nanoid.dart';
+import 'package:http/http.dart' as http;
 
 import '../../services/firebase/firestore.dart';
 import '../../services/firebase/storage.dart';
@@ -12,17 +12,23 @@ import '../../domain/models/meal_model.dart';
 import '../../services/firebase/auth.dart';
 import '../common_widgets/error_handling.dart';
 import '../account/account_provider.dart';
-import 'screens/meal_detail_screen/meal_details_screen.dart';
 
 enum PhotoType { camera, gallery, url }
 
 enum CategoryType { myMeals, allMeals, favorites }
 
 class MealsProvider with ChangeNotifier {
-  final ErrorHandling _errorHandling = ErrorHandling();
-  final Firestore _firestore = Firestore();
-  final Storage _storage = Storage();
-  final Auth _auth = Auth();
+  MealsProvider(
+    this._firestore,
+    this._auth,
+    this._storage,
+    this._errorHandling,
+  );
+
+  final Firestore _firestore;
+  final Auth _auth;
+  final Storage _storage;
+  final ErrorHandling _errorHandling;
 
   List<String> favoritesId = [];
   Complexity complexity = Complexity.easy;
@@ -43,15 +49,11 @@ class MealsProvider with ChangeNotifier {
   ///
 
   bool checkIfAuthor({required String authorId}) {
-    if (_auth.uid == authorId) {
+    if (_auth.getUid() == authorId) {
       return true;
     } else {
       return false;
     }
-  }
-
-  Future<void> updateMealAuthor({required String newUsername}) async {
-    await _firestore.updateMealAuthor(newUsername: newUsername);
   }
 
   ///
@@ -78,7 +80,7 @@ class MealsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void togglePublic({required bool switchPublic}) {
+  void setPublic({required bool switchPublic}) {
     isPublic = switchPublic;
     notifyListeners();
   }
@@ -163,7 +165,6 @@ class MealsProvider with ChangeNotifier {
   ///
   ////// Error handling
   ///
-
   void toggleLoading() {
     isLoading = !isLoading;
     notifyListeners();
@@ -184,52 +185,56 @@ class MealsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> validateStatusAndType({
+    required String urlAdress,
+  }) async {
+    http.Response res;
+
+    try {
+      res = await http.get(
+        Uri.parse(urlAdress),
+      );
+    } catch (error) {
+      return false;
+    }
+    if (res.statusCode != 200) return false;
+
+    if (urlAdress.endsWith('.jpg') ||
+        urlAdress.endsWith('.jpeg') ||
+        urlAdress.endsWith('.png')) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Future<void> validateUrl({
     required BuildContext context,
     required TextEditingController urlController,
+    required void Function() onSuccess,
   }) async {
-    Future<bool> validateStatusAndType() async {
-      http.Response res;
-
-      try {
-        res = await http.get(
-          Uri.parse(urlController.text),
-        );
-      } catch (error) {
-        return false;
-      }
-      if (res.statusCode != 200) return false;
-
-      if (urlController.text.endsWith('.jpg') ||
-          urlController.text.endsWith('.jpeg') ||
-          urlController.text.endsWith('.png')) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
     if (urlController.text.trim().isEmpty) {
       addErrorMessage(message: 'Field is empty');
       resetErrorMessage();
-    } else {
-      _errorHandling.toggleMealLoadingSpinner(context);
-      await validateStatusAndType().then(
-        (bool isValid) {
-          if (!isValid) {
-            _errorHandling.toggleMealLoadingSpinner(context);
-            addErrorMessage(message: 'Provided URL is not valid');
-            resetErrorMessage();
-          } else {
-            _errorHandling.toggleMealLoadingSpinner(context);
-            imageUrl = urlController.text;
-            changePhotoType(PhotoType.url);
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          }
-        },
-      );
+      return;
     }
+    _errorHandling.toggleMealLoadingSpinner(context);
+    await validateStatusAndType(
+      urlAdress: urlController.text,
+    ).then(
+      (bool isValid) {
+        if (!isValid) {
+          _errorHandling.toggleMealLoadingSpinner(context);
+          addErrorMessage(message: 'Provided URL is not valid');
+          resetErrorMessage();
+          return;
+        }
+        _errorHandling.toggleMealLoadingSpinner(context);
+        imageUrl = urlController.text;
+        changePhotoType(PhotoType.url);
+        onSuccess();
+      },
+    );
   }
 
   ///
@@ -252,10 +257,8 @@ class MealsProvider with ChangeNotifier {
     required bool deleteAll,
     required List<MealModel> userMeals,
   }) async {
-    final List<String> recipesIdToDelete = [];
     for (final meal in userMeals) {
       if (deleteAll) {
-        recipesIdToDelete.add(meal.id);
         if (meal.imageUrl.contains('firebasestorage')) {
           await _storage.deleteImage(imageId: meal.id);
         }
@@ -265,7 +268,6 @@ class MealsProvider with ChangeNotifier {
         );
       } else {
         if (!meal.isPublic) {
-          recipesIdToDelete.add(meal.id);
           if (meal.imageUrl.contains('firebasestorage')) {
             await _storage.deleteImage(imageId: meal.id);
           }
@@ -314,8 +316,9 @@ class MealsProvider with ChangeNotifier {
     required TextEditingController ingredientsTec,
     required TextEditingController descriptionTec,
     required TextEditingController imageUrlTec,
+    required AccountProvider accountProvider,
+    required bool mounted,
   }) async {
-    final AccountProvider accountProvider = AccountProvider();
     final List<String> ingredientsList = [];
     final List<String> descriptionList = [];
     String imageUrl;
@@ -404,48 +407,63 @@ class MealsProvider with ChangeNotifier {
       descriptionList: descriptionList,
       complexity: getComplexity(),
       isPublic: isPublic,
-      authorId: _auth.uid!,
+      authorId: _auth.getUid(),
       authorName: username,
       imageUrl: imageUrl,
       generatedUid: generatedUid,
     )
-        .then((errorText) {
+        .then((errorText) async {
       if (errorText.isNotEmpty) {
         FocusManager.instance.primaryFocus?.unfocus();
         _errorHandling.showInfoSnackbar(
           context,
           errorText,
         );
-      } else {
-        _errorHandling.toggleMealLoadingSpinner(context);
-        resetFields();
-        getUserMeals();
-        mealNameTec.clear();
-        ingredientsTec.clear();
-        descriptionTec.clear();
-        imageUrlTec.clear();
-
-        FocusManager.instance.primaryFocus?.unfocus();
-        _errorHandling.showInfoSnackbar(
-          context,
-          'Recipe added successfully',
-          Colors.green,
-        );
+        return;
       }
+
+      resetFields();
+      await getUserMeals();
+      mealNameTec.clear();
+      ingredientsTec.clear();
+      descriptionTec.clear();
+      imageUrlTec.clear();
+
+      if (!mounted) return;
+      _errorHandling.toggleMealLoadingSpinner(context);
+      FocusManager.instance.primaryFocus?.unfocus();
+      _errorHandling.showInfoSnackbar(
+        context,
+        'Recipe added successfully',
+        Colors.green,
+      );
     });
   }
 
-  Future<void> updateMeal({
+  Future<MealModel> updateMeal({
     required BuildContext context,
     required TextEditingController mealNameTec,
     required TextEditingController ingredientsTec,
     required TextEditingController descriptionTec,
     required TextEditingController imageUrlTec,
+    required AccountProvider accountProvider,
     required String currentMealId,
   }) async {
-    final AccountProvider accountProvider = AccountProvider();
     final List<String> ingredientsList = [];
     final List<String> descriptionList = [];
+
+    final emptyMeal = MealModel(
+        id: '',
+        name: '',
+        description: [''],
+        ingredients: [''],
+        imageUrl: '',
+        mealAuthor: '',
+        authorId: '',
+        isPublic: false,
+        complexity: '');
+    MealModel updatedMeal = emptyMeal;
+
     String imageUrl;
     final mealId = currentMealId;
 
@@ -459,7 +477,7 @@ class MealsProvider with ChangeNotifier {
         context,
         'Please fill in all fields',
       );
-      return;
+      return emptyMeal;
     }
 
     if (imageUrlTec.text.isEmpty && imageFile == null) {
@@ -467,7 +485,7 @@ class MealsProvider with ChangeNotifier {
         context,
         'Please provide photo',
       );
-      return;
+      return emptyMeal;
     }
 
     String getComplexity() {
@@ -531,7 +549,7 @@ class MealsProvider with ChangeNotifier {
       descriptionList: descriptionList,
       complexity: getComplexity(),
       isPublic: isPublic,
-      authorId: _auth.uid!,
+      authorId: _auth.getUid(),
       authorName: username,
       imageUrl: imageUrl,
     )
@@ -543,6 +561,7 @@ class MealsProvider with ChangeNotifier {
             context,
             errorText,
           );
+          return emptyMeal;
         } else {
           final mealModel = MealModel(
             id: currentMealId,
@@ -551,7 +570,7 @@ class MealsProvider with ChangeNotifier {
             ingredients: ingredientsList,
             imageUrl: imageUrl,
             mealAuthor: username,
-            authorId: _auth.uid!,
+            authorId: _auth.getUid(),
             isPublic: isPublic,
             complexity: getComplexity(),
           );
@@ -568,15 +587,11 @@ class MealsProvider with ChangeNotifier {
             'Recipe updated successfully',
             Colors.green,
           );
-          Navigator.of(context).pop();
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => MealDetailsScreen(
-              mealModel: mealModel,
-              mealsProvider: this,
-            ),
-          ));
+
+          updatedMeal = mealModel;
         }
       },
     );
+    return updatedMeal;
   }
 }

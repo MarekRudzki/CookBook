@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../services/firebase/firestore.dart';
 import '../../../../core/internet_not_connected.dart';
-import '../../../../core/theme_provider.dart';
 import '../../../../domain/models/meal_model.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../../services/hive_services.dart';
+import '../../../../core/theme_provider.dart';
+import '../../../common_widgets/error_handling.dart';
+import '../../../account/account_provider.dart';
 import '../../meals_provider.dart';
 import 'widgets/meal_characteristics.dart';
 import 'widgets/recipe_info_button.dart';
@@ -25,7 +30,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
   final _ingredientsController = TextEditingController();
   final _imageUrlController = TextEditingController();
 
-  final ThemeProvider _themeProvider = ThemeProvider();
+  final _themeProvider = ThemeProvider();
 
   @override
   void dispose() {
@@ -180,6 +185,13 @@ class _AddMealScreenState extends State<AddMealScreen> {
                                   ingredientsTec: _ingredientsController,
                                   descriptionTec: _descriptionController,
                                   imageUrlTec: _imageUrlController,
+                                  mounted: mounted,
+                                  accountProvider: AccountProvider(
+                                    Firestore(),
+                                    HiveServices(),
+                                    Auth(),
+                                    ErrorHandling(),
+                                  ),
                                 );
                               },
                             );

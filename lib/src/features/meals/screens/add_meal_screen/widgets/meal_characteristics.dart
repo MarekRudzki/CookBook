@@ -69,7 +69,7 @@ class MealCharacteristics extends StatelessWidget {
               activeColor: Theme.of(context).highlightColor,
               value: mealsProvider.isPublic,
               onChanged: (bool switchPublic) {
-                mealsProvider.togglePublic(
+                mealsProvider.setPublic(
                   switchPublic: switchPublic,
                 );
               },

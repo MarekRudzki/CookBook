@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
+import '../../../../services/firebase/firestore.dart';
+import '../../../../services/firebase/storage.dart';
 import '../../../../domain/models/meal_model.dart';
+import '../../../../services/firebase/auth.dart';
+import '../../../../services/hive_services.dart';
 import '../../../../core/theme_provider.dart';
 import '../../../account/screens/account_screen/widgets/custom_alert_dialog.dart';
+import '../../../common_widgets/error_handling.dart';
+import '../../../account/account_provider.dart';
 import '../../../main_screen.dart';
 import '../../meals_provider.dart';
 import '../add_meal_screen/widgets/meal_characteristics.dart';
 import '../add_meal_screen/widgets/recipe_info_button.dart';
 import '../add_meal_screen/widgets/meal_photo_picker.dart';
 import '../add_meal_screen/widgets/meal_text_field.dart';
+import '../meal_detail_screen/meal_details_screen.dart';
 
 class EditMealScreen extends StatefulWidget {
   const EditMealScreen({
@@ -30,8 +37,13 @@ class _EditMealScreenState extends State<EditMealScreen> {
   final _ingredientsController = TextEditingController();
   final _imageUrlController = TextEditingController();
 
-  final ThemeProvider _themeProvider = ThemeProvider();
-  final MealsProvider _mealsProvider = MealsProvider();
+  final _themeProvider = ThemeProvider();
+  final _mealsProvider = MealsProvider(
+    Firestore(),
+    Auth(),
+    Storage(),
+    ErrorHandling(),
+  );
 
   @override
   void dispose() {
@@ -228,14 +240,36 @@ class _EditMealScreenState extends State<EditMealScreen> {
                             _imageUrlController.text =
                                 widget.mealModel.imageUrl;
                           }
-                          await mealsProvider.updateMeal(
-                            context: context,
-                            mealNameTec: _mealNameController,
-                            ingredientsTec: _ingredientsController,
-                            descriptionTec: _descriptionController,
-                            imageUrlTec: _imageUrlController,
-                            currentMealId: widget.mealModel.id,
-                          );
+                          await mealsProvider
+                              .updateMeal(
+                                context: context,
+                                mealNameTec: _mealNameController,
+                                ingredientsTec: _ingredientsController,
+                                descriptionTec: _descriptionController,
+                                imageUrlTec: _imageUrlController,
+                                currentMealId: widget.mealModel.id,
+                                accountProvider: AccountProvider(
+                                  Firestore(),
+                                  HiveServices(),
+                                  Auth(),
+                                  ErrorHandling(),
+                                ),
+                              )
+                              .then((mealModel) => {
+                                    if (mealModel.authorId.isNotEmpty)
+                                      {
+                                        Navigator.of(context).pop(),
+                                        Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                MealDetailsScreen(
+                                              mealModel: mealModel,
+                                              mealsProvider: mealsProvider,
+                                            ),
+                                          ),
+                                        ),
+                                      }
+                                  });
                         },
                       );
                     },

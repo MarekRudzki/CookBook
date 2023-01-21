@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'auth.dart';
 import '../../domain/models/meal_model.dart';
+import 'auth.dart';
 
 class Firestore {
   final Auth _auth = Auth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  //Firestore for user data storage
+  // Firestore for user data storage
   Future<String> addUser(String username) async {
-    final String? uid = _auth.uid;
+    final String uid = _auth.getUid();
     String errorText = '';
 
     final List<String> userMealsId = await getUserMealsId();
@@ -27,7 +27,7 @@ class Firestore {
   }
 
   Future<String> getUsername() async {
-    final String? uid = _auth.uid;
+    final String uid = _auth.getUid();
     String errorText = '';
 
     try {
@@ -57,7 +57,7 @@ class Firestore {
     return errorText;
   }
 
-  //Firestore for meals data storage
+  // Firestore for meals data storage
   Future<String> addMeal({
     required String mealId,
     required String mealName,
@@ -161,7 +161,7 @@ class Firestore {
   }
 
   Future<List<String>> getUserMealsId() async {
-    final String? uid = _auth.uid;
+    final String uid = _auth.getUid();
     final List<String> userMeals = [];
 
     try {
@@ -184,7 +184,7 @@ class Firestore {
   }
 
   Future<List<String>> getUserFavoriteMealsId() async {
-    final String? uid = _auth.uid;
+    final String uid = _auth.getUid();
     final List<String> userFavoriteMealsIds = [];
 
     try {
@@ -207,7 +207,7 @@ class Firestore {
   }
 
   Future<void> toggleMealFavorite(String mealId) async {
-    final String? uid = _auth.uid;
+    final String uid = _auth.getUid();
     final List<String> mealList = [mealId];
 
     try {

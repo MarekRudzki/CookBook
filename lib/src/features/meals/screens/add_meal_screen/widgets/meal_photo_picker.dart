@@ -239,6 +239,10 @@ class PhotoFromURL extends StatelessWidget {
                                 await mealsProvider.validateUrl(
                                   context: context,
                                   urlController: imageUrlController,
+                                  onSuccess: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  },
                                 );
                               },
                               icon: const Icon(
