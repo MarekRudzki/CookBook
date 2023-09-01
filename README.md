@@ -39,9 +39,9 @@ Project is created with:
 
 
 I am a Flutter enthusiast from Poland.
-- :telescope: I met Flutter in March 2022 and since then I can't get away from it!
+- :telescope: I started learning Flutter in March 2022 and since then I can't get away from it!
 - :book: Learning new Flutter related stuff every day.
-- :computer: In my free time, i love to read books and play video games.
+- :computer: In my free time, I love to read books and play video games.
 
 ### :hammer_and_wrench: Languages and Tools :
 <div>
