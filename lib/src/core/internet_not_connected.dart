@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class InternetNotConnected extends StatelessWidget {
   const InternetNotConnected({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -11,20 +12,23 @@ class InternetNotConnected extends StatelessWidget {
         height: 35,
         width: MediaQuery.of(context).size.width,
         color: Colors.red.withOpacity(0.5),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const SpinKitThreeBounce(
+            SpinKitThreeBounce(
               size: 25,
               color: Colors.red,
             ),
-            const Center(
+            Center(
               child: Text(
                 'No Internet connection',
-                style: TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
               ),
             ),
-            const SpinKitThreeBounce(
+            SpinKitThreeBounce(
               size: 25,
               color: Colors.red,
             ),
