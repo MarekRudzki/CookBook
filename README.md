@@ -1,10 +1,11 @@
-# CookBook - meals app
+# 🍕 CookBook - meals app 🍰
 
 Simple app for aspiring chefs.
 
 ## Table of contents
 * [General info](#general-info)
 * [Technologies](#technologies)
+* [How to run](#how-to-run)
 
 ## General info
 
@@ -13,20 +14,31 @@ My first bigger project created mainly for learning purposes.
 ### :star: What's included
 - Auto LogIn and theme fetch (Hive)
 - Meals CRUD
-- Store user images (Firestore, Storage)
+- Store user data (Firestore, Storage)
 - Authentication features (username change, password reset, password change, delete account)
 - Error handling
+- Bloc pattern
 - Dark and light mode
 
-https://user-images.githubusercontent.com/102899533/213205810-2a81aada-4891-45e4-aad8-7c657afaf842.mp4
+https://user-images.githubusercontent.com/102899533/268074410-21f837f7-8845-4ebb-a8f8-29ac95e8c996.mp4
 
-https://user-images.githubusercontent.com/102899533/213205820-8874304b-4099-412a-9d1f-c498d77b18ad.mp4
+https://user-images.githubusercontent.com/102899533/268074582-2ef2f5e8-9181-4d3c-850b-25d85263ca8c.mp4
 
 
 ## Technologies
 Project is created with:
-* Flutter version: 3.3.10
-* Dart version: 2.18.6
+* Flutter version: 3.13.2
+* Dart version: 3.1.0
+
+## How to run
+1. Copy repository link.
+   ```sh
+   git clone https://github.com/MarekRudzki/CookBook.git
+   ```
+2. Open command prompt and navigate to the path where you want to clone repo.
+3. Paste copied link and hit enter.
+4. Congrats, you have successfully cloned this repository in your computer!.
+5. Open project in IDE of your choice.
 
 ---
 
